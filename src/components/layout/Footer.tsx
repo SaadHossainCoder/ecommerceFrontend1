@@ -18,7 +18,6 @@ const footerLinks = {
         { href: "/media/ourStory", label: "Our Story" },
         { href: "/media/post", label: "Journal" },
         { href: "/media/careers", label: "Careers" },
-        { href: "/media/gallery", label: "Gallery" },
         { href: "/media/vendor", label: "Vendor" },
         { href: "/contact", label: "Contact Us" },
         { href: "/auth/register", label: "Register" },

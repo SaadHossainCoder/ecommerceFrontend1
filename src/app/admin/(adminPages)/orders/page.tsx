@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
     DropdownMenu,
@@ -47,6 +47,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toaster";
 import { OrderInvoice } from "../../_components/OrderInvoice";
+import OrderDetailDialog from "./_components/OrderDetailDialog";
 
 const ordersData = [
     { id: "SH-001234", customer: "John Doe", email: "john@example.com", items: 3, amount: 749.97, status: "Completed", date: "2024-01-15", address: "123 Main St, New York, NY 10001" },
@@ -287,7 +288,7 @@ export default function AllOrdersPage() {
             </Card>
 
             {/* Recurrent Modals */}
-            <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+            {/* <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
                         <DialogTitle className="flex justify-between items-center">
@@ -331,7 +332,12 @@ export default function AllOrdersPage() {
                         </div>
                     </div>
                 </DialogContent>
-            </Dialog>
+            </Dialog> */}
+            <OrderDetailDialog
+                isOpen={isDetailOpen}
+                onClose={() => setIsDetailOpen(false)}
+                selectedOrder={selectedOrder ? { ...selectedOrder, items: Array.isArray(selectedOrder.items) ? selectedOrder.items : orderItems } : null}
+            />
 
             <Dialog open={isUpdateStatusOpen} onOpenChange={setIsUpdateStatusOpen}>
                 <DialogContent className="sm:max-w-[400px]">

@@ -1,79 +1,125 @@
 "use client";
-
-import { useState } from "react";
-import Link from "next/link";
-// import { motion, AnimatePresence } from "framer-motion";
-import { Mail, ArrowLeft, ArrowRight, CheckCircle2, Lock } from "lucide-react";
+// ______________design____________________________
+import { Lock, Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-// import { scaleInVariants, staggerContainerVariants, staggerItemVariants } from "@/lib/motion";
+// ______________logic____________________________
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import Link from "next/link";
+import { Progress } from "@/components/ui/progress";
+import { toast } from "@/components/ui/toaster";
+import { resetPasswordSchema, ResetPasswordFormValues } from "@/validations/auth.validation";
+import { AxiosError } from "axios";
+import { authService } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 
-export default function ForgotPasswordPage() {
+const passwordRequirements = [
+    { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
+    { label: "Contains uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
+    { label: "Contains lowercase letter", test: (p: string) => /[a-z]/.test(p) },
+    { label: "Contains a number", test: (p: string) => /\d/.test(p) },
+    { label: "Contains special character", test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p) },
+];
+
+function ChangePasswordContent() {
     const [isLoading, setIsLoading] = useState(false);
-    const [isSubmitted, setIsSubmitted] = useState(false);
-    const [email, setEmail] = useState("");
-    const [error, setError] = useState("");
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    // const router = useRouter();
+    const searchParams = useSearchParams();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const uid = searchParams.get("uid");
+    const token = searchParams.get("token");
 
-        if (!email.trim()) {
-            setError("Email is required");
-            return;
-        }
-        if (!/\S+@\S+\.\S+/.test(email)) {
-            setError("Please enter a valid email");
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch,
+    } = useForm<ResetPasswordFormValues>({
+        resolver: zodResolver(resetPasswordSchema),
+        defaultValues: {
+            password: "",
+            confirmPassword: "",
+        },
+    });
+
+    const password = watch("password");
+
+    const passwordStrength = useMemo(() => {
+        if (!password) return 0;
+        const passed = passwordRequirements.filter((req) => req.test(password)).length;
+        return (passed / passwordRequirements.length) * 100;
+    }, [password]);
+
+    const getStrengthColor = () => {
+        if (passwordStrength < 40) return "bg-destructive";
+        if (passwordStrength < 70) return "bg-warning";
+        return "bg-success";
+    };
+
+    const getStrengthText = () => {
+        if (passwordStrength < 40) return "Weak";
+        if (passwordStrength < 70) return "Medium";
+        return "Strong";
+    };
+
+    const onSubmit = async (data: ResetPasswordFormValues) => {
+        if (!uid || !token) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Invalid reset link. Please request a new one.",
+            });
             return;
         }
 
         setIsLoading(true);
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setIsLoading(false);
-        setIsSubmitted(true);
+        try {
+            await authService.resetPassword({
+                ...data,
+                uid,
+                token,
+            });
+            setIsSuccess(true);
+            toast({
+                title: "Success",
+                description: "Password reset successfully.",
+            });
+        } catch (error) {
+            const axiosError = error as AxiosError<{ message: string }>;
+            toast({
+                variant: "destructive",
+                title: "Reset Failed",
+                description: axiosError.response?.data?.message || "Something went wrong",
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <div>
             <Card className="border-0 shadow-2xl">
                 <CardHeader className="text-center pb-2">
-                    <div className="flex justify-center mb-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                            <Lock className="h-8 w-8 text-primary" /> {/* Replaced Lock manually if not imported? Wait, Lock was not in imports in the replacement chunk above. Need to check if Lock is imported. Original imports didn't show Lock. Ah, standard lucide-react import has it? No, original had CheckCircle2, Mail, ArrowLeft, ArrowRight. I need to make sure Lock is imported or use existing icon. */}
-                            {/* Actually, looking at original file line 6: import { Mail, ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react"; */}
-                            {/* Wait, the original file content show Lock usage? */}
-                            {/* Line 81: CheckCircle2. Line 116: Mail. Line 131: ArrowRight. Line 144: ArrowLeft. */}
-                            {/* I don't see Lock used in original file content I viewed in step 245. */}
-                            {/* Step 245 lines 79-81: CheckCircle2. */}
-                            {/* Step 245 line 116: Mail. */}
-                            {/* Wait, my replacement content included Lock in the icon usage? */}
-                            {/* "CardHeader ... <Lock ..." */}
-                            {/* Let me check where I got Lock from. I might have hallucinated it from other pages or previous version. */}
-                            {/* In step 245 view: Line 59-70 (Form Header) has no icon? */}
-                            {/* Ah, I see line 47-56 Mobile Logo. */}
-                            {/* I don't see any other icon in the header in the original file. */}
-                            {/* Wait! In my previous failed replacement (Step 243) I had `<Lock ... />` in replacement. */}
-                            {/* The original file (Step 245) DOES NOT have Lock. */}
-                            {/* So I should stick to the original design or add Lock if I want to enhance it. */}
-                            {/* I'll stick to original design but remove animations. */}
-                            {/* Wait, the original file has `imports from lucide-react` on line 6. */}
-
-                            {/* I will use CheckCircle2 as in the success state. */}
-                            {/* For the initial state (forgot password), the original code (lines 58-70) behaves: */}
-                            {/* Just text "Forgot Password" and description. */}
-                            {/* So I won't add an icon there if not present. */}
-                        </div>
-                    </div>
-
-                    {!isSubmitted ? (
-                        <div>
-                            <CardTitle className="text-2xl font-bold">Forgot Password?</CardTitle>
+                    {!isSuccess ? (
+                        <>
+                            <div className="flex justify-center mb-4">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                                    <Lock className="h-8 w-8 text-primary" />
+                                </div>
+                            </div>
+                            <CardTitle className="text-2xl font-bold">Set New Password</CardTitle>
                             <CardDescription>
-                                No worries! Enter your email and we&apos;ll send you reset instructions.
+                                Your new password must be different from previously used passwords.
                             </CardDescription>
-                        </div>
+                        </>
                     ) : (
                         <div className="space-y-4">
                             <div className="flex justify-center">
@@ -81,79 +127,118 @@ export default function ForgotPasswordPage() {
                                     <CheckCircle2 className="h-8 w-8 text-success" />
                                 </div>
                             </div>
-                            <CardTitle className="text-2xl font-bold">Check Your Email</CardTitle>
+                            <CardTitle className="text-2xl font-bold">Password Updated</CardTitle>
                             <CardDescription>
-                                We&apos;ve sent a password reset link to<br />
-                                <span className="font-medium text-foreground">{email}</span>
+                                Your password has been successfully reset. You can now login with your new password.
                             </CardDescription>
                         </div>
                     )}
                 </CardHeader>
+
                 <CardContent>
-                    {!isSubmitted ? (
-                        <form
-                            onSubmit={handleSubmit}
-                            className="space-y-4"
-                        >
+                    {!isSuccess ? (
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="john@example.com"
-                                    value={email}
-                                    onChange={(e) => {
-                                        setEmail(e.target.value);
-                                        if (error) setError("");
-                                    }}
-                                    icon={<Mail className="h-4 w-4" />}
-                                    error={error}
-                                />
+                                <Label htmlFor="password">New Password</Label>
+                                <div className="relative">
+                                    <Input
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="••••••••"
+                                        {...register("password")}
+                                        icon={<Lock className="h-4 w-4" />}
+                                        error={errors.password?.message}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </button>
+                                </div>
+
+                                {/* Password Strength Indicator */}
+                                {password && (
+                                    <div className="space-y-2 pt-2">
+                                        <div className="flex items-center justify-between text-xs">
+                                            <span className="text-muted-foreground">Password strength</span>
+                                            <span className={`font-medium ${passwordStrength < 40 ? "text-destructive" :
+                                                passwordStrength < 70 ? "text-warning" : "text-success"
+                                                }`}>
+                                                {getStrengthText()}
+                                            </span>
+                                        </div>
+                                        <Progress value={passwordStrength} indicatorClassName={getStrengthColor()} />
+                                        <div className="grid grid-cols-2 gap-2 pt-1">
+                                            {passwordRequirements.map((req) => (
+                                                <div
+                                                    key={req.label}
+                                                    className={`flex items-center gap-1.5 text-xs ${req.test(password) ? "text-success" : "text-muted-foreground"
+                                                        }`}
+                                                >
+                                                    {req.test(password) ? (
+                                                        <Check className="h-3 w-3" />
+                                                    ) : (
+                                                        <X className="h-3 w-3" />
+                                                    )}
+                                                    {req.label}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="w-full flex items-center justify-center pt-5">
+                            <div className="space-y-2">
+                                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                <div className="relative">
+                                    <Input
+                                        id="confirmPassword"
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        placeholder="••••••••"
+                                        {...register("confirmPassword")}
+                                        icon={<Lock className="h-4 w-4" />}
+                                        error={errors.confirmPassword?.message}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        {showConfirmPassword ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="pt-2">
                                 <Button
                                     type="submit"
                                     className="w-full rounded-none"
                                     size="lg"
-                                    // loading={isLoading}
+                                    disabled={isLoading}
                                 >
                                     {!isLoading && (
                                         <>
-                                            Send Reset Link
+                                            Update Password
                                             <ArrowRight className="h-4 w-4 ml-2" />
                                         </>
                                     )}
                                 </Button>
                             </div>
 
-                            <div>
-                                <Button
-                                    variant="link"
-                                    className="w-full"
-                                    asChild
-                                >
-                                    <Link href="/auth/login">
-                                        <ArrowLeft className="h-4 w-4 mr-2" />
-                                        Back to Login
-                                    </Link>
-                                </Button>
-                            </div>
-                        </form>
-                    ) : (
-                        <div className="space-y-4">
-                            <p className="text-center text-sm text-muted-foreground">
-                                Didn&apos;t receive the email? Check your spam folder or{" "}
-                                <button
-                                    onClick={() => setIsSubmitted(false)}
-                                    className="text-primary hover:underline font-medium"
-                                >
-                                    try another email
-                                </button>
-                            </p>
-
                             <Button
-                                variant="outline"
+                                variant="ghost"
                                 className="w-full"
                                 asChild
                             >
@@ -162,10 +247,31 @@ export default function ForgotPasswordPage() {
                                     Back to Login
                                 </Link>
                             </Button>
+                        </form>
+                    ) : (
+                        <div className="space-y-4">
+                            <Button
+                                className="w-full"
+                                size="lg"
+                                asChild
+                            >
+                                <Link href="/auth/login">
+                                    Go to Login
+                                    <ArrowRight className="h-4 w-4 ml-2" />
+                                </Link>
+                            </Button>
                         </div>
                     )}
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+export default function ChangePasswordPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ChangePasswordContent />
+        </Suspense>
     );
 }

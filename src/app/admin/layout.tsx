@@ -17,7 +17,7 @@ import {
     // BarChart3,
     // ClipboardList,
     // History,
-    MessageSquare,
+    // MessageSquare,
     Folders,
     LineChart,
     TriangleAlert,
@@ -36,7 +36,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// import { AdminGuard } from "@/components/auth/admin-guard";
+// import { AdminGuard } from "@/Auth/admin-guard";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -71,11 +71,6 @@ const sidebarLinks = [
         href: "/admin/categories",
         icon: Folders,
     },
-    // {
-    //     label: "Inbox",
-    //     href: "/admin/inbox",
-    //     icon: MessageSquare,
-    // },
     {
         label: "Settings",
         href: "/admin/settings",
@@ -264,7 +259,7 @@ export default function AdminLayout({
                     <main className="p-4 lg:p-8">{children}</main>
                 </div>
             </div>
-        // </AdminGuard>
+        // { </AdminGuard> }
     );
 }
 

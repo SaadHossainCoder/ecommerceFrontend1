@@ -1,32 +1,43 @@
 "use client";
-
-import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
-// import { motion } from "framer-motion";
+// ______________design____________________________
 import { ArrowLeft, ArrowRight, Shield, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-// import { scaleInVariants, staggerContainerVariants, staggerItemVariants } from "@/lib/motion";
+
+// ______________logic____________________________
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useRef, useEffect, Suspense } from "react";
+import { toast } from "@/components/ui/toaster";
+import { useAuthStore } from "@/store/auth-store";
+import { authService } from "@/services/auth.service";
+import Link from "next/link";
+import { AxiosError } from "axios";
 
 const OTP_LENGTH = 6;
 
-export default function OTPPage() {
+function OTPContent() {
     const [otp, setOtp] = useState<string[]>(new Array(OTP_LENGTH).fill(""));
     const [isLoading, setIsLoading] = useState(false);
     const [timer, setTimer] = useState(60);
     const [canResend, setCanResend] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { user } = useAuthStore();
 
-    // useEffect(() => {
-    //     if (timer > 0) {
-    //         const interval = setInterval(() => {
-    //             setTimer((prev) => prev - 1);
-    //         }, 1000);
-    //         return () => clearInterval(interval);
-    //     } else {
-    //         setCanResend(true);
-    //     }
-    // }, [timer]);
+    const email = searchParams.get("email") || user?.email || "your email";
+    const uid = user?.id; // Assuming user is set after signup or we need to pass it
+
+    useEffect(() => {
+        if (timer > 0) {
+            const interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+            return () => clearInterval(interval);
+        } else {
+            setCanResend(true);
+        }
+    }, [timer]);
 
     const handleChange = (index: number, value: string) => {
         if (!/^\d*$/.test(value)) return; // Only allow digits
@@ -75,10 +86,19 @@ export default function OTPPage() {
     };
 
     const handleResend = async () => {
+        if (!uid) {
+            toast({ variant: "destructive", title: "Error", description: "User ID not found. Please sign up again." });
+            return;
+        }
         setCanResend(false);
         setTimer(60);
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+            await authService.sendOtp(uid);
+            toast({ title: "OTP Sent", description: "A new verification code has been sent to your email." });
+        } catch (error: unknown) {
+            const err = error as AxiosError<{ message: string }>;
+            toast({ variant: "destructive", title: "Failed to send OTP", description: err.response?.data?.message || "Something went wrong" });
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -86,10 +106,26 @@ export default function OTPPage() {
         const otpValue = otp.join("");
         if (otpValue.length !== OTP_LENGTH) return;
 
+        if (!uid) {
+            toast({ variant: "destructive", title: "Error", description: "User ID not found. Please sign up again." });
+            return;
+        }
+
         setIsLoading(true);
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setIsLoading(false);
+        try {
+            await authService.verifyOtp(uid, otpValue);
+            toast({ title: "Verification Successful", description: "Your email has been verified. You can now login." });
+            router.push("/home");
+        } catch (error: unknown) {
+            const err = error as AxiosError<{ message: string }>;
+            toast({
+                variant: "destructive",
+                title: "Verification Failed",
+                description: err.response?.data?.message || "Invalid OTP",
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const isComplete = otp.every((digit) => digit !== "");
@@ -98,18 +134,6 @@ export default function OTPPage() {
         <div>
             <Card className="border-0 shadow-2xl">
                 <CardHeader className="text-center pb-2">
-                    {/* Mobile Logo */}
-                    <div className="flex justify-center mb-4 lg:hidden">
-                        <Link href="/home" className="flex items-center gap-2">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-                                <span className="text-xl font-bold text-primary-foreground">S</span>
-                            </div>
-                            <span className="text-2xl font-bold">
-                                Shop<span className="text-primary">Hub</span>
-                            </span>
-                        </Link>
-                    </div>
-
                     <div className="flex justify-center mb-4">
                         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                             <Shield className="h-8 w-8 text-primary" />
@@ -119,7 +143,7 @@ export default function OTPPage() {
                     <CardTitle className="text-2xl font-bold">Verify Your Email</CardTitle>
                     <CardDescription>
                         We&apos;ve sent a verification code to<br />
-                        <span className="font-medium text-foreground">john@example.com</span>
+                        <span className="font-medium text-foreground">{email}</span>
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -142,11 +166,11 @@ export default function OTPPage() {
                                         onKeyDown={(e) => handleKeyDown(index, e)}
                                         onPaste={handlePaste}
                                         className={`
-                      w-11 h-14 sm:w-12 sm:h-16 text-center text-xl sm:text-2xl font-bold outline-none rounded-none
-                       border-2 bg-background transition-all duration-200
-                      focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
-                      ${digit ? "border-primary bg-primary/5" : "border-input hover:border-muted-foreground/50"}
-                    `}
+                        w-11 h-14 sm:w-12 sm:h-16 text-center text-xl sm:text-2xl font-bold outline-none rounded-none
+                        border-2 bg-background transition-all duration-200
+                        focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
+                        ${digit ? "border-primary bg-primary/5" : "border-input hover:border-muted-foreground/50"}
+                        `}
                                     />
                                 ))}
                             </div>
@@ -181,10 +205,11 @@ export default function OTPPage() {
                                 type="submit"
                                 className="w-full rounded-none"
                                 size="lg"
-                                disabled={!isComplete}
-                                // loading={isLoading}
+                                disabled={!isComplete || isLoading}
                             >
-                                {!isLoading && (
+                                {isLoading ? (
+                                    <RefreshCw className="h-4 w-4 animate-spin" />
+                                ) : (
                                     <>
                                         Verify Email
                                         <ArrowRight className="h-4 w-4 ml-2" />
@@ -218,5 +243,13 @@ export default function OTPPage() {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+export default function OTPPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <OTPContent />
+        </Suspense>
     );
 }

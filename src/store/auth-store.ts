@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { authService } from "@/services/auth.service";
-import { LoginFormValues, SignupFormValues } from "@/validations/auth.validation";
-// Update the import based on the actual export from userData module
+import type { LoginFormValues, SignupFormValues } from "@/validations/auth.validation";
 import { userLocalStorageData } from "@/localStorage/userData";
 
 export interface User {
@@ -11,114 +10,147 @@ export interface User {
     role: string;
 }
 
+interface AuthResponse {
+    ok: boolean;
+    user?: User;
+    message?: string;
+}
+
 interface AuthState {
+    // State
     user: User | null;
+    role: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
 
+    // Actions
     login: (data: LoginFormValues) => Promise<void>;
     signup: (data: SignupFormValues) => Promise<void>;
     logout: () => Promise<void>;
-    setLoading: (isLoading: boolean) => void;
-    setError: (error: string | null) => void;
     checkAuth: () => Promise<void>;
+    setError: (error: string | null) => void;
+    clearError: () => void;
+    reset: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-    user: null, // Full user data will be loaded via checkAuth
+export const useAuthStore = create<AuthState>((set, get) => ({
+    user: null,
     role: null,
     isAuthenticated: false,
     isLoading: false,
     error: null,
 
-    setLoading: (isLoading) => set({ isLoading }),
+    // Simple setters
     setError: (error) => set({ error }),
+    clearError: () => set({ error: null }),
 
-    login: async (data) => {
+    // Full reset (used in logout and failed auth)
+    reset: () =>
+        set({
+            user: null,
+            role: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: null,
+        }),
+
+    login: async (data: LoginFormValues) => {
         set({ isLoading: true, error: null });
+
         try {
-            const res = await authService.login(data);
-            if (res.ok) {
-                set({
-                    user: res.user,
-                    role: res.user?.role || null,
-                    isAuthenticated: true,
-                    isLoading: false,
-                });
-                userLocalStorageData.setUser(res!.user!); // Store only user ID in localStorage
-            }
-        } catch (error: any) {
-            set({
-                error: error.response?.data?.message || "Login failed",
-                isLoading: false,
-            });
+            const res: AuthResponse = await authService.login(data);
 
-            throw error;
-        }
-    },
-
-    signup: async (data) => {
-        set({ isLoading: true, error: null });
-        try {
-            const res = await authService.signup(data);
-            if (res.ok) {
-                set({
-                    user: res.user || null,
-                    isAuthenticated: !!res.user, // Depending on if backend logs user in on signup
-                    isLoading: false,
-                });
-            }
-        } catch (error: any) {
-            set({
-                error: error.response?.data?.message || "Signup failed",
-                isLoading: false,
-            });
-            throw error;
-        }
-    },
-
-
-    logout: async () => {
-        try {
-            await authService.logout();
-            userLocalStorageData.removeUser();
-        } catch (error) {
-            console.error("Logout failed:", error);
-        } finally {
-            set({
-                user: null,
-                isAuthenticated: false,
-            });
-            userLocalStorageData.removeUser();
-        }
-    },
-
-
-    checkAuth: async () => {
-        try {
-            const res = await authService.getMe();
             if (res.ok && res.user) {
                 set({
                     user: res.user,
+                    role: res.user.role,
                     isAuthenticated: true,
+                    isLoading: false,
                 });
-                userLocalStorageData.setUser(res!.user!);
+
+                userLocalStorageData.setUser(res.user);
+            } else {
+                throw new Error(res.message || "Login failed");
             }
-            else {
+        } catch (err: unknown) {
+            const message =
+                err instanceof Error
+                    ? err.message
+                    : "An unexpected error occurred during login";
+
+            set({ error: message, isLoading: false });
+            throw err; // Allow components to catch if needed
+        }
+    },
+
+    signup: async (data: SignupFormValues) => {
+        set({ isLoading: true, error: null });
+
+        try {
+            const res: AuthResponse = await authService.signup(data);
+
+            if (res.ok && res.user) {
                 set({
-                    user: null,
-                    isAuthenticated: false,
+                    user: res.user,
+                    role: res.user.role,
+                    isAuthenticated: true, // Most backends auto-login after signup
+                    isLoading: false,
                 });
-                userLocalStorageData.removeUser();
+
+                userLocalStorageData.setUser(res.user);
+            } else {
+                throw new Error(res.message || "Signup failed");
             }
-        } catch (error) {
-            console.error("Check auth failed:", error);
-            set({
-                user: null,
-                isAuthenticated: false,
-            });
+        } catch (err: unknown) {
+            const message =
+                err instanceof Error
+                    ? err.message
+                    : "An unexpected error occurred during signup";
+
+            set({ error: message, isLoading: false });
+            throw err;
+        }
+    },
+
+    logout: async () => {
+        set({ isLoading: true });
+
+        try {
+            await authService.logout();
+        } catch (err) {
+            console.warn("Backend logout failed (proceeding with local cleanup):", err);
+        } finally {
             userLocalStorageData.removeUser();
+            get().reset();
+        }
+    },
+
+    checkAuth: async () => {
+        // Prevent unnecessary calls if already authenticated
+        if (get().isAuthenticated && get().user) return;
+
+        set({ isLoading: true, error: null });
+
+        try {
+            const res: AuthResponse = await authService.getMe();
+
+            if (res.ok && res.user) {
+                set({
+                    user: res.user,
+                    role: res.user.role,
+                    isAuthenticated: true,
+                    isLoading: false,
+                });
+                userLocalStorageData.setUser(res.user);
+            } else {
+                throw new Error("Session invalid");
+            }
+        } catch (err) {
+            console.error("checkAuth failed:", err);
+
+            userLocalStorageData.removeUser();
+            get().reset();
         }
     },
 }));

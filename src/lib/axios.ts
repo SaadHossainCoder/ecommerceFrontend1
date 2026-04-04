@@ -1,57 +1,61 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { toast } from "@/components/ui/toaster";
+// ─── Validate env ─────────────────────────────────────────────────────────────
 
-const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_URL) {
+    throw new Error("NEXT_PUBLIC_API_URL is not defined in environment variables");
+}
+
+// ─── Axios instance ───────────────────────────────────────────────────────────
 
 export const api = axios.create({
     baseURL: API_URL,
-    withCredentials: true, // 🍪 cookies auto sent
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
-// Extend request type to include _retry
-interface CustomRequest extends InternalAxiosRequestConfig {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface RetryableRequest extends InternalAxiosRequestConfig {
     _retry?: boolean;
 }
 
-// 🔁 RESPONSE INTERCEPTOR
+// ─── Response interceptor ─────────────────────────────────────────────────────
+
 api.interceptors.response.use(
-    (res) => res,
-
+    (response) => response,
     async (error: AxiosError) => {
-        const originalRequest = error.config as CustomRequest;
+        const request = error.config as RetryableRequest | undefined;
 
-        if (!originalRequest) {
+        if (!request) {
             return Promise.reject(error);
         }
 
-        const isRefreshRequest =
-            originalRequest.url?.includes("/auth/refresh");
+        const isUnauthorized   = error.response?.status === 401;
+        const isFirstAttempt   = !request._retry;
+        const isRefreshEndpoint = request.url?.includes("/auth/refresh") ?? false;
 
-        // 🔥 MAIN LOGIC
-        if (
-            error.response?.status === 401 &&
-            !originalRequest._retry &&
-            !isRefreshRequest
-        ) {
-            originalRequest._retry = true;
+        if (isUnauthorized && isFirstAttempt && !isRefreshEndpoint) {
+            request._retry = true;
 
             try {
-                // 🔁 Call refresh endpoint (cookie auto sent)
                 await api.post("/auth/refresh");
-
-                // ✅ Retry original request
-                return api(originalRequest);
+                return api(request);
             } catch (refreshError) {
-                console.error("Refresh failed:", refreshError);
-
-                // 🚨 Redirect to login (client-side only)
                 // if (typeof window !== "undefined") {
-                //   window.location.href = "/auth/login-popup";
+                //     window.location.href = "/auth/login";
                 // }
-
+                console.log(refreshError);
+                toast({
+                    title: "Session expired",
+                    description: "Please log in again.",
+                    variant: "destructive",
+                });
+                
                 return Promise.reject(refreshError);
             }
         }

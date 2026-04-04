@@ -21,6 +21,7 @@ const footerLinks = {
         { href: "/media/vendor", label: "Vendor" },
         { href: "/contact", label: "Contact Us" },
         { href: "/auth/register", label: "Register" },
+        { href: "/admin/dashboard", label: "admin" },
     ],
     support: [
         { href: "/myAccount", label: "My Account" },

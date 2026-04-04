@@ -44,6 +44,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toaster";
+import EditProductForm from "./_components/addProduct";
 // import Link from "next/link";
 
 // Mock Data
@@ -111,11 +112,6 @@ export default function ProductsPage() {
         return matchesSearch && matchesCategory;
     });
 
-    const handleAddProduct = () => {
-        setEditingProduct(null);
-        setIsAddEditOpen(true);
-    };
-
     const handleEditProduct = (product: any) => {
         setEditingProduct(product);
         setIsAddEditOpen(true);
@@ -145,10 +141,15 @@ export default function ProductsPage() {
     const confirmSave = () => {
         setIsAddEditOpen(false);
         toast({
-            title: editingProduct ? "Product Updated" : "Product Created",
-            description: `${editingProduct ? "Changes saved" : "New product added"} successfully.`,
+            title: editingProduct?.id ? "Product Updated" : "Product Created",
+            description: `${editingProduct?.id ? "Changes saved" : "New product added"} successfully.`,
             variant: "success",
         });
+    };
+
+    const handleSaveProduct = (data: any) => {
+        console.log("Saving product:", data);
+        confirmSave();
     };
 
     const confirmDelete = () => {
@@ -167,7 +168,7 @@ export default function ProductsPage() {
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Products</h1>
                     <p className="text-muted-foreground mt-1">
-                        Manage your store's inventory and product catalog
+                        Manage your store&apos;s inventory and product catalog
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -175,7 +176,10 @@ export default function ProductsPage() {
                         <Download className="h-4 w-4 mr-2" />
                         Export
                     </Button>
-                    <Button variant="gradient" onClick={handleAddProduct}>
+                    <Button variant="gradient" onClick={() => {
+                        setEditingProduct(null);
+                        setIsAddEditOpen(true);
+                    }}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Product
                     </Button>
@@ -405,73 +409,26 @@ export default function ProductsPage() {
                 </div>
             )}
 
+
             {/* Add/Edit Product Modal */}
-            <Dialog open={isAddEditOpen} onOpenChange={setIsAddEditOpen}>
-                <DialogContent className="sm:max-w-[600px]">
+            <Dialog 
+                open={isAddEditOpen} 
+                onOpenChange={(open) => {
+                    setIsAddEditOpen(open);
+                    if (!open) setEditingProduct(null);
+                }}
+            >
+                <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto ">
                     <DialogHeader>
-                        <DialogTitle>{editingProduct ? "Edit Product" : "Add New Product"}</DialogTitle>
-                        <DialogDescription>
-                            {editingProduct
-                                ? "Update your product information below."
-                                : "Fill in the details to add a new product to your store."}
-                        </DialogDescription>
+                        <DialogTitle>
+                            {editingProduct?.id ? "Edit Product" : "Add New Product"}
+                        </DialogTitle>
                     </DialogHeader>
-                    <div className="grid gap-6 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Product Name</Label>
-                                <Input id="name" defaultValue={editingProduct?.name} placeholder="e.g. Leather Bag" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="category">Category</Label>
-                                <Select defaultValue={editingProduct?.category || "Fashion"}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Fashion">Fashion</SelectItem>
-                                        <SelectItem value="Electronics">Electronics</SelectItem>
-                                        <SelectItem value="Home & Living">Home & Living</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="price">Price ($)</Label>
-                                <Input id="price" type="number" defaultValue={editingProduct?.price} placeholder="0.00" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="stock">Initial Stock</Label>
-                                <Input id="stock" type="number" defaultValue={editingProduct?.stock} placeholder="100" />
-                            </div>
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
-                                defaultValue={editingProduct?.description}
-                                placeholder="Tell us more about this product..."
-                                className="h-24 resize-none"
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label>Product Image</Label>
-                            <div className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center gap-2 hover:bg-muted/50 transition-colors cursor-pointer group">
-                                <div className="p-3 bg-primary/10 rounded-full group-hover:scale-110 transition-transform">
-                                    <ImageIcon className="h-6 w-6 text-primary" />
-                                </div>
-                                <p className="text-sm font-medium">Click to upload or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">PNG, JPG or WEBP (Max 2MB)</p>
-                            </div>
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsAddEditOpen(false)}>Cancel</Button>
-                        <Button variant="gradient" onClick={confirmSave}>
-                            {editingProduct ? "Save Changes" : "Create Product"}
-                        </Button>
-                    </DialogFooter>
+                    <EditProductForm
+                        onClose={() => setIsAddEditOpen(false)}
+                        onSave={handleSaveProduct}
+                        initialData={editingProduct}
+                    />
                 </DialogContent>
             </Dialog>
 

@@ -3,11 +3,17 @@ import { authService } from "@/services/auth.service";
 import type { LoginFormValues, SignupFormValues } from "@/validations/auth.validation";
 import { userLocalStorageData } from "@/localStorage/userData";
 
+// Mirrors all safe (non-sensitive) fields from the Prisma User model
 export interface User {
     id: string;
     username: string;
     email: string;
-    role: string;
+    role: string;                  // "USER" | "ADMIN" | "VENDOR" etc.
+    isEmailVerified: boolean;
+    isBlocked: boolean;
+    lockedUntil: string | null;    // ISO datetime string or null
+    createdAt: string;             // ISO datetime string
+    updatedAt: string;             // ISO datetime string
 }
 
 interface AuthResponse {
@@ -19,7 +25,6 @@ interface AuthResponse {
 interface AuthState {
     // State
     user: User | null;
-    role: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
@@ -28,33 +33,49 @@ interface AuthState {
     login: (data: LoginFormValues) => Promise<void>;
     signup: (data: SignupFormValues) => Promise<void>;
     logout: () => Promise<void>;
-    checkAuth: () => Promise<void>;
     setError: (error: string | null) => void;
     clearError: () => void;
     reset: () => void;
 }
 
+// Hydrate minimal session from localStorage on store creation.
+// Full user data (username, email, flags, etc.) is populated after login/signup.
+const _stored = userLocalStorageData.getUser(); // returns { id, role } | null
+
 export const useAuthStore = create<AuthState>((set, get) => ({
-    user: null,
-    role: null,
-    isAuthenticated: false,
+    // If localStorage has a session, mark as authenticated with partial data.
+    // Components that need full user data should call authService.getMe() separately.
+    user: _stored
+        ? {
+              id: _stored.id,
+              username: "",
+              email: "",
+              role: _stored.role,
+              isEmailVerified: false,
+              isBlocked: false,
+              lockedUntil: null,
+              createdAt: "",
+              updatedAt: "",
+          }
+        : null,
+    isAuthenticated: !!_stored,
     isLoading: false,
     error: null,
 
-    // Simple setters
+    // ─── Simple setters ───────────────────────────────────────────────────────
     setError: (error) => set({ error }),
     clearError: () => set({ error: null }),
 
-    // Full reset (used in logout and failed auth)
+    // Full reset (used on logout and failed auth)
     reset: () =>
         set({
             user: null,
-            role: null,
             isAuthenticated: false,
             isLoading: false,
             error: null,
         }),
 
+    // ─── Login ───────────────────────────────────────────────────────────────
     login: async (data: LoginFormValues) => {
         set({ isLoading: true, error: null });
 
@@ -64,11 +85,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             if (res.ok && res.user) {
                 set({
                     user: res.user,
-                    role: res.user.role,
                     isAuthenticated: true,
                     isLoading: false,
                 });
-
+                // Persist minimal session data (id + role only)
                 userLocalStorageData.setUser(res.user);
             } else {
                 throw new Error(res.message || "Login failed");
@@ -80,10 +100,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     : "An unexpected error occurred during login";
 
             set({ error: message, isLoading: false });
-            throw err; // Allow components to catch if needed
+            throw err;
         }
     },
 
+    // ─── Signup ──────────────────────────────────────────────────────────────
     signup: async (data: SignupFormValues) => {
         set({ isLoading: true, error: null });
 
@@ -93,11 +114,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             if (res.ok && res.user) {
                 set({
                     user: res.user,
-                    role: res.user.role,
-                    isAuthenticated: true, // Most backends auto-login after signup
+                    isAuthenticated: true,
                     isLoading: false,
                 });
-
                 userLocalStorageData.setUser(res.user);
             } else {
                 throw new Error(res.message || "Signup failed");
@@ -113,6 +132,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }
     },
 
+    // ─── Logout ──────────────────────────────────────────────────────────────
     logout: async () => {
         set({ isLoading: true });
 
@@ -121,34 +141,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } catch (err) {
             console.warn("Backend logout failed (proceeding with local cleanup):", err);
         } finally {
-            userLocalStorageData.removeUser();
-            get().reset();
-        }
-    },
-
-    checkAuth: async () => {
-        // Prevent unnecessary calls if already authenticated
-        if (get().isAuthenticated && get().user) return;
-
-        set({ isLoading: true, error: null });
-
-        try {
-            const res: AuthResponse = await authService.getMe();
-
-            if (res.ok && res.user) {
-                set({
-                    user: res.user,
-                    role: res.user.role,
-                    isAuthenticated: true,
-                    isLoading: false,
-                });
-                userLocalStorageData.setUser(res.user);
-            } else {
-                throw new Error("Session invalid");
-            }
-        } catch (err) {
-            console.error("checkAuth failed:", err);
-
             userLocalStorageData.removeUser();
             get().reset();
         }

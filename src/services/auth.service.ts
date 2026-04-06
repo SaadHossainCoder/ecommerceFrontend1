@@ -71,4 +71,9 @@ export const authService = {
         const response = await api.get("auth/me");
         return response.data;
     },
+
+    authguard: async () => {
+        const response = await api.get("auth/auth-guard");
+        return response.data;
+    },
 };

@@ -3,16 +3,16 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareholderReports } from "@/app/(main)/home/_components/carousel";
-import { getTrendingProducts, getSeasonChoices, getReports } from "@/services/product-service";
+// import { getTrendingProducts, getSeasonChoices, getReports } from "@/services/product-service";
 import ProductCard from "./_components/ProductCard";
 import { TestimonialsSection } from "./_components/TestimonialsSection";
 import { Suspense } from "react";
 import {LoaderCircleIcon as LoaderCircle} from "@/components/icon/loader-circle"
 
 export default async function HomePage() {
-    const trendingProducts = await getTrendingProducts();
-    const seasonChoices = await getSeasonChoices();
-    const reportsData = await getReports();
+    // const trendingProducts = await getTrendingProducts();
+    // const seasonChoices = await getSeasonChoices();
+    // const reportsData = await getReports();
 
     return (
 
@@ -171,9 +171,9 @@ export default async function HomePage() {
                     <hr className="pb-10 h-3" />
                     <Suspense fallback={<LoaderCircle className="text-black"/>}>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 container-custom">
-                            {trendingProducts.map((p) => (
+                            {/* {trending   Products.map((p) => (
                                 <ProductCard key={p.id} {...p} />
-                            ))}
+                            ))} */}
                         </div>
                     </Suspense>
                 </section>
@@ -214,9 +214,9 @@ export default async function HomePage() {
                     <hr className="pb-10 h-3" />
                     <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 container-custom">
-                            {seasonChoices.map((p) => (
+                            {/* {seasonChoices.map((p) => (
                                 <ProductCard key={p.id} {...p} />
-                            ))}
+                            ))} */}
                         </div>
                     </Suspense>
                 </section>
@@ -265,7 +265,7 @@ export default async function HomePage() {
                 {/* --- SECTION:  --- */}
                 <section className=" py-16">
                     <div className="w-full bg-background">
-                        <ShareholderReports reports={reportsData} />
+                        {/* <ShareholderReports reports={reportsData} /> */}
                     </div>
                 </section>
                 <hr />

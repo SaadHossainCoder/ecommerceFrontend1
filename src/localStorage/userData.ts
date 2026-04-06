@@ -7,9 +7,10 @@ export interface User {
 
 type StoredUser = {
   id: string;
+  role: string;
 };
 
-const USER_KEY = "shophub_user";
+const USER_KEY = "clint";
 
 // ⚠️ NOTE: This is NOT real encryption (just obfuscation)
 const encode = (text: string): string => {
@@ -30,8 +31,7 @@ export const userLocalStorageData = {
     if (typeof window === "undefined") return;
 
     try {
-      const minimalUser: StoredUser = { id: user.id };
-      const encoded = encode(JSON.stringify(minimalUser));
+      const encoded = encode(JSON.stringify({ id: user.id, role: user.role }));
       localStorage.setItem(USER_KEY, encoded);
     } catch (err) {
       console.error("Failed to store user:", err);
@@ -52,7 +52,7 @@ export const userLocalStorageData = {
       const parsed = JSON.parse(decoded);
 
       // ✅ validate shape
-      if (parsed && typeof parsed.id === "string") {
+      if (parsed && typeof parsed.id === "string" && typeof parsed.role === "string") {
         return parsed;
       }
 

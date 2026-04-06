@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -25,6 +25,9 @@ import {
     TicketPercent,
     ChartNetwork,
     MonitorCog,
+    Store,
+    Megaphone,
+    BellRing,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,9 +39,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// import { AdminGuard } from "@/Auth/admin-guard";
+// import { AdminGuard } from "@/hooks/admin-guard";
+// import { useAuthGuard } from "@/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+// import { useRouter } from "next/navigation";
 
 const sidebarLinks = [
     {
@@ -71,11 +76,11 @@ const sidebarLinks = [
         href: "/admin/categories",
         icon: Folders,
     },
-    {
-        label: "Settings",
-        href: "/admin/settings",
-        icon: Settings,
-    },
+    // {
+    //     label: "Settings",
+    //     href: "/admin/settings",
+    //     icon: Settings,
+    // },
     {
         label: "reports",
         href: "/admin/reports",
@@ -91,27 +96,41 @@ const sidebarLinks = [
         href: "/admin/discounts",
         icon: TicketPercent,
     },
-    {
-        label: "activity log",
-        href: "/admin/activity",
-        icon: ChartNetwork,
-    },
+    // {
+    //     label: "activity log",
+    //     href: "/admin/activity",
+    //     icon: ChartNetwork,
+    // },
     {
         label: "system actions",
         href: "/admin/system",
         icon: MonitorCog,
+    },
+    {
+        label: "Vendors",
+        href: "/admin/vender",
+        icon: Store,
+    },
+    {
+        label: "Banners",
+        href: "/admin/makeBanner",
+        icon: Megaphone,
+    },
+    {
+        label: "Notification Bar",
+        href: "/admin/notificationBar",
+        icon: BellRing,
     }
 ];
 
 export default function AdminLayout({
-    children,
+ children,
 }: {
     children: React.ReactNode;
 }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileOpen, setMobileOpen] = useState(false);
     const pathname = usePathname();
-
 
     return (
         // <AdminGuard>
@@ -259,7 +278,7 @@ export default function AdminLayout({
                     <main className="p-4 lg:p-8">{children}</main>
                 </div>
             </div>
-        // { </AdminGuard> }
+        // </AdminGuard>
     );
 }
 

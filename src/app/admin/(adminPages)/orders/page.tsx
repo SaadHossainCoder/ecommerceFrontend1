@@ -57,6 +57,17 @@ const ordersData = [
     { id: "SH-001230", customer: "Charlie Davis", email: "charlie@example.com", items: 2, amount: 249.98, status: "Cancelled", date: "2024-01-13", address: "654 Maple Dr, Phoenix, AZ 85001" },
 ];
 
+interface Order {
+    id: string;
+    customer: string;
+    email: string;
+    items: number | any[];
+    amount: number;
+    status: string;
+    date: string;
+    address: string;
+}
+
 const orderItems = [
     { id: 1, name: "Wireless Headphones", price: 299.99, quantity: 1, image: "🎧" },
     { id: 2, name: "Smart Watch Pro", price: 449.99, quantity: 2, image: "⌚" },
@@ -86,7 +97,7 @@ export default function AllOrdersPage() {
     const [statusFilter, setStatusFilter] = useState("all");
 
     // Modal States
-    const [selectedOrder, setSelectedOrder] = useState<any>(null);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isUpdateStatusOpen, setIsUpdateStatusOpen] = useState(false);
     const [isCancelOpen, setIsCancelOpen] = useState(false);
@@ -100,22 +111,22 @@ export default function AllOrdersPage() {
         return matchesSearch && matchesStatus;
     });
 
-    const handleViewDetail = (order: any) => {
+    const handleViewDetail = (order: Order) => {
         setSelectedOrder(order);
         setIsDetailOpen(true);
     };
 
-    const handleUpdateStatus = (order: any) => {
+    const handleUpdateStatus = (order: Order) => {
         setSelectedOrder(order);
         setIsUpdateStatusOpen(true);
     };
 
-    const handleCancelClick = (order: any) => {
+    const handleCancelClick = (order: Order) => {
         setSelectedOrder(order);
         setIsCancelOpen(true);
     };
 
-    const handleArchiveClick = (order: any) => {
+    const handleArchiveClick = (order: Order) => {
         setSelectedOrder(order);
         setIsArchiveOpen(true);
     };
@@ -128,7 +139,7 @@ export default function AllOrdersPage() {
         });
     };
 
-    const handlePrintInvoice = (order: any) => {
+    const handlePrintInvoice = (order: Order) => {
         setSelectedOrder(order);
         // Small delay to ensure state update propagates if needed, though window.print is synchronous
         setTimeout(() => {

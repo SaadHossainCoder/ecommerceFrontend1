@@ -2,12 +2,27 @@
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+    ImageIcon,
+    Upload,
+    Plus,
+    Trash2,
+    X,
+    Link as LinkIcon,
+    PlusCircle,
+    FileImage,
+    ExternalLink,
+    Box,
+    Filter,
+    List,
+    Loader2
+} from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -15,41 +30,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Upload, X, Image as ImageIcon } from "lucide-react";
-import { useState, useEffect } from "react";
-
-const productSchema = z.object({
-    title: z.string().min(5, "Title must be at least 5 characters"),
-    shortDescription: z.string().min(20, "Short description must be at least 20 characters"),
-    longDescription: z.string().min(50, "Long description is required"),
-    brand: z.string().min(2, "Brand is required"),
-    vendor: z.string().min(1, "Vendor is required"),
-    sku: z.string().min(3, "SKU is required"),
-    discount: z.number().min(0).max(100).optional().default(0),
-    category: z.string().min(1, "Category is required"),
-    subcategory: z.string().min(1, "Subcategory is required"),
-    isFeatured: z.boolean().default(false),
-
-    sizes: z.array(
-        z.object({
-            name: z.string().min(1, "Size name is required"),
-            stock: z.number().min(0, "Stock must be 0 or more"),
-            price: z.number().min(1, "Price must be greater than 0"),
-            image: z.string().optional(),           // ← New: Image per size
-        })
-    ).min(1, "At least one size/variant is required"),
-
-    benefits: z.array(z.string()).default([]),
-    ingredients: z.array(z.string()).default([]),
-    images: z.array(z.string()).min(1, "At least one main product image is required"),
-});
-
-type ProductFormValues = z.infer<typeof productSchema>;
+import { Card } from "@/components/ui/card";
+import { productSchema, ProductFormValues } from "@/validations/addProduct.validation";
 
 interface EditProductFormProps {
     onClose?: () => void;
     onSave?: (data: ProductFormValues) => void;
-    initialData?: Partial<ProductFormValues>;
+    initialData?: any;
 }
 
 const vendorOptions = [
@@ -61,8 +48,97 @@ const vendorOptions = [
     "Vista Audio Solutions",
 ];
 
-export default function EditProductForm({ onClose, onSave, initialData }: EditProductFormProps) {
-    const [mainImagePreviews, setMainImagePreviews] = useState<string[]>(initialData?.images || []);
+// Helper: Multi-URL Input Component (from Vendor pattern)
+function MultiUrlInput({
+    label,
+    values,
+    onChange,
+    errors,
+    placeholder = "https://...",
+}: {
+    label: string;
+    values: string[];
+    onChange: (newValues: string[]) => void;
+    errors?: any;
+    placeholder?: string;
+}) {
+    const addRow = () => onChange([...values, ""]);
+    const removeRow = (i: number) => {
+        const next = values.filter((_, idx) => idx !== i);
+        onChange(next.length === 0 ? [""] : next);
+    };
+    const updateRow = (i: number, val: string) => {
+        const next = [...values];
+        next[i] = val;
+        onChange(next);
+    };
+
+    return (
+        <div className="space-y-3">
+            <div className="flex items-center justify-between">
+                <Label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{label}</Label>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={addRow}
+                    className="h-7 text-xs text-primary hover:text-primary hover:bg-primary/5 gap-1"
+                >
+                    <PlusCircle className="h-3 w-3" /> Add Image URL
+                </Button>
+            </div>
+            <div className="space-y-2">
+                {values.map((val, i) => (
+                    <div key={i} className="group relative">
+                        <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                <Input
+                                    placeholder={placeholder}
+                                    value={val}
+                                    onChange={(e) => updateRow(i, e.target.value)}
+                                    className="pl-9 h-10 bg-muted/30 focus-visible:bg-background border-dashed focus-visible:border-solid transition-all"
+                                />
+                            </div>
+                            {values.length > 1 && (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeRow(i)}
+                                    className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
+                        {val && (
+                            <div className="mt-2 w-20 h-20 rounded-lg overflow-hidden border bg-muted group-hover:shadow-md transition-shadow">
+                                <img
+                                    src={val}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        (e.currentTarget as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Invalid';
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export default function EditProductForm({
+    onClose,
+    onSave,
+    initialData,
+}: EditProductFormProps) {
+
+    // Map initial images from objects to strings
+    const initialImages = initialData?.images?.map((img: any) => typeof img === 'string' ? img : img.url) || [""];
 
     const {
         register,
@@ -70,347 +146,255 @@ export default function EditProductForm({ onClose, onSave, initialData }: EditPr
         handleSubmit,
         setValue,
         watch,
-        formState: { errors, isSubmitting },
+        formState: { isSubmitting, errors },
     } = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema),
         defaultValues: {
-            title: "",
-            shortDescription: "",
-            longDescription: "",
-            brand: "",
-            vendor: "",
-            sku: "",
-            discount: 0,
-            category: "",
-            subcategory: "",
-            isFeatured: false,
-            sizes: [{ name: "", stock: 0, price: 0, image: "" }],
-            benefits: [],
-            ingredients: [],
-            images: [],
-            ...initialData,
+            title: initialData?.title || "",
+            shortDescription: initialData?.shortDescription || "",
+            longDescription: initialData?.longDescription || "",
+            brand: initialData?.brand || "",
+            vendor: initialData?.vendor || "",
+            sku: initialData?.sku || "",
+            discount: initialData?.discount || 0,
+            category: initialData?.category || "",
+            subcategory: initialData?.subcategory || "",
+            isFeatured: initialData?.isFeatured || false,
+            sizes: initialData?.sizes?.map((s: any) => ({
+                name: s.size || s.name || "",
+                stock: Number(s.qty || s.stock || 0),
+                price: Number(s.price || 0),
+                image: s.image || ""
+            })) || [{ name: "", stock: 0, price: 0, image: "" }],
+            benefits: initialData?.benefits || [""],
+            ingredients: initialData?.ingredients || [""],
+            images: initialImages,
         },
     });
 
-    const { fields: sizeFields, append: appendSize, remove: removeSize } = useFieldArray({
-        control,
-        name: "sizes",
-    });
+    const { fields: sizeFields, append: appendSize, remove: removeSize } = useFieldArray({ control, name: "sizes" });
+    const { fields: benefitFields, append: appendBenefit, remove: removeBenefit } = useFieldArray({ control, name: "benefits" });
+    const { fields: ingredientFields, append: appendIngredient, remove: removeIngredient } = useFieldArray({ control, name: "ingredients" });
 
-    const { fields: benefitFields, append: appendBenefit, remove: removeBenefit } = useFieldArray({
-        control,
-        name: "benefits",
-    });
+    const watchImages = watch("images");
 
-    const { fields: ingredientFields, append: appendIngredient, remove: removeIngredient } = useFieldArray({
-        control,
-        name: "ingredients",
-    });
-
-    // Handle size-specific image change
-    const handleSizeImageChange = (index: number, fileOrUrl: string) => {
-        setValue(`sizes.${index}.image`, fileOrUrl);
-    };
-
-    const onSubmit = async (data: ProductFormValues) => {
-        console.log("Product Data Submitted:", data);
+    const onSubmit = (data: ProductFormValues) => {
         onSave?.(data);
-        onClose?.();
-    };
-
-    const handleMainImageRemove = (index: number) => {
-        const newImages = mainImagePreviews.filter((_, i) => i !== index);
-        setMainImagePreviews(newImages);
-        setValue("images", newImages);
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold tracking-tight">Edit Product</h1>
-            </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                {/* Left Column - Essential Information */}
+                <div className="lg:col-span-7 space-y-8">
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 text-primary">
+                            <Box className="h-5 w-5" />
+                            <h3 className="font-bold uppercase tracking-wider">Basic Information</h3>
+                        </div>
+                        <div className="grid gap-4">
+                            <div>
+                                <Label htmlFor="title" className="text-xs font-semibold">PRODUCT TITLE *</Label>
+                                <Input id="title" {...register("title")} placeholder="e.g. Wireless Noise Cancelling Headphones" className="mt-1" />
+                                {errors.title && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.title.message}</p>}
+                            </div>
+                            <div>
+                                <Label htmlFor="shortDescription" className="text-xs font-semibold">HOOK LINE / SHORT DESCRIPTION *</Label>
+                                <Input id="shortDescription" {...register("shortDescription")} placeholder="A punchy 1-line summary (min 20 chars)" className="mt-1" />
+                                {errors.shortDescription && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.shortDescription.message}</p>}
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="brand" className="text-xs font-semibold">MANUFACTURER / BRAND *</Label>
+                                    <Input id="brand" {...register("brand")} placeholder="e.g. Sony, Bose" className="mt-1" />
+                                </div>
+                                <div>
+                                    <Label className="text-xs font-semibold">VENDOR PARTNER *</Label>
+                                    <Select onValueChange={(v) => setValue("vendor", v, { shouldValidate: true })} defaultValue={watch("vendor")}>
+                                        <SelectTrigger className="mt-1">
+                                            <SelectValue placeholder="Select Vendor" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {vendorOptions.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Left Column - Basic Info */}
-                <div className="space-y-6">
-                    <div>
-                        <Label htmlFor="title">Product Title *</Label>
-                        <Input id="title" {...register("title")} className="mt-1" />
-                        {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
-                    </div>
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 text-primary">
+                            <Filter className="h-5 w-5" />
+                            <h3 className="font-bold uppercase tracking-wider">Categorization & Logic</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label className="text-xs font-semibold">PRIMARY CATEGORY *</Label>
+                                <Select onValueChange={(v) => setValue("category", v, { shouldValidate: true })} defaultValue={watch("category")}>
+                                    <SelectTrigger className="mt-1">
+                                        <SelectValue placeholder="Select Category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Electronics">Electronics</SelectItem>
+                                        <SelectItem value="Audio">Audio</SelectItem>
+                                        <SelectItem value="Fashion">Fashion</SelectItem>
+                                        <SelectItem value="Home & Living">Home & Living</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label className="text-xs font-semibold">SUBCATEGORY *</Label>
+                                <Select onValueChange={(v) => setValue("subcategory", v, { shouldValidate: true })} defaultValue={watch("subcategory")}>
+                                    <SelectTrigger className="mt-1">
+                                        <SelectValue placeholder="Select Subcategory" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Wireless">Wireless</SelectItem>
+                                        <SelectItem value="Wired">Wired</SelectItem>
+                                        <SelectItem value="Accessories">Accessories</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <Label htmlFor="sku" className="text-xs font-semibold">UNIQUE SKU *</Label>
+                                <Input id="sku" {...register("sku")} placeholder="e.g. AUD-001-WH" className="mt-1 font-mono" />
+                            </div>
+                            <div>
+                                <Label htmlFor="discount" className="text-xs font-semibold">FLAT DISCOUNT (%)</Label>
+                                <Input id="discount" type="number" {...register("discount", { valueAsNumber: true })} className="mt-1" />
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl border border-dashed border-primary/20">
+                            <Switch id="featured" checked={watch("isFeatured")} onCheckedChange={(v) => setValue("isFeatured", v)} />
+                            <Label htmlFor="featured" className="cursor-pointer font-bold text-xs uppercase">Mark as Featured Product</Label>
+                        </div>
+                    </section>
 
-                    <div>
-                        <Label htmlFor="shortDescription">Short Description *</Label>
-                        <Textarea id="shortDescription" rows={4} {...register("shortDescription")} className="mt-1" />
-                        {errors.shortDescription && <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="brand">Brand *</Label>
-                            <Input id="brand" {...register("brand")} className="mt-1" />
-                            {errors.brand && <p className="text-red-500 text-sm mt-1">{errors.brand.message}</p>}
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 text-primary">
+                            <FileImage className="h-5 w-5" />
+                            <h3 className="font-bold uppercase tracking-wider">Detailed Narrative</h3>
                         </div>
                         <div>
-                            <Label htmlFor="vendor">Vendor *</Label>
-                            <Select onValueChange={(value) => setValue("vendor", value)} value={watch("vendor")}>
-                                <SelectTrigger className="mt-1">
-                                    <SelectValue placeholder="Select Vendor" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {vendorOptions.map((vendor) => (
-                                        <SelectItem key={vendor} value={vendor}>
-                                            {vendor}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.vendor && <p className="text-red-500 text-sm mt-1">{errors.vendor.message}</p>}
+                            <Label htmlFor="longDescription" className="text-xs font-semibold">STORYTELLING / LONG DESCRIPTION *</Label>
+                            <Textarea id="longDescription" rows={10} {...register("longDescription")} placeholder="Go deep into product features, history, and usage..." className="mt-1 leading-relaxed" />
+                            {errors.longDescription && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.longDescription.message}</p>}
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="sku">SKU *</Label>
-                            <Input id="sku" {...register("sku")} className="mt-1" />
-                        </div>
-                        <div>
-                            <Label htmlFor="discount">Discount (%)</Label>
-                            <Input
-                                id="discount"
-                                type="number"
-                                {...register("discount", { valueAsNumber: true })}
-                                className="mt-1"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label>Category *</Label>
-                            <Select onValueChange={(value) => setValue("category", value)} value={watch("category")}>
-                                <SelectTrigger className="mt-1">
-                                    <SelectValue placeholder="Select Category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Electronics">Electronics</SelectItem>
-                                    <SelectItem value="Audio">Audio</SelectItem>
-                                    <SelectItem value="Headphones">Headphones</SelectItem>
-                                    <SelectItem value="Accessories">Accessories</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label>Subcategory *</Label>
-                            <Select onValueChange={(value) => setValue("subcategory", value)} value={watch("subcategory")}>
-                                <SelectTrigger className="mt-1">
-                                    <SelectValue placeholder="Select Subcategory" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Wireless">Wireless</SelectItem>
-                                    <SelectItem value="Wired">Wired</SelectItem>
-                                    <SelectItem value="Gaming">Gaming</SelectItem>
-                                    <SelectItem value="Studio">Studio</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <Switch
-                            id="featured"
-                            checked={watch("isFeatured")}
-                            onCheckedChange={(checked) => setValue("isFeatured", checked)}
-                        />
-                        <Label htmlFor="featured" className="cursor-pointer">Featured Product</Label>
-                    </div>
-
-                    <div>
-                        <Label htmlFor="longDescription">Long Description *</Label>
-                        <Textarea id="longDescription" rows={8} {...register("longDescription")} className="mt-1" />
-                        {errors.longDescription && <p className="text-red-500 text-sm mt-1">{errors.longDescription.message}</p>}
-                    </div>
+                    </section>
                 </div>
 
-                {/* Right Column - Variants & Media */}
-                <div className="space-y-6">
-                    {/* Sizes / Variants with Image Support */}
-                    <div>
-                        <Label className="mb-3 block">Sizes / Variants *</Label>
-                        <div className="space-y-4">
-                            {sizeFields.map((field, index) => {
-                                const sizeImage = watch(`sizes.${index}.image`);
-                                return (
-                                    <div key={field.id} className="border rounded-lg p-4 space-y-4 bg-card">
-                                        <div className="flex gap-3 items-end">
-                                            {/* Size Name */}
+                {/* Right Column - Media & Variants */}
+                <div className="lg:col-span-5 space-y-8">
+                    <section className="p-6 bg-muted/20 rounded-2xl border border-dashed border-primary/20 space-y-6">
+                        <MultiUrlInput
+                            label="Product Media Gallery"
+                            values={watchImages}
+                            onChange={(vals) => setValue("images", vals, { shouldValidate: true })}
+                            placeholder="https://images.unsplash.com/photo-..."
+                        />
+                        {errors.images && <p className="text-destructive text-[10px] uppercase font-bold text-center">{errors.images.message}</p>}
+                    </section>
+
+                    <section className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-primary">
+                                <List className="h-5 w-5" />
+                                <h3 className="font-bold uppercase tracking-wider">Variants & Inventory</h3>
+                            </div>
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendSize({ name: "", stock: 0, price: 0, image: "" })} className="h-7 text-xs gap-1 border-primary/30">
+                                <Plus className="h-3 w-3" /> Add Variant
+                            </Button>
+                        </div>
+                        <div className="space-y-3">
+                            {sizeFields.map((field, index) => (
+                                <Card key={field.id} className="p-4 bg-background border-primary/10 shadow-sm relative group overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                                    <div className="grid gap-3">
+                                        <div className="flex items-center gap-3">
                                             <div className="flex-1">
-                                                <Input
-                                                    placeholder="Variant Name (e.g. Black, 100ML, Large)"
-                                                    {...register(`sizes.${index}.name`)}
-                                                />
+                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Variant Name</Label>
+                                                <Input placeholder="Small, Red, 1TB..." {...register(`sizes.${index}.name`)} className="mt-0.5 h-8 text-xs" />
                                             </div>
-
-                                            {/* Stock */}
+                                            <div className="w-20">
+                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Qty</Label>
+                                                <Input type="number" placeholder="0" {...register(`sizes.${index}.stock`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
+                                            </div>
                                             <div className="w-24">
-                                                <Input
-                                                    type="number"
-                                                    placeholder="Stock"
-                                                    {...register(`sizes.${index}.stock`, { valueAsNumber: true })}
-                                                />
+                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Price ($)</Label>
+                                                <Input type="number" step="0.01" placeholder="0.00" {...register(`sizes.${index}.price`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
                                             </div>
-
-                                            {/* Price */}
-                                            <div className="w-28">
-                                                <Input
-                                                    type="number"
-                                                    placeholder="Price"
-                                                    {...register(`sizes.${index}.price`, { valueAsNumber: true })}
-                                                />
-                                            </div>
-
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => removeSize(index)}
-                                                disabled={sizeFields.length === 1}
-                                            >
-                                                <Trash2 className="h-4 w-4 text-red-500" />
-                                            </Button>
+                                            {sizeFields.length > 1 && (
+                                                <Button type="button" variant="ghost" size="icon" onClick={() => removeSize(index)} className="mt-4 h-8 w-8 text-destructive hover:bg-destructive/5 shrink-0">
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </Button>
+                                            )}
                                         </div>
-
-                                        {/* Variant Image Upload */}
                                         <div>
-                                            <Label className="text-sm text-muted-foreground mb-1 block">
-                                                Variant Image (Optional)
-                                            </Label>
-                                            <div className="flex items-center gap-3">
-                                                {sizeImage ? (
-                                                    <div className="relative w-20 h-20 border rounded-md overflow-hidden">
-                                                        <img
-                                                            src={sizeImage}
-                                                            alt="Variant"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleSizeImageChange(index, "")}
-                                                            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5"
-                                                        >
-                                                            <X className="h-3 w-3" />
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div className="w-20 h-20 border border-dashed rounded-md flex items-center justify-center bg-muted">
-                                                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                            <Label className="text-[10px] font-bold text-muted-foreground uppercase">Variant URL (Optional)</Label>
+                                            <div className="flex items-center gap-3 mt-0.5">
+                                                <Input placeholder="URL link..." {...register(`sizes.${index}.image`)} className="h-8 text-xs flex-1 border-dashed" />
+                                                {watch(`sizes.${index}.image`) && (
+                                                    <div className="h-8 w-8 rounded border overflow-hidden shrink-0">
+                                                        <img src={watch(`sizes.${index}.image`)} className="w-full h-full object-cover" />
                                                     </div>
                                                 )}
-
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        // In real app: open file input and handle upload
-                                                        const fakeUrl = `https://via.placeholder.com/300x300/0066cc/ffffff?text=Variant+${index + 1}`;
-                                                        handleSizeImageChange(index, fakeUrl);
-                                                    }}
-                                                >
-                                                    <Upload className="mr-2 h-4 w-4" />
-                                                    Upload Image
-                                                </Button>
                                             </div>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="mt-4"
-                            onClick={() => appendSize({ name: "", stock: 0, price: 0, image: "" })}
-                        >
-                            <Plus className="mr-2 h-4 w-4" /> Add New Variant
-                        </Button>
-                    </div>
-
-                    {/* Benefits & Ingredients (kept as before) */}
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <Label>Benefits</Label>
-                            <Button type="button" variant="outline" size="sm" onClick={() => appendBenefit("")}>
-                                <Plus className="mr-2 h-4 w-4" /> Add
-                            </Button>
-                        </div>
-                        <div className="space-y-2">
-                            {benefitFields.map((field, index) => (
-                                <div key={field.id} className="flex gap-2">
-                                    <Input {...register(`benefits.${index}`)} placeholder="Enter benefit..." />
-                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeBenefit(index)}>
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
+                                </Card>
                             ))}
                         </div>
-                    </div>
+                    </section>
 
-                    <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <Label>Ingredients</Label>
-                            <Button type="button" variant="outline" size="sm" onClick={() => appendIngredient("")}>
-                                <Plus className="mr-2 h-4 w-4" /> Add
-                            </Button>
+                    <section className="grid grid-cols-1 gap-6">
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-bold uppercase tracking-wider text-xs text-primary">Core Benefits</h3>
+                                <Button type="button" variant="ghost" size="sm" onClick={() => appendBenefit("")} className="h-6 text-[10px] items-center gap-1">
+                                    <Plus className="h-3 w-3" /> Add Benefit
+                                </Button>
+                            </div>
+                            <div className="space-y-2">
+                                {benefitFields.map((field, index) => (
+                                    <div key={field.id} className="flex gap-2">
+                                        <Input {...register(`benefits.${index}`)} placeholder="e.g. 24h Battery Life" className="h-8 text-xs" />
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeBenefit(index)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            {ingredientFields.map((field, index) => (
-                                <div key={field.id} className="flex gap-2">
-                                    <Input {...register(`ingredients.${index}`)} placeholder="Enter ingredient..." />
-                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(index)}>
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="font-bold uppercase tracking-wider text-xs text-primary">Ingredients / Materials</h3>
+                                <Button type="button" variant="ghost" size="sm" onClick={() => appendIngredient("")} className="h-6 text-[10px] items-center gap-1">
+                                    <Plus className="h-3 w-3" /> Add Line
+                                </Button>
+                            </div>
+                            <div className="space-y-2">
+                                {ingredientFields.map((field, index) => (
+                                    <div key={field.id} className="flex gap-2">
+                                        <Input {...register(`ingredients.${index}`)} placeholder="e.g. Recycled Aluminum" className="h-8 text-xs" />
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(index)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-
-                    {/* Main Product Images */}
-                    <div>
-                        <Label className="mb-3 block">Main Product Images *</Label>
-                        <div className="grid grid-cols-3 gap-4">
-                            {mainImagePreviews.map((img, index) => (
-                                <div key={index} className="relative group">
-                                    <img
-                                        src={img}
-                                        alt={`Preview ${index + 1}`}
-                                        className="w-full aspect-square object-cover rounded-lg border"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => handleMainImageRemove(index)}
-                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                        <Button type="button" variant="outline" className="mt-4 w-full">
-                            <Upload className="mr-2 h-4 w-4" /> Upload Main Images
-                        </Button>
-                    </div>
+                    </section>
                 </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-4 pt-6 border-t">
-                <Button type="button" variant="outline" onClick={onClose}>
+            <div className="flex justify-end gap-3 pt-10 border-t sticky bottom-0 bg-background/80 backdrop-blur-sm pb-4">
+                <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="min-w-[120px]">
                     Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Saving Changes..." : "Save Changes"}
+                <Button type="submit" disabled={isSubmitting} className="min-w-[200px] shadow-lg shadow-primary/20">
+                    {isSubmitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> :
+                        initialData?._id || initialData?.id ? "Apply Modifications" : "Register Product"}
                 </Button>
             </div>
         </form>

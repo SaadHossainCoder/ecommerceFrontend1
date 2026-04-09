@@ -8,36 +8,46 @@ export interface ProductVariant {
     size: string;
     qty: number;
     price: number;
+    image?: string;
 }
 
 export interface CreateProductData {
     title: string;
-    shortDescription: string;
+    slug?: string;
+    description: string;
     longDescription: string;
     brand: string;
-    vendor: string;
+    vendorId: string;
     sku: string;
     discount: number;
-    category: string;
+    categoryId: string;
     subcategory: string;
-    isFeatured: boolean;
+    featured: boolean;
     sizes: ProductVariant[];
     benefits: string[];
     ingredients: string[];
-    images: ProductImage[];
-    descriptionImages: ProductImage[];
+    images: string[];
+    descriptionImages: string[];
 }
 
-export interface Product extends CreateProductData {
+export interface Product extends Omit<CreateProductData, 'categoryId' | 'vendorId'> {
     id: string;
     _id?: string;
+    category: { id: string; name: string; slug: string } | string;
+    vendor: { id: string; name: string } | string;
+    images: string[];
+    descriptionImages: string[];
     createdAt: string;
     updatedAt: string;
 }
 
 export const productService = {
     // GET /products — Public
-    getAllProducts: async (params?: Record<string, any>): Promise<{ ok: boolean; message: string; data: Product[] }> => {
+    getAllProducts: async (params?: Record<string, any>): Promise<{ 
+        ok: boolean; 
+        message: string; 
+        data: { data: Product[]; pagination: any } 
+    }> => {
         const response = await api.get("products", { params });
         return response.data;
     },

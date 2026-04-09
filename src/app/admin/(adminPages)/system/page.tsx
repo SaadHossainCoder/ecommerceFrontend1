@@ -108,11 +108,10 @@ export default function SystemMonitorPage() {
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/50 bg-clip-text text-transparent">System Infrastructure</h1>
-                    <p className="text-muted-foreground mt-1 flex items-center gap-2">
+                    <div className="text-muted-foreground mt-1 flex items-center gap-2">
                         <StatusGlow status="active" />
                         Live Cluster: <span className="text-foreground font-mono font-bold tracking-tighter">US-EAST-RG-01</span>
-                    </p>
-                </div>
+                    </div>                </div>
                 <div className="flex items-center gap-3">
                     <Button variant="outline" size="sm" onClick={() => setIsLive(!isLive)}>
                         {isLive ? <Square className="h-3.5 w-3.5 mr-2 fill-current" /> : <Play className="h-3.5 w-3.5 mr-2 fill-current" />}

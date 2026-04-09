@@ -52,14 +52,14 @@ const sidebarLinks = [
         icon: LayoutDashboard,
     },
     {
-        label: "Products",
-        href: "/admin/products",
-        icon: Package,
-    },
-    {
         label: "Orders",
         href: "/admin/orders",
         icon: ShoppingCart,
+    },
+    {
+        label: "Products",
+        href: "/admin/products",
+        icon: Package,
     },
     {
         label: "Customers",
@@ -76,11 +76,6 @@ const sidebarLinks = [
         href: "/admin/categories",
         icon: Folders,
     },
-    // {
-    //     label: "Settings",
-    //     href: "/admin/settings",
-    //     icon: Settings,
-    // },
     {
         label: "reports",
         href: "/admin/reports",
@@ -92,20 +87,16 @@ const sidebarLinks = [
         icon: ShelvingUnit,
     },
     {
-        label: "discounts",
-        href: "/admin/discounts",
-        icon: TicketPercent,
-    },
-    // {
-    //     label: "activity log",
-    //     href: "/admin/activity",
-    //     icon: ChartNetwork,
-    // },
-    {
         label: "system actions",
         href: "/admin/system",
         icon: MonitorCog,
     },
+    {
+        label: "discounts",
+        href: "/admin/discounts",
+        icon: TicketPercent,
+    },
+    
     {
         label: "Vendors",
         href: "/admin/vender",

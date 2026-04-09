@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
-    ImageIcon,
-    Upload,
+    // ImageIcon,
+    // Upload,
     Plus,
     Trash2,
     X,
@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { productSchema, ProductFormValues } from "@/validations/addProduct.validation";
+import { useCategoryStore } from "@/store/category-store";
+import { useVendorStore } from "@/store/vendor-store";
 
 interface EditProductFormProps {
     onClose?: () => void;
@@ -39,14 +41,7 @@ interface EditProductFormProps {
     initialData?: any;
 }
 
-const vendorOptions = [
-    "AudioTech Distributors",
-    "SoundWave Pvt Ltd",
-    "Premium Audio Hub",
-    "Global Electronics",
-    "TechGear Imports",
-    "Vista Audio Solutions",
-];
+const vendorOptions = []; // No longer needed hardcoded
 
 // Helper: Multi-URL Input Component (from Vendor pattern)
 function MultiUrlInput({
@@ -136,6 +131,13 @@ export default function EditProductForm({
     onSave,
     initialData,
 }: EditProductFormProps) {
+    const { categoryTree, fetchTree } = useCategoryStore();
+    const { vendors, fetchVendors } = useVendorStore();
+
+    useEffect(() => {
+        fetchTree();
+        fetchVendors();
+    }, [fetchTree, fetchVendors]);
 
     // Map initial images from objects to strings
     const initialImages = initialData?.images?.map((img: any) => typeof img === 'string' ? img : img.url) || [""];
@@ -151,23 +153,24 @@ export default function EditProductForm({
         resolver: zodResolver(productSchema),
         defaultValues: {
             title: initialData?.title || "",
-            shortDescription: initialData?.shortDescription || "",
+            description: initialData?.description || "",
             longDescription: initialData?.longDescription || "",
-            brand: initialData?.brand || "",
-            vendor: initialData?.vendor || "",
+            brand: initialData?.brand || initialData?.ingredients?.brand || "",
+            vendor: typeof initialData?.vendor === 'object' ? initialData.vendor.id : initialData?.vendor || "",
             sku: initialData?.sku || "",
             discount: initialData?.discount || 0,
-            category: initialData?.category || "",
-            subcategory: initialData?.subcategory || "",
-            isFeatured: initialData?.isFeatured || false,
+            category: typeof initialData?.category === 'object' ? initialData.category.id : initialData?.category || "",
+            subcategory: initialData?.subcategory || initialData?.ingredients?.subcategory || "",
+            featured: initialData?.featured || false,
             sizes: initialData?.sizes?.map((s: any) => ({
-                name: s.size || s.name || "",
-                stock: Number(s.qty || s.stock || 0),
+                size: s.size || "",
+                qty: Number(s.qty || 0),
                 price: Number(s.price || 0),
-                image: s.image || ""
-            })) || [{ name: "", stock: 0, price: 0, image: "" }],
-            benefits: initialData?.benefits || [""],
-            ingredients: initialData?.ingredients || [""],
+                image: s.image || "",
+                images: s.images && s.images.length ? s.images : (s.image ? [s.image] : [""])
+            })) || [{ size: "", qty: 0, price: 0, image: "", images: [""] }],
+            benefits: (Array.isArray(initialData?.benefits) ? initialData.benefits : (Array.isArray(initialData?.ingredients?.benefits) ? initialData.ingredients.benefits : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
+            ingredients: (Array.isArray(initialData?.ingredients) ? initialData.ingredients : (Array.isArray(initialData?.ingredients?.details) ? initialData.ingredients.details : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
             images: initialImages,
         },
     });
@@ -178,12 +181,30 @@ export default function EditProductForm({
 
     const watchImages = watch("images");
 
-    const onSubmit = (data: ProductFormValues) => {
-        onSave?.(data);
+    const onSubmit = async (data: ProductFormValues) => {
+        // Sync the first variant image as the primary image for legacy backend queries
+        data.sizes = data.sizes.map(s => ({
+            ...s,
+            image: s.images && s.images[0] ? s.images[0] : (s.image || ""),
+            images: (s.images || []).filter(v => v.trim() !== "")
+        }));
+        console.log("Form submission started:", data);
+        try {
+            if (onSave) {
+                await onSave(data);
+            }
+        } catch (err) {
+            console.error("Submission failed:", err);
+        }
+    };
+
+    const onError = (errors: any) => {
+        console.error("Form validation failed for fields:", Object.keys(errors));
+        console.error("Form validation error details:", JSON.stringify(errors, null, 2));
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 {/* Left Column - Essential Information */}
                 <div className="lg:col-span-7 space-y-8">
@@ -199,9 +220,9 @@ export default function EditProductForm({
                                 {errors.title && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.title.message}</p>}
                             </div>
                             <div>
-                                <Label htmlFor="shortDescription" className="text-xs font-semibold">HOOK LINE / SHORT DESCRIPTION *</Label>
-                                <Input id="shortDescription" {...register("shortDescription")} placeholder="A punchy 1-line summary (min 20 chars)" className="mt-1" />
-                                {errors.shortDescription && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.shortDescription.message}</p>}
+                                <Label htmlFor="description" className="text-xs font-semibold">HOOK LINE / SHORT DESCRIPTION *</Label>
+                                <Input id="description" {...register("description")} placeholder="A punchy 1-line summary (min 20 chars)" className="mt-1" />
+                                {errors.description && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.description.message}</p>}
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -210,14 +231,20 @@ export default function EditProductForm({
                                 </div>
                                 <div>
                                     <Label className="text-xs font-semibold">VENDOR PARTNER *</Label>
-                                    <Select onValueChange={(v) => setValue("vendor", v, { shouldValidate: true })} defaultValue={watch("vendor")}>
-                                        <SelectTrigger className="mt-1">
-                                            <SelectValue placeholder="Select Vendor" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {vendorOptions.map((v) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
+                                    <Controller
+                                        name="vendor"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <SelectTrigger className="mt-1">
+                                                    <SelectValue placeholder="Select Vendor" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {vendors.map((v) => <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -231,30 +258,50 @@ export default function EditProductForm({
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label className="text-xs font-semibold">PRIMARY CATEGORY *</Label>
-                                <Select onValueChange={(v) => setValue("category", v, { shouldValidate: true })} defaultValue={watch("category")}>
-                                    <SelectTrigger className="mt-1">
-                                        <SelectValue placeholder="Select Category" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Electronics">Electronics</SelectItem>
-                                        <SelectItem value="Audio">Audio</SelectItem>
-                                        <SelectItem value="Fashion">Fashion</SelectItem>
-                                        <SelectItem value="Home & Living">Home & Living</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <Controller
+                                    name="category"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select onValueChange={(v) => {
+                                            field.onChange(v);
+                                            setValue("subcategory", ""); // Reset subcategory when primary changes
+                                        }} defaultValue={field.value}>
+                                            <SelectTrigger className="mt-1">
+                                                <SelectValue placeholder="Select Category" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {categoryTree.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
                             </div>
                             <div>
                                 <Label className="text-xs font-semibold">SUBCATEGORY *</Label>
-                                <Select onValueChange={(v) => setValue("subcategory", v, { shouldValidate: true })} defaultValue={watch("subcategory")}>
-                                    <SelectTrigger className="mt-1">
-                                        <SelectValue placeholder="Select Subcategory" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Wireless">Wireless</SelectItem>
-                                        <SelectItem value="Wired">Wired</SelectItem>
-                                        <SelectItem value="Accessories">Accessories</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <Controller
+                                    name="subcategory"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <SelectTrigger className="mt-1">
+                                                <SelectValue placeholder="Select Subcategory" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {(() => {
+                                                    const selectedCatId = watch("category");
+                                                    const selectedCat = categoryTree.find(c => c.id === selectedCatId);
+                                                    const subs = selectedCat?.subCategories || [];
+
+                                                    if (subs.length === 0) return <SelectItem value="none" disabled>No Subcategories Found</SelectItem>;
+
+                                                    return subs.map((s) => (
+                                                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                                    ));
+                                                })()}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
                             </div>
                             <div>
                                 <Label htmlFor="sku" className="text-xs font-semibold">UNIQUE SKU *</Label>
@@ -266,7 +313,13 @@ export default function EditProductForm({
                             </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl border border-dashed border-primary/20">
-                            <Switch id="featured" checked={watch("isFeatured")} onCheckedChange={(v) => setValue("isFeatured", v)} />
+                            <Controller
+                                name="featured"
+                                control={control}
+                                render={({ field }) => (
+                                    <Switch id="featured" checked={field.value} onCheckedChange={field.onChange} />
+                                )}
+                            />
                             <Label htmlFor="featured" className="cursor-pointer font-bold text-xs uppercase">Mark as Featured Product</Label>
                         </div>
                     </section>
@@ -302,7 +355,7 @@ export default function EditProductForm({
                                 <List className="h-5 w-5" />
                                 <h3 className="font-bold uppercase tracking-wider">Variants & Inventory</h3>
                             </div>
-                            <Button type="button" variant="outline" size="sm" onClick={() => appendSize({ name: "", stock: 0, price: 0, image: "" })} className="h-7 text-xs gap-1 border-primary/30">
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendSize({ size: "", qty: 0, price: 0, image: "", images: [""] })} className="h-7 text-xs gap-1 border-primary/30">
                                 <Plus className="h-3 w-3" /> Add Variant
                             </Button>
                         </div>
@@ -314,11 +367,11 @@ export default function EditProductForm({
                                         <div className="flex items-center gap-3">
                                             <div className="flex-1">
                                                 <Label className="text-[10px] font-bold text-muted-foreground uppercase">Variant Name</Label>
-                                                <Input placeholder="Small, Red, 1TB..." {...register(`sizes.${index}.name`)} className="mt-0.5 h-8 text-xs" />
+                                                <Input placeholder="Small, Red, 1TB..." {...register(`sizes.${index}.size`)} className="mt-0.5 h-8 text-xs" />
                                             </div>
                                             <div className="w-20">
                                                 <Label className="text-[10px] font-bold text-muted-foreground uppercase">Qty</Label>
-                                                <Input type="number" placeholder="0" {...register(`sizes.${index}.stock`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
+                                                <Input type="number" placeholder="0" {...register(`sizes.${index}.qty`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
                                             </div>
                                             <div className="w-24">
                                                 <Label className="text-[10px] font-bold text-muted-foreground uppercase">Price ($)</Label>
@@ -330,16 +383,19 @@ export default function EditProductForm({
                                                 </Button>
                                             )}
                                         </div>
-                                        <div>
-                                            <Label className="text-[10px] font-bold text-muted-foreground uppercase">Variant URL (Optional)</Label>
-                                            <div className="flex items-center gap-3 mt-0.5">
-                                                <Input placeholder="URL link..." {...register(`sizes.${index}.image`)} className="h-8 text-xs flex-1 border-dashed" />
-                                                {watch(`sizes.${index}.image`) && (
-                                                    <div className="h-8 w-8 rounded border overflow-hidden shrink-0">
-                                                        <img src={watch(`sizes.${index}.image`)} className="w-full h-full object-cover" />
-                                                    </div>
+                                        <div className="mt-2 pt-2 border-t border-dashed">
+                                            <Controller
+                                                name={`sizes.${index}.images`}
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <MultiUrlInput
+                                                        label="Variant Images"
+                                                        values={field.value || []}
+                                                        onChange={(vals) => field.onChange(vals)}
+                                                        placeholder="Variant image URL..."
+                                                    />
                                                 )}
-                                            </div>
+                                            />
                                         </div>
                                     </div>
                                 </Card>
@@ -351,14 +407,14 @@ export default function EditProductForm({
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-bold uppercase tracking-wider text-xs text-primary">Core Benefits</h3>
-                                <Button type="button" variant="ghost" size="sm" onClick={() => appendBenefit("")} className="h-6 text-[10px] items-center gap-1">
+                                <Button type="button" variant="ghost" size="sm" onClick={() => appendBenefit({ value: "" })} className="h-6 text-[10px] items-center gap-1">
                                     <Plus className="h-3 w-3" /> Add Benefit
                                 </Button>
                             </div>
                             <div className="space-y-2">
                                 {benefitFields.map((field, index) => (
                                     <div key={field.id} className="flex gap-2">
-                                        <Input {...register(`benefits.${index}`)} placeholder="e.g. 24h Battery Life" className="h-8 text-xs" />
+                                        <Input {...register(`benefits.${index}.value`)} placeholder="e.g. 24h Battery Life" className="h-8 text-xs" />
                                         <Button type="button" variant="ghost" size="icon" onClick={() => removeBenefit(index)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </Button>
@@ -369,14 +425,14 @@ export default function EditProductForm({
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h3 className="font-bold uppercase tracking-wider text-xs text-primary">Ingredients / Materials</h3>
-                                <Button type="button" variant="ghost" size="sm" onClick={() => appendIngredient("")} className="h-6 text-[10px] items-center gap-1">
+                                <Button type="button" variant="ghost" size="sm" onClick={() => appendIngredient({ value: "" })} className="h-6 text-[10px] items-center gap-1">
                                     <Plus className="h-3 w-3" /> Add Line
                                 </Button>
                             </div>
                             <div className="space-y-2">
                                 {ingredientFields.map((field, index) => (
                                     <div key={field.id} className="flex gap-2">
-                                        <Input {...register(`ingredients.${index}`)} placeholder="e.g. Recycled Aluminum" className="h-8 text-xs" />
+                                        <Input {...register(`ingredients.${index}.value`)} placeholder="e.g. Recycled Aluminum" className="h-8 text-xs" />
                                         <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(index)} className="h-8 w-8 text-muted-foreground hover:text-destructive">
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </Button>

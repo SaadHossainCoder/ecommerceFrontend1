@@ -173,7 +173,7 @@ export default function ProductsPage() {
     }, [products]);
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 pb-12">
+        <div className="space-y-8 pb-12">
             {/* Header - Glassmorphic Hero */}
             <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-primary/10 via-primary/5 to-transparent p-8 lg:p-12 border border-primary/10 shadow-sm">
                 <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-96 h-96 bg-primary/20 rounded-full blur-[80px]" />
@@ -190,7 +190,7 @@ export default function ProductsPage() {
                         <Button variant="outline" size="icon" onClick={handleRefresh} disabled={isLoading} className="h-12 w-12 rounded-2xl bg-background/50 backdrop-blur-sm border-primary/20 hover:bg-primary/10">
                             <RefreshCw className={`h-5 w-5 ${isLoading ? "animate-spin" : ""}`} />
                         </Button>
-                        <Button onClick={() => { setSelectedProduct(null); setIsAddEditOpen(true); }} className="h-12 px-6 rounded-2xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/30 hover:scale-105 transition-transform">
+                        <Button onClick={() => { setSelectedProduct(null); setIsAddEditOpen(true); }} className="h-12 px-6 rounded-2xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/30">
                             <Plus className="h-5 w-5 mr-2" />
                             Create Product
                         </Button>
@@ -298,9 +298,9 @@ export default function ProductsPage() {
                             const status = totalStock > 10 ? "Published" : totalStock > 0 ? "Low Stock" : "Out of Stock";
 
                             return (
-                                <Card key={product._id || product.id} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center p-4 lg:px-8 rounded-3xl hover:bg-muted/30 hover:shadow-xl hover:-translate-y-0.5 border border-transparent hover:border-primary/20 transition-all duration-300">
+                                <Card key={product._id || product.id} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center p-4 lg:px-8 rounded-3xl hover:bg-muted/30 hover:shadow-xl border border-transparent hover:border-primary/20">
                                     <div className="col-span-4 flex items-center gap-5">
-                                        <div className="h-16 w-16 rounded-2xl bg-muted overflow-hidden flex items-center justify-center shrink-0 border border-primary/10 relative group-hover:shadow-md transition-shadow">
+                                        <div className="h-16 w-16 rounded-2xl bg-muted overflow-hidden flex items-center justify-center shrink-0 border border-primary/10 relative group-hover:shadow-md">
                                             {typeof mainImg === 'string' && mainImg.startsWith('http') ? (
                                                 <img src={mainImg} alt={product.title} className="w-full h-full object-cover" />
                                             ) : <span className="text-3xl">📦</span>}
@@ -362,7 +362,7 @@ export default function ProductsPage() {
                         const status = totalStock > 10 ? "Published" : totalStock > 0 ? "Low Stock" : "Out of Stock";
 
                         return (
-                            <Card key={product._id || product.id} className="rounded-3xl overflow-hidden group hover:shadow-2xl border border-transparent hover:border-primary/30 transition-all duration-500 bg-card flex flex-col relative">
+                            <Card key={product._id || product.id} className="rounded-3xl overflow-hidden group hover:shadow-2xl border border-transparent hover:border-primary/30 bg-card flex flex-col relative">
                                 <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
                                     <Badge variant={getStatusColor(status) as any} className="shadow-lg backdrop-blur-md px-3 py-1 font-bold text-[10px] uppercase tracking-widest">
                                         {status}
@@ -370,16 +370,16 @@ export default function ProductsPage() {
                                 </div>
                                 <div className="aspect-[4/3] bg-muted relative overflow-hidden shrink-0">
                                     {typeof mainImg === 'string' && mainImg.startsWith('http') ? (
-                                        <img src={mainImg} alt={product.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+                                        <img src={mainImg} alt={product.title} className="w-full h-full object-cover" />
                                     ) : <div className="w-full h-full flex items-center justify-center text-6xl">📦</div>}
-                                    <div className="absolute inset-0 bg-linear-to-t from-background via-background/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                                    <div className="absolute inset-0 bg-linear-to-t from-background via-background/20 to-transparent opacity-80 group-hover:opacity-90" />
                                     
                                     {/* Grid Action Overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 backdrop-blur-sm bg-black/20">
-                                        <Button size="icon" variant="secondary" className="h-12 w-12 rounded-full shadow-2xl hover:scale-110 transition-transform" onClick={() => handleViewDetails(product)}>
+                                    <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 backdrop-blur-sm bg-black/20">
+                                        <Button size="icon" variant="secondary" className="h-12 w-12 rounded-full shadow-2xl" onClick={() => handleViewDetails(product)}>
                                             <Eye className="h-5 w-5" />
                                         </Button>
-                                        <Button size="icon" className="h-12 w-12 rounded-full shadow-2xl hover:scale-110 transition-transform bg-primary" onClick={() => handleEditProduct(product)}>
+                                        <Button size="icon" className="h-12 w-12 rounded-full shadow-2xl bg-primary" onClick={() => handleEditProduct(product)}>
                                             <Edit2 className="h-5 w-5" />
                                         </Button>
                                     </div>
@@ -560,7 +560,7 @@ export default function ProductsPage() {
                                     <div className="grid grid-cols-4 gap-3">
                                         {selectedProduct.images?.map((url: string, i: number) => (
                                             <div key={i} className="aspect-square rounded-xl border overflow-hidden bg-muted group relative">
-                                                <img src={url} alt="Gallery" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                                <img src={url} alt="Gallery" className="w-full h-full object-cover" />
                                             </div>
                                         ))}
                                     </div>

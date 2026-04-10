@@ -200,7 +200,7 @@ export default function EditProductForm({
 
     const onError = (errors: any) => {
         console.error("Form validation failed for fields:", Object.keys(errors));
-        console.error("Form validation error details:", JSON.stringify(errors, null, 2));
+        console.error("Form validation error details:", errors);
     };
 
     return (
@@ -228,6 +228,7 @@ export default function EditProductForm({
                                 <div>
                                     <Label htmlFor="brand" className="text-xs font-semibold">MANUFACTURER / BRAND *</Label>
                                     <Input id="brand" {...register("brand")} placeholder="e.g. Sony, Bose" className="mt-1" />
+                                    {errors.brand && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.brand.message as string}</p>}
                                 </div>
                                 <div>
                                     <Label className="text-xs font-semibold">VENDOR PARTNER *</Label>
@@ -306,10 +307,12 @@ export default function EditProductForm({
                             <div>
                                 <Label htmlFor="sku" className="text-xs font-semibold">UNIQUE SKU *</Label>
                                 <Input id="sku" {...register("sku")} placeholder="e.g. AUD-001-WH" className="mt-1 font-mono" />
+                                {errors.sku && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.sku.message as string}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="discount" className="text-xs font-semibold">FLAT DISCOUNT (%)</Label>
                                 <Input id="discount" type="number" {...register("discount", { valueAsNumber: true })} className="mt-1" />
+                                {errors.discount && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.discount.message as string}</p>}
                             </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl border border-dashed border-primary/20">

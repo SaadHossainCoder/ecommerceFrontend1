@@ -80,53 +80,54 @@ function GridCard({
     onAddToCart: (item: Item) => void;
 }) {
     return (
-        <div className="group bg-white border border-stone-200 hover:border-amber-700/50 hover:shadow-sm transition-all duration-300 flex flex-col h-full">
+        <div className="group bg-white border border-stone-200 hover:border-amber-700/50 hover:shadow-md transition-all duration-500 flex flex-col h-full">
             {/* Image area */}
-            <div className="relative aspect-square bg-stone-100 overflow-hidden border-b border-stone-200 flex items-center justify-center">
+            <div className="relative aspect-square bg-stone-50 overflow-hidden border-b border-stone-200 flex items-center justify-center">
                 <Link
-                    href={`/product/${item.id}`}
+                    href={`/products/${item.id}`}
                     className="absolute inset-0 z-10"
                     aria-label={`View ${item.name}`}
                 />
-                <span className="text-6xl group-hover:scale-110 transition-transform duration-500">{item.image}</span>
+                <span className="text-7xl group-hover:scale-110 transition-transform duration-700">{item.image}</span>
+                <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/5 transition-colors duration-500 pointer-events-none" />
 
                 {/* Badge */}
                 {item.badge && (
-                    <span className="absolute top-4 left-4 z-20 bg-stone-900 text-white text-[9px] uppercase tracking-[0.2em] font-bold px-3 py-1.5 shadow-sm">
+                    <span className="absolute top-4 left-4 z-20 bg-stone-900 text-white text-[9px] uppercase tracking-[0.25em] font-bold px-3 py-1.5 shadow-sm">
                         {item.badge}
                     </span>
                 )}
 
                 {/* Discount */}
                 {item.originalPrice > item.price && (
-                    <span className="absolute top-4 right-4 z-20 bg-amber-100 text-amber-800 text-[9px] font-bold px-2 py-1.5 shadow-sm">
+                    <span className="absolute top-4 right-4 z-20 bg-amber-50 text-amber-900 border border-amber-200/50 text-[9px] uppercase tracking-[0.2em] font-bold px-2.5 py-1.5 shadow-sm">
                         -{discount(item.price, item.originalPrice)}%
                     </span>
                 )}
 
                 {/* Hover: Add to cart */}
-                <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-30">
+                <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-30">
                     <button
                         onClick={(e) => {
                             e.preventDefault();
                             onAddToCart(item);
                         }}
-                        className="w-full bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.2em] font-bold py-3.5 flex items-center justify-center gap-2 transition-colors"
+                        className="w-full bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.25em] font-bold py-4 flex items-center justify-center gap-2 transition-colors shadow-[0_-5px_15px_rgba(0,0,0,0.1)]"
                     >
                         <ShoppingCart className="w-3.5 h-3.5" />
-                        Add to Cart
+                        Acquire
                     </button>
                 </div>
             </div>
 
             {/* Info */}
-            <div className="p-5 flex flex-col flex-1">
-                <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="min-w-0">
-                        <p className="text-[9px] uppercase tracking-[0.2em] text-stone-400 font-semibold mb-1.5">
+            <div className="p-5 md:p-6 flex flex-col flex-1">
+                <div className="flex items-start justify-between gap-4 mb-2">
+                    <div className="min-w-0 pr-2">
+                        <p className="text-[9px] uppercase tracking-[0.25em] text-stone-400 font-bold mb-2">
                             {item.category}
                         </p>
-                        <Link href={`/product/${item.id}`} className="block">
+                        <Link href={`/products/${item.id}`} className="block relative z-10">
                             <h3 className="text-sm font-serif font-semibold text-stone-900 leading-snug line-clamp-2 group-hover:text-amber-700 transition-colors">
                                 {item.name}
                             </h3>
@@ -134,23 +135,23 @@ function GridCard({
                     </div>
                     <button
                         onClick={() => onRemove(item.id)}
-                        className="shrink-0 text-stone-300 hover:text-red-500 transition-colors mt-1 relative z-20"
+                        className="shrink-0 text-stone-300 hover:text-red-600 transition-colors mt-0 relative z-20"
                         aria-label="Remove"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
                 </div>
 
-                <div className="flex items-center gap-1.5 mt-auto mb-3 pt-2">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    <span className="text-[10px] font-bold text-stone-700">{item.rating}</span>
-                    <span className="text-[10px] text-stone-400">({item.reviews.toLocaleString()})</span>
+                <div className="flex items-center gap-2 mt-auto mb-4 pt-1">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    <span className="text-[11px] font-bold text-stone-700">{item.rating}</span>
+                    <span className="text-[9px] uppercase tracking-widest font-mono text-stone-400">({item.reviews.toLocaleString()})</span>
                 </div>
 
-                <div className="flex items-baseline gap-2 pt-3 border-t border-stone-100">
-                    <span className="text-base font-bold text-stone-900">${item.price}</span>
+                <div className="flex items-baseline gap-2 pt-4 border-t border-stone-200">
+                    <span className="text-lg font-serif text-stone-900 font-bold">₹{item.price.toLocaleString()}</span>
                     {item.originalPrice > item.price && (
-                        <span className="text-xs text-stone-400 line-through">${item.originalPrice}</span>
+                        <span className="text-xs font-mono font-bold text-stone-400 line-through tracking-wider">₹{item.originalPrice.toLocaleString()}</span>
                     )}
                 </div>
             </div>
@@ -170,70 +171,69 @@ function ListRow({
     onAddToCart: (item: Item) => void;
 }) {
     return (
-        <div className="flex flex-col sm:flex-row gap-0 sm:gap-6 bg-white border border-stone-200 hover:border-amber-700/50 hover:shadow-sm transition-all duration-300 group">
+        <div className="flex flex-col sm:flex-row gap-0 sm:gap-0 bg-white border border-stone-200 hover:border-amber-700/50 hover:shadow-md transition-all duration-300 group">
             {/* Thumbnail */}
-            <div className="relative shrink-0 w-full sm:w-40 h-40 sm:h-auto bg-stone-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-stone-200 overflow-hidden">
+            <div className="relative shrink-0 w-full sm:w-56 h-56 sm:h-auto bg-stone-50 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-stone-200 overflow-hidden">
                 <Link
-                    href={`/product/${item.id}`}
+                    href={`/products/${item.id}`}
                     className="absolute inset-0 z-10"
                     aria-label={`View ${item.name}`}
                 />
-                <span className="text-5xl group-hover:scale-110 transition-transform duration-500">{item.image}</span>
+                <span className="text-7xl group-hover:scale-110 transition-transform duration-700">{item.image}</span>
                 {item.badge && (
-                    <span className="absolute top-3 left-3 z-20 bg-stone-900 text-white text-[8px] uppercase tracking-[0.2em] font-bold px-2 py-1">
+                    <span className="absolute top-4 left-4 z-20 bg-stone-900 text-white text-[9px] uppercase tracking-[0.25em] font-bold px-3 py-1.5 shadow-sm">
                         {item.badge}
+                    </span>
+                )}
+                {item.originalPrice > item.price && (
+                    <span className="absolute top-4 right-4 z-20 bg-amber-50 text-amber-900 border border-amber-200/50 text-[9px] uppercase tracking-[0.2em] font-bold px-2.5 py-1.5 shadow-sm">
+                        -{discount(item.price, item.originalPrice)}%
                     </span>
                 )}
             </div>
 
             {/* Content */}
-            <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-5 p-5">
-                <div className="flex-1 min-w-0">
-                    <p className="text-[9px] uppercase tracking-[0.2em] text-stone-400 font-semibold mb-1.5 flex items-center gap-2">
+            <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 md:p-8">
+                <div className="flex-1 min-w-0 pr-0 sm:pr-6">
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-bold mb-2.5 flex items-center gap-2">
                         {item.category}
-                        {item.originalPrice > item.price && (
-                            <>
-                                <span className="w-1 h-1 rounded-full bg-stone-300" />
-                                <span className="text-amber-600 font-bold tracking-widest uppercase">Save {discount(item.price, item.originalPrice)}%</span>
-                            </>
-                        )}
                     </p>
-                    <Link href={`/product/${item.id}`} className="block relative z-10">
-                        <h3 className="text-base font-serif font-semibold text-stone-900 group-hover:text-amber-700 transition-colors line-clamp-1 mb-2">
+                    <Link href={`/product/${item.id}`} className="block relative z-10 mb-3">
+                        <h3 className="text-xl md:text-2xl font-serif font-semibold text-stone-900 group-hover:text-amber-700 transition-colors line-clamp-2">
                             {item.name}
                         </h3>
                     </Link>
-                    <div className="flex items-center gap-1.5">
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                        <span className="text-[10px] font-bold text-stone-700">{item.rating}</span>
-                        <span className="text-[10px] text-stone-400">({item.reviews.toLocaleString()})</span>
+                    <div className="flex items-center gap-2">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <span className="text-xs font-bold text-stone-700">{item.rating}</span>
+                        <span className="text-[10px] uppercase font-mono tracking-widest text-stone-400">({item.reviews.toLocaleString()} Reviews)</span>
                     </div>
                 </div>
 
                 {/* Price + Actions */}
-                <div className="flex items-center justify-between sm:justify-end gap-6 shrink-0 relative z-20 border-t sm:border-t-0 border-stone-100 sm:border-l sm:border-l-stone-100 pt-4 sm:pt-0 sm:pl-6 w-full sm:w-auto">
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-bold text-stone-900">${item.price}</span>
+                <div className="flex flex-col sm:items-end justify-between sm:justify-center gap-6 shrink-0 relative z-20 border-t sm:border-t-0 border-stone-200 sm:border-l pl-0 sm:pl-8 pt-6 sm:pt-0 w-full sm:w-auto min-w-[200px]">
+                    <div className="flex items-baseline gap-3 mb-1 sm:mb-3">
+                        <span className="text-2xl font-serif text-stone-900">₹{item.price.toLocaleString()}</span>
                         {item.originalPrice > item.price && (
-                            <span className="text-xs text-stone-400 line-through">${item.originalPrice}</span>
+                            <span className="text-sm font-bold font-mono tracking-wider text-stone-400 line-through">₹{item.originalPrice.toLocaleString()}</span>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
                         <button
                             onClick={() => onRemove(item.id)}
-                            className="p-2.5 bg-stone-50 border border-stone-200 text-stone-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors"
+                            className="flex items-center justify-center w-12 h-12 bg-white border border-stone-200 text-stone-400 hover:text-red-600 hover:border-red-600 hover:bg-red-50 transition-colors shadow-sm shrink-0"
                             aria-label="Remove"
                         >
                             <Trash2 className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => onAddToCart(item)}
-                            className="flex items-center justify-center w-10 h-10 sm:w-auto sm:px-5 sm:py-2.5 gap-2 bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.2em] font-bold transition-colors"
+                            className="flex-1 sm:flex-none flex items-center justify-center h-12 px-6 lg:px-8 gap-2 bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.25em] font-bold transition-colors shadow-sm"
                             aria-label="Add to cart"
                         >
                             <ShoppingCart className="w-4 h-4" />
-                            <span className="hidden sm:inline">Add to Cart</span>
+                            <span>Acquire</span>
                         </button>
                     </div>
                 </div>
@@ -250,9 +250,9 @@ export default function WishlistPage() {
     const [sortBy, setSortBy] = useState("added-newest");
 
     const sorted = [...wishlist].sort((a, b) => {
-        if (sortBy === "price-low")  return a.price - b.price;
+        if (sortBy === "price-low") return a.price - b.price;
         if (sortBy === "price-high") return b.price - a.price;
-        if (sortBy === "rating")     return b.rating - a.rating;
+        if (sortBy === "rating") return b.rating - a.rating;
         return 0;
     });
 
@@ -272,7 +272,7 @@ export default function WishlistPage() {
 
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col">
-            
+
             {/* ── Dashboard Hero ── */}
             <div className="bg-stone-900 py-10 md:py-14">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -346,10 +346,11 @@ export default function WishlistPage() {
                                         <SelectValue placeholder="SORT BY" />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-none border-stone-200">
-                                        <SelectItem value="added-newest" className="text-xs hover:bg-stone-50 cursor-pointer">Recently Added</SelectItem>
-                                        <SelectItem value="price-low" className="text-xs hover:bg-stone-50 cursor-pointer">Price: Low to High</SelectItem>
-                                        <SelectItem value="price-high" className="text-xs hover:bg-stone-50 cursor-pointer">Price: High to Low</SelectItem>
-                                        <SelectItem value="rating" className="text-xs hover:bg-stone-50 cursor-pointer">Highest Rated</SelectItem>
+                                        <SelectItem value="added-newest" className="text-xs cursor-pointer">Recently Added</SelectItem>
+                                        <SelectItem value="price-low" className="text-xs cursor-pointer">Price: Low to High</SelectItem>
+                                        <SelectItem value="price-high" className="text-xs cursor-pointer">Price: High to Low</SelectItem>
+                                        <SelectItem value="rating" className="text-xs cursor-pointer"
+                                        >Highest Rated</SelectItem>
                                     </SelectContent>
                                 </Select>
 
@@ -357,22 +358,20 @@ export default function WishlistPage() {
                                 <div className="hidden sm:flex border border-stone-200 bg-white items-center p-1 gap-1">
                                     <button
                                         onClick={() => setViewMode("grid")}
-                                        className={`p-2 transition-colors ${
-                                            viewMode === "grid"
+                                        className={`p-2 transition-colors ${viewMode === "grid"
                                                 ? "bg-stone-100 text-stone-900"
                                                 : "text-stone-400 hover:text-stone-900"
-                                        }`}
+                                            }`}
                                         aria-label="Grid view"
                                     >
                                         <Grid3X3 className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={() => setViewMode("list")}
-                                        className={`p-2 transition-colors ${
-                                            viewMode === "list"
+                                        className={`p-2 transition-colors ${viewMode === "list"
                                                 ? "bg-stone-100 text-stone-900"
                                                 : "text-stone-400 hover:text-stone-900"
-                                        }`}
+                                            }`}
                                         aria-label="List view"
                                     >
                                         <LayoutList className="w-4 h-4" />
@@ -383,7 +382,7 @@ export default function WishlistPage() {
 
                         {/* ── Items ── */}
                         {viewMode === "grid" ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                                 {sorted.map((item) => (
                                     <GridCard
                                         key={item.id}

@@ -71,48 +71,48 @@ export function Footer() {
 
 
             <div className="container-custom relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 mb-20">
+                <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-8 gap-y-12 lg:gap-12 mb-20">
                     {/* Brand Section */}
-                    <div className="md:col-span-4 relative">
-                        <h2 className="text-6xlv text-white md:text-[6rem] lg:text-[8rem] font-heading font-bold leading-[0.8] tracking-tight  pointer-events-none select-none ">
+                    <div className="col-span-2 lg:col-span-4 relative">
+                        <h2 className="text-6xl sm:text-7xl md:text-[6rem] lg:text-[8rem] text-white font-heading font-bold leading-[0.8] tracking-tight pointer-events-none select-none">
                             GEMINI
                         </h2>
                         <div className="mt-8 space-y-4 relative z-10">
-                            <blockquote className="quote max-w-md text-primary-foreground">
+                            <blockquote className="quote max-w-md text-stone-300 italic">
                                 {"From Soil to Soul. Where art breathes, and tradition lives."}
                             </blockquote>
-                            <p className="max-w-xs text-sm text-[#FBF9F4]">
+                            <p className="max-w-xs text-sm text-stone-400">
                                 Celebrating the artisans of Shantiniketan. Every piece handcrafted, every story authentic.
                             </p>
 
                             <div className="pt-6 space-y-4">
-                                <div className="flex items-start gap-3 group group">
-                                    <div className="w-10 h-10 rounded-full bg-[#5E1C2D] flex items-center justify-center shrink-0 group-hover:bg-[#3d121d] transition-all duration-300">
-                                        <MapPin className="w-7 h-7 group-hover:text-[#919191] text-white" />
+                                <div className="flex items-start gap-4 group">
+                                    <div className="w-10 h-10 rounded-full border border-stone-700 bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-500">
+                                        <MapPin className="w-4 h-4 text-stone-400 group-hover:text-stone-900 transition-colors" />
                                     </div>
                                     <div className="text-sm">
-                                        <p className="font-semibold text-[#fbfbfb]">Location</p>
-                                        <p className="text-[#959595]">Shantiniketan, Bolpur, WB 731235, India</p>
+                                        <p className="font-bold text-white uppercase tracking-widest text-[9px] mb-1.5 mt-1">Location</p>
+                                        <p className="text-stone-400 font-light">Shantiniketan, Bolpur, WB 731235</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-3 group">
-                                    <div className="w-10 h-10 rounded-full bg-[#5E1C2D] flex items-center justify-center shrink-0 group-hover:bg-[#3d121d] transition-all duration-300">
-                                        <Phone className="w-7 h-7 group-hover:text-[#919191] text-white" />
+                                <div className="flex items-start gap-4 group">
+                                    <div className="w-10 h-10 rounded-full border border-stone-700 bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-500">
+                                        <Phone className="w-4 h-4 text-stone-400 group-hover:text-stone-900 transition-colors" />
                                     </div>
                                     <div className="text-sm">
-                                        <p className="font-semibold text-[#fbfbfb]">Phone</p>
-                                        <p className="text-[#959595]">+91 98765 43210</p>
+                                        <p className="font-bold text-white uppercase tracking-widest text-[9px] mb-1.5 mt-1">Phone</p>
+                                        <p className="text-stone-400 font-light">+91 98765 43210</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-3 group">
-                                    <div className="w-10 h-10 rounded-full bg-[#5E1C2D] flex items-center justify-center shrink-0 group-hover:bg-[#3d121d] transition-all duration-300">
-                                        <Mail className="w-7 h-7 group-hover:text-[#919191] text-white" />
+                                <div className="flex items-start gap-4 group">
+                                    <div className="w-10 h-10 rounded-full border border-stone-700 bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-500">
+                                        <Mail className="w-4 h-4 text-stone-400 group-hover:text-stone-900 transition-colors" />
                                     </div>
                                     <div className="text-sm">
-                                        <p className="font-semibold text-[#fbfbfb]">Email</p>
-                                        <p className="text-[#959595]">contact@geminiheritage.com</p>
+                                        <p className="font-bold text-white uppercase tracking-widest text-[9px] mb-1.5 mt-1">Email</p>
+                                        <p className="text-stone-400 font-light">contact@geminiheritage.com</p>
                                     </div>
                                 </div>
                             </div>
@@ -120,16 +120,16 @@ export function Footer() {
                     </div>
 
                     {/* Company */}
-                    <div className="md:col-span-2 space-y-6 pt-12 md:pt-0">
-                        <h4 className="text-lg font-bold uppercase tracking-wider text-white">Company</h4>
-                        <ul className="space-y-3">
+                    <div className="col-span-1 lg:col-span-2 space-y-6 pt-6 lg:pt-0">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-white">Company</h4>
+                        <ul className="space-y-4">
                             {footerLinks.company.map((link) => (
                                 <li key={link.href}>
                                     <Link
                                         href={link.href}
                                         className={cn(
-                                            "text-sm transition-colors font-medium relative group inline-block",
-                                            pathname === link.href ? "text-white font-bold" : "text-[#a3a3a3] hover:text-white"
+                                            "text-xs transition-colors font-light relative group inline-block",
+                                            pathname === link.href ? "text-white font-medium" : "text-stone-400 hover:text-white"
                                         )}
                                     >
                                         {link.label}
@@ -144,16 +144,16 @@ export function Footer() {
                     </div>
 
                     {/* Support */}
-                    <div className="md:col-span-2 space-y-6 pt-12 md:pt-0">
-                        <h4 className="text-lg font-bold uppercase tracking-wider text-white">Support</h4>
-                        <ul className="space-y-3">
+                    <div className="col-span-1 lg:col-span-2 space-y-6 pt-6 lg:pt-0">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-white">Support</h4>
+                        <ul className="space-y-4">
                             {footerLinks.support.map((link) => (
                                 <li key={link.href}>
                                     <Link
                                         href={link.href}
                                         className={cn(
-                                            "text-sm transition-colors font-medium relative group inline-block",
-                                            pathname === link.href ? "text-white font-bold" : "text-[#a3a3a3] hover:text-white"
+                                            "text-xs transition-colors font-light relative group inline-block",
+                                            pathname === link.href ? "text-white font-medium" : "text-stone-400 hover:text-white"
                                         )}
                                     >
                                         {link.label}
@@ -168,16 +168,16 @@ export function Footer() {
                     </div>
 
                     {/* Legal */}
-                    <div className="md:col-span-2 space-y-6 pt-12 md:pt-0">
-                        <h4 className="text-lg font-bold uppercase tracking-wider text-white">Legal</h4>
-                        <ul className="space-y-3">
+                    <div className="col-span-1 lg:col-span-2 space-y-6 pt-6 lg:pt-0">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-white">Legal</h4>
+                        <ul className="space-y-4">
                             {footerLinks.legal.map((link) => (
                                 <li key={link.href}>
                                     <Link
                                         href={link.href}
                                         className={cn(
-                                            "text-sm transition-colors font-medium relative group inline-block",
-                                            pathname === link.href ? "text-white font-bold" : "text-[#a3a3a3] hover:text-white"
+                                            "text-xs transition-colors font-light relative group inline-block",
+                                            pathname === link.href ? "text-white font-medium" : "text-stone-400 hover:text-white"
                                         )}
                                     >
                                         {link.label}
@@ -192,19 +192,19 @@ export function Footer() {
                     </div>
 
                     {/* Social Media */}
-                    <div className="md:col-span-2 space-y-6 pt-12 md:pt-0">
-                        <h4 className="text-lg font-bold uppercase tracking-wider text-white">Connect</h4>
-                        <div className="flex flex-wrap gap-4">
+                    <div className="col-span-1 lg:col-span-2 space-y-6 pt-6 lg:pt-0">
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-white">Connect</h4>
+                        <div className="flex flex-wrap gap-3">
                             {socialLinks.map((social) => (
                                 <a
                                     key={social.label}
                                     href={social.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className=" p-5 flex items-center justify-center w-7 h-7 rounded-full  text-white transition-colors  group"
+                                    className="w-10 h-10 rounded-full border border-stone-700 bg-white/5 flex items-center justify-center text-stone-400 hover:bg-white hover:text-stone-900 transition-all duration-500 group"
                                     aria-label={social.label}
                                 >
-                                    <social.icon className="" />
+                                    <social.icon className="w-4 h-4 fill-current group-hover:fill-current" />
                                 </a>
                             ))}
                         </div>
@@ -214,13 +214,13 @@ export function Footer() {
                 {/* <Separator className="bg-primary/10 mb-8" /> */}
 
                 {/* Bottom Bar */}
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[#a3a3a3]">
-                    <p className="text-xs  uppercase tracking-widest font-medium">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 border-t border-white/10 text-stone-500">
+                    <p className="text-[9px] uppercase tracking-[0.2em] font-medium text-center sm:text-left">
                         © {new Date().getFullYear()} GEMINI HERITAGE. ALL RIGHTS RESERVED.
                     </p>
                     <div className="flex gap-8">
-                        <Link href="/media/privacy&security" className="text-xs  hover:text-primary uppercase tracking-widest transition-colors font-bold">Privacy Policy</Link>
-                        <Link href="/media/terms" className="text-xs  hover:text-primary uppercase tracking-widest transition-colors font-bold">Terms of Service</Link>
+                        <Link href="/media/privacy&security" className="text-[9px] hover:text-white uppercase tracking-[0.2em] transition-colors font-bold">Privacy Policy</Link>
+                        <Link href="/media/terms" className="text-[9px] hover:text-white uppercase tracking-[0.2em] transition-colors font-bold">Terms of Service</Link>
                     </div>
                 </div>
             </div>

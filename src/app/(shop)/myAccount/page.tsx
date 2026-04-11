@@ -322,7 +322,7 @@ export default function MyAccountPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
                         {/* Sidebar Navigation */}
-                        <aside className="lg:col-span-3 sticky top-24">
+                        <aside className="hidden lg:block lg:col-span-3 sticky top-24">
                             <nav className="space-y-1">
                                 {menuItems.map((item) => (
                                     <button

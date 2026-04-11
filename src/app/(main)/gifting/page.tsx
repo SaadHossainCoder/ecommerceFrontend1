@@ -67,7 +67,7 @@ const goBranchesGifts = [
     { title: "Classic Box",  image: "https://images.unsplash.com/photo-1549465220-1d8c9d9c6703?q=80&w=400&auto=format&fit=crop", price: "₹1,299" },
     { title: "Bespoke Set",  image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=400&auto=format&fit=crop", price: "₹2,149" },
     { title: "Heritage Box", image: "https://images.unsplash.com/photo-1511177545613-b150c99da9ac?q=80&w=400&auto=format&fit=crop", price: "₹3,450" },
-    { title: "Grand Gift",   image: "", price: "₹4,999" },
+    { title: "Grand Gift",   image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400&auto=format&fit=crop", price: "₹4,999" },
 ];
 
 const productCategories = [
@@ -178,7 +178,7 @@ export default function GiftingPage() {
                             <p className="text-[10px] uppercase tracking-[0.5em] text-[#C5A25D] font-semibold mb-3">Curated Collections</p>
                             <h2 className="text-3xl md:text-4xl font-serif text-stone-900">Signature Gift Boxes</h2>
                         </div>
-                        <Link href="/products" className="hidden md:flex items-center gap-2 text-xs uppercase tracking-[0.3em] font-semibold text-stone-500 hover:text-stone-900 transition-colors">
+                        <Link href="/products" className="hidden md:flex items-center gap-2 text-xs uppercase tracking-[0.3em] font-semibold text-stone-500 hover:text-text-black transition-colors">
                             View All <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
@@ -216,7 +216,7 @@ export default function GiftingPage() {
                                         </p>
                                         <div className="flex items-center justify-between pt-2">
                                             <span className="text-2xl font-serif text-stone-900 font-light">{box.price}</span>
-                                            <Button className="bg-stone-900 hover:bg-[#C5A25D] text-white rounded-none px-8 py-5 text-[10px] uppercase tracking-[0.3em] font-bold transition-colors duration-300">
+                                            <Button className="bg-button-black hover:bg-button-hover text-white rounded-none px-8 py-5 text-[10px] uppercase tracking-[0.3em] font-bold transition-colors duration-300">
                                                 Reserve
                                                 <ChevronRight className="ml-1 w-3.5 h-3.5" />
                                             </Button>
@@ -237,7 +237,7 @@ export default function GiftingPage() {
                             <p className="text-[10px] uppercase tracking-[0.5em] text-[#C5A25D] font-semibold mb-3">Quick Selection</p>
                             <h2 className="text-3xl md:text-4xl font-serif text-stone-900">Go Branches Gift Boxes</h2>
                         </div>
-                        <Link href="/products" className="hidden md:flex items-center gap-2 text-xs uppercase tracking-[0.3em] font-semibold text-stone-500 hover:text-stone-900 transition-colors">
+                        <Link href="/products" className="hidden md:flex items-center gap-2 text-xs uppercase tracking-[0.3em] font-semibold text-stone-500 hover:text-text-black transition-colors">
                             Browse All <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
@@ -406,7 +406,7 @@ export default function GiftingPage() {
                                 Browse our full collection of heritage gifts, or speak to our concierge to build something entirely bespoke.
                             </p>
                             <div className="flex flex-wrap gap-4 pt-2">
-                                <Button className="bg-stone-900 hover:bg-[#C5A25D] text-white rounded-none px-8 py-6 text-xs uppercase tracking-[0.3em] font-bold transition-colors duration-300">
+                                <Button className="bg-button-black hover:bg-button-hover text-white rounded-none px-8 py-6 text-xs uppercase tracking-[0.3em] font-bold transition-colors duration-300">
                                     <ShoppingBag className="mr-2 w-4 h-4" />
                                     Explore Collection
                                 </Button>

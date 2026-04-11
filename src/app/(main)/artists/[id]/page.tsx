@@ -125,7 +125,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                             <h2 className="text-xl md:text-2xl font-serif text-stone-900 lowercase italic">
                                 by {artist.name}
                             </h2>
-                            <Link href="/products" className="text-sm uppercase tracking-widest font-medium border-b border-stone-900 pb-1 hover:text-stone-600 transition-colors">
+                            <Link href="/products" className="text-sm uppercase tracking-widest font-medium border-b border-button-black pb-1 hover:text-button-hover hover:border-button-hover transition-colors">
                                 See More
                             </Link>
                         </div>
@@ -229,7 +229,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                                 placeholder="Enter your email address"
                                 className="flex-1 bg-transparent border-b border-stone-200 pb-2 text-sm focus:outline-none focus:border-stone-900 transition-colors"
                             />
-                            <button className="bg-stone-900 text-white px-8 py-3 text-xs uppercase tracking-widest font-bold hover:bg-stone-800 transition-colors flex items-center justify-center gap-2">
+                            <button className="bg-button-black text-white px-8 py-3 text-xs uppercase tracking-widest font-bold hover:bg-button-hover transition-colors flex items-center justify-center gap-2">
                                 Sign up <ArrowRight className="h-4 w-4" />
                             </button>
                         </div>

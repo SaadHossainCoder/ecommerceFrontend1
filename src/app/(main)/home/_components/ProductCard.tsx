@@ -25,7 +25,7 @@ export default function ProductCard({ name, price, image }: ProductCardProps) {
                     <button className="p-2 bg-background rounded-full shadow-md hover:bg-muted">
                         <Heart className="w-4 h-4 text-foreground" />
                     </button>
-                    <button className="p-2 bg-[#3B4A3A] text-white rounded-full shadow-md hover:bg-[#2B3A2A]">
+                    <button className="p-2 bg-button-black text-text-white rounded-full shadow-md hover:bg-button-hover">
                         <ShoppingBag className="w-4 h-4" />
                     </button>
                 </div>

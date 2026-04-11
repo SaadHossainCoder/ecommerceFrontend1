@@ -22,6 +22,8 @@ const footerLinks = {
         { href: "/contact", label: "Contact Us" },
         { href: "/auth/register", label: "Register" },
         { href: "/admin/dashboard", label: "admin" },
+        { href: "/wishlist", label: "wishlist" },
+
     ],
     support: [
         { href: "/myAccount", label: "My Account" },
@@ -35,6 +37,10 @@ const footerLinks = {
         { href: "/media/terms", label: "Terms of Service" },
         { href: "/media/privacy&security", label: "Privacy & Security" },
         { href: "/media/cookies", label: "Cookie Policy" },
+        { href: "/media/post", label: "Post" },
+
+        // { href: "/media/careers", label: "Careers" },
+        // { href: "/media/cookies", label: "Cookie Policy" },
     ]
 };
 
@@ -213,8 +219,8 @@ export function Footer() {
                         © {new Date().getFullYear()} GEMINI HERITAGE. ALL RIGHTS RESERVED.
                     </p>
                     <div className="flex gap-8">
-                        <Link href="/privacy" className="text-xs  hover:text-primary uppercase tracking-widest transition-colors font-bold">Privacy Policy</Link>
-                        <Link href="/terms" className="text-xs  hover:text-primary uppercase tracking-widest transition-colors font-bold">Terms of Service</Link>
+                        <Link href="/media/privacy&security" className="text-xs  hover:text-primary uppercase tracking-widest transition-colors font-bold">Privacy Policy</Link>
+                        <Link href="/media/terms" className="text-xs  hover:text-primary uppercase tracking-widest transition-colors font-bold">Terms of Service</Link>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -181,7 +181,7 @@ export default function EditProductForm({
 
     const watchImages = watch("images");
 
-    const onSubmit = async (data: ProductFormValues) => {
+    const onSubmit: SubmitHandler<ProductFormValues> = async (data: ProductFormValues) => {
         // Sync the first variant image as the primary image for legacy backend queries
         data.sizes = data.sizes.map(s => ({
             ...s,

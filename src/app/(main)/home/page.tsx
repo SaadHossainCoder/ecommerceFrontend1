@@ -63,7 +63,7 @@ export default async function HomePage() {
                     </div>
                 </div>
             </section>
-
+            
             <section>
                 <hr />
 
@@ -293,10 +293,10 @@ export default async function HomePage() {
                                 significance and master craftsmanship. Experience the soul of artisanal India.
                             </p>
                             <div className="flex gap-4">
-                                <Button className="bg-[#3B4A3A] text-white hover:bg-[#2B3A2A] px-8 h-12 rounded-none" asChild>
+                                <Button className="bg-button-black text-white hover:bg-button-hover-black px-8 h-12 rounded-none" asChild>
                                     <Link href="/products">SHOP NOW</Link>
                                 </Button>
-                                <Button variant="outline" className="border-[#3B4A3A] text-[#3B4A3A] hover:bg-[#3B4A3A] hover:text-white px-8 h-12 rounded-none" asChild>
+                                <Button variant="outline" className="border-button-black text-button-black hover:bg-button-black hover:text-text-white px-8 h-12 rounded-none" asChild>
                                     <Link href="/products">VIEW ALL</Link>
                                 </Button>
                             </div>

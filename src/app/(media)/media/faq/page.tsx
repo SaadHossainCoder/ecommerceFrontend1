@@ -1,16 +1,6 @@
 "use client";
 
-// import { motion } from "framer-motion";
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion";
-// import { PageTransition } from "@/components/layout/PageTransition";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, HelpCircle } from "lucide-react";
+import { HelpCircle, Search, ChevronDown } from "lucide-react";
 
 const faqs = [
     {
@@ -64,56 +54,96 @@ const faqs = [
 
 export default function FAQPage() {
     return (
-        <section>
-            <div className="container-custom py-16">
-                <div className="text-center max-w-2xl mx-auto mb-12">
-                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                        <HelpCircle className="h-8 w-8 text-primary" />
+        <div className="min-h-screen bg-stone-50">
+            {/* ── Hero ── */}
+            <div className="bg-stone-900 px-8 md:px-16 py-16 md:py-20">
+                <div className="max-w-6xl mx-auto">
+                    <div className="flex items-center gap-2 mb-4">
+                        <HelpCircle className="h-3.5 w-3.5 text-amber-400" />
+                        <span className="text-[10px] uppercase tracking-[0.45em] font-semibold text-stone-400">
+                            Knowledge Base
+                        </span>
                     </div>
-                    <h1 className="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
-                    <p className="text-lg text-muted-foreground mb-8">
-                        Everything you need to know about our products and services.
-                    </p>
-                    <div className="relative max-w-md mx-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
+                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                        <h1 className="text-4xl md:text-5xl font-serif text-white leading-tight tracking-tight">
+                            Frequently Asked <span className="italic font-light text-amber-200">Questions</span>
+                        </h1>
+                        <p className="text-sm text-stone-400 max-w-sm leading-relaxed md:text-right">
+                            Everything you need to know about our products, services, and policies to ensure a seamless premium experience.
+                        </p>
+                    </div>
+                    <div className="mt-8 h-px bg-stone-700" />
+                </div>
+            </div>
+
+            {/* ── Content ── */}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 pb-28">
+
+                {/* ── Search Bar ── */}
+                <div className="mb-14 max-w-4xl mx-auto">
+                    <div className="relative group">
+                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400 group-focus-within:text-amber-500 transition-colors" />
+                        <input
+                            type="text"
                             placeholder="Search for answers..."
-                            className="pl-10 h-12 rounded-full"
+                            className="w-full bg-white border border-stone-200 py-5 pl-16 pr-6 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-stone-400 transition-colors rounded-none shadow-sm"
                         />
                     </div>
                 </div>
 
-                <div className="max-w-3xl mx-auto space-y-12">
-                    {faqs.map((category) => (
-                        <div key={category.category}>
-                            <h2 className="text-2xl font-semibold mb-6">{category.category}</h2>
-                            <Accordion type="single" collapsible className="w-full">
+                {/* ── Accordions ── */}
+                <div className="max-w-4xl mx-auto space-y-10">
+                    {faqs.map((category, catIdx) => (
+                        <div key={category.category} className="bg-white border border-stone-200 shadow-sm">
+                            <div className="bg-stone-50 border-b border-stone-200 px-8 py-5 flex items-center justify-between">
+                                <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-900">{category.category}</h2>
+                                <span className="text-[10px] text-stone-400 font-mono font-bold tracking-widest">SECTION 0{catIdx + 1}</span>
+                            </div>
+                            <div className="divide-y divide-stone-100">
                                 {category.items.map((item, index) => (
-                                    <AccordionItem key={index} value={`item-${index}`}>
-                                        <AccordionTrigger className="text-left py-4 hover:no-underline hover:text-primary">
-                                            {item.q}
-                                        </AccordionTrigger>
-                                        <AccordionContent className="text-muted-foreground leading-relaxed">
+                                    <details key={index} className="group p-8 px-6 md:px-8">
+                                        <summary className="flex items-center justify-between cursor-pointer list-none [&::-webkit-details-marker]:hidden outline-none">
+                                            <h3 className="text-base font-serif font-semibold text-stone-800 group-open:text-amber-700 transition-colors pr-6">
+                                                {item.q}
+                                            </h3>
+                                            <div className="w-7 h-7 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center shrink-0 group-open:rotate-180 transition-transform duration-300 group-hover:bg-stone-100">
+                                                <ChevronDown className="h-3.5 w-3.5 text-stone-600" />
+                                            </div>
+                                        </summary>
+                                        <div className="pt-6 mt-6 border-t border-stone-100 text-sm text-stone-500 leading-relaxed font-light">
                                             {item.a}
-                                        </AccordionContent>
-                                    </AccordionItem>
+                                        </div>
+                                    </details>
                                 ))}
-                            </Accordion>
+                            </div>
                         </div>
                     ))}
                 </div>
 
-                <div className="mt-20 text-center p-12 rounded-3xl bg-muted/30">
-                    <h3 className="text-xl font-semibold mb-2">Still have questions?</h3>
-                    <p className="text-muted-foreground mb-6">
-                        Can&apos;t find the answer you&apos;re looking for? Please chat to our friendly team.
-                    </p>
-                    <div className="flex gap-4 justify-center">
-                        <Button size="lg" variant="gradient">Contact Support</Button>
-                        <Button size="lg" variant="outline">Email Us</Button>
+                {/* ── Contact CTA ── */}
+                <div className="mt-16 bg-stone-900 p-10 md:p-14 flex flex-col md:flex-row md:items-center justify-between gap-8 max-w-4xl mx-auto">
+                    <div>
+                        <p className="text-[9px] uppercase tracking-[0.4em] font-semibold text-stone-500 mb-3">
+                            Support
+                        </p>
+                        <h3 className="text-2xl font-serif text-white leading-tight mb-3">
+                            Still have questions?
+                        </h3>
+                        <p className="text-sm text-stone-400 leading-relaxed max-w-sm font-light">
+                            Cannot find the answer you are looking for? Reach out to our concierge team directly.
+                        </p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-4 shrink-0">
+                        <button className="border border-stone-700 bg-stone-900 hover:bg-stone-800 text-stone-300 hover:text-white px-8 py-3.5 text-[10px] uppercase tracking-[0.2em] font-bold transition-all duration-300">
+                            Email Us
+                        </button>
+                        <button className="bg-amber-100 hover:bg-white text-stone-900 px-8 py-3.5 text-[10px] uppercase tracking-[0.2em] font-bold transition-all duration-300 shadow-sm">
+                            Live Chat
+                        </button>
                     </div>
                 </div>
+
             </div>
-        </section>
+        </div>
     );
 }

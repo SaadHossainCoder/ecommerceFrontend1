@@ -2,9 +2,11 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { Check, ClipboardList, Package, Truck, Home, MapPin, Phone, Headphones, 
+import {
+    Check, ClipboardList, Package, Truck, Home, MapPin, Phone, Headphones,
     // CreditCard,
-     ArrowLeft } from "lucide-react";
+    ArrowLeft
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 // import { PageTransition } from "@/components/layout/PageTransition";

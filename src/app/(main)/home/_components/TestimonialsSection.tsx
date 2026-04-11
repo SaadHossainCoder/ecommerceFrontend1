@@ -52,10 +52,10 @@ export function TestimonialsSection() {
                             What our customers are saying
                         </h3>
                         <div className="flex gap-4 mt-4">
-                            <button className="w-10 h-10 rounded-full border-2 border-primary/20 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all">
+                            <button className="w-10 h-10 rounded-full border-2 border-primary/20 flex items-center justify-center hover:bg-button-black hover:text-text-white hover:border-button-black transition-all">
                                 <ChevronLeft className="w-5 h-5" />
                             </button>
-                            <button className="w-10 h-10 rounded-full border-2 border-primary/20 flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-all">
+                            <button className="w-10 h-10 rounded-full border-2 border-primary/20 flex items-center justify-center hover:bg-button-black hover:text-text-white hover:border-button-black transition-all">
                                 <ChevronRight className="w-5 h-5" />
                             </button>
                         </div>

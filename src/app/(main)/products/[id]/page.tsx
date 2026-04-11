@@ -231,10 +231,10 @@ export default function ProductDetailsPage() {
                             <ImageZoom src={product.images[selectedImage]} alt={product.name} />
 
                             {/* Nav arrows */}
-                            <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-stone-200 flex items-center justify-center hover:bg-stone-900 hover:text-white hover:border-stone-900 transition-colors z-20 shadow-sm">
+                            <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-stone-200 flex items-center justify-center hover:bg-button-black hover:text-text-white hover:border-button-black transition-colors z-20 shadow-sm">
                                 <ChevronLeft className="w-4 h-4" />
                             </button>
-                            <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-stone-200 flex items-center justify-center hover:bg-stone-900 hover:text-white hover:border-stone-900 transition-colors z-20 shadow-sm">
+                            <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-stone-200 flex items-center justify-center hover:bg-button-black hover:text-text-white hover:border-button-black transition-colors z-20 shadow-sm">
                                 <ChevronRight className="w-4 h-4" />
                             </button>
 
@@ -602,7 +602,7 @@ export default function ProductDetailsPage() {
                                         <textarea rows={4} placeholder="Share your experience..." className="w-full border border-stone-200 px-3 py-2.5 text-sm focus:border-stone-900 focus:outline-none transition-colors resize-none" />
                                     </div>
 
-                                    <button className="bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.25em] font-bold px-8 py-3 transition-colors">
+                                    <button className="bg-button-black hover:bg-button-hover text-text-white text-[10px] uppercase tracking-[0.25em] font-bold px-8 py-3 transition-colors">
                                         Submit Review
                                     </button>
                                 </div>

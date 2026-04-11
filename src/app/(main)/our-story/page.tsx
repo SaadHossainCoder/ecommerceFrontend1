@@ -226,17 +226,17 @@ export default function OurStoryPage() {
                                     placeholder="Enter your email"
                                     className="flex-1 bg-transparent border-b border-stone-200 pb-2 text-sm focus:outline-none focus:border-stone-900 transition-colors text-center sm:text-left"
                                 />
-                                <button className="bg-stone-900 text-white px-10 py-4 text-xs uppercase tracking-widest font-bold hover:bg-stone-800 transition-colors flex items-center justify-center gap-2 group">
+                                <button className="bg-button-white text-text-black px-10 py-4 text-xs uppercase tracking-widest font-bold hover:bg-button-black hover:text-text-white transition-colors flex items-center justify-center gap-2 group">
                                     Subscribe <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                                 </button>
                             </div>
                         </div>
 
                         <div className="flex items-center justify-center gap-12 pt-12">
-                            <Link href="/products" className="text-xs uppercase tracking-widest font-bold border-b-2 border-stone-900 pb-1 hover:border-stone-300 transition-colors">
+                            <Link href="/products" className="text-xs uppercase tracking-widest font-bold border-b-2 border-button-black pb-1 hover:border-button-hover transition-colors">
                                 Explore Shop
                             </Link>
-                            <Link href="/artists" className="text-xs uppercase tracking-widest font-bold border-b-2 border-stone-900 pb-1 hover:border-stone-300 transition-colors">
+                            <Link href="/artists" className="text-xs uppercase tracking-widest font-bold border-b-2 border-button-black pb-1 hover:border-button-hover transition-colors">
                                 Meet Artisans
                             </Link>
                         </div>

@@ -154,17 +154,17 @@ function ProductCard({ product }: { product: typeof curatedProducts[0] }) {
 
                 {/* Hover actions */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-stone-900 hover:text-white transition-colors shadow-sm">
+                    <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-button-black hover:text-text-white transition-colors shadow-sm">
                         <Heart className="w-3.5 h-3.5" />
                     </button>
-                    <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-stone-900 hover:text-white transition-colors shadow-sm">
+                    <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-button-black hover:text-text-white transition-colors shadow-sm">
                         <ShoppingBag className="w-3.5 h-3.5" />
                     </button>
                 </div>
 
                 {/* Bottom CTA */}
                 <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <button className="w-full bg-stone-900 hover:bg-stone-800 text-white text-[9px] uppercase tracking-[0.2em] font-bold py-3 transition-colors">
+                    <button className="w-full bg-button-black hover:bg-button-hover text-text-white text-[9px] uppercase tracking-[0.2em] font-bold py-3 transition-colors">
                         Add to Cart
                     </button>
                 </div>
@@ -416,13 +416,13 @@ export default function ProductsPage() {
                                 <button className="w-9 h-9 border border-stone-200 text-stone-300 text-xs font-semibold cursor-not-allowed">
                                     ←
                                 </button>
-                                <button className="w-9 h-9 bg-stone-900 text-white text-xs font-bold">
+                                <button className="w-9 h-9 bg-button-black text-text-white text-xs font-bold">
                                     1
                                 </button>
-                                <button className="w-9 h-9 border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900 text-xs font-semibold transition-colors">
+                                <button className="w-9 h-9 border border-stone-200 text-stone-500 hover:border-button-black hover:text-text-white text-xs font-semibold transition-colors">
                                     2
                                 </button>
-                                <button className="w-9 h-9 border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900 text-xs font-semibold transition-colors">
+                                <button className="w-9 h-9 border border-stone-200 text-stone-500 hover:border-button-black hover:text-text-white text-xs font-semibold transition-colors">
                                     →
                                 </button>
                             </div>

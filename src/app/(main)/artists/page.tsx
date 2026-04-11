@@ -52,7 +52,7 @@ export default function ArtistsPage() {
                         <p className="text-stone-500 max-w-2xl mx-auto font-light leading-relaxed">
                             A legacy of artisanal excellence, born in the heart of Bengal and dedicated to the art of the perfect daily ritual.
                         </p>
-                        <Button variant="outline" className="h-14 px-10 rounded-none border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white transition-all duration-300" asChild>
+                        <Button variant="outline" className="h-14 px-10 rounded-none border-button-black text-button-black hover:bg-button-black hover:text-text-white transition-all duration-300" asChild>
                             <Link href="/our-story">
                                 Discover More
                             </Link>

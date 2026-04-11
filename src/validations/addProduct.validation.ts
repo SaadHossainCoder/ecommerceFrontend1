@@ -11,7 +11,7 @@ export const productSchema = z.object({
     vendor: z.string().min(1, "Vendor is required"),
     sku: z.string().min(3, "SKU must be at least 3 chars"),
 
-    discount: z.coerce.number().min(0).max(100),
+    discount: z.number().min(0).max(100),
 
     category: z.string().min(1, "Category is required"),
     subcategory: z.string().optional(),
@@ -20,8 +20,8 @@ export const productSchema = z.object({
     sizes: z.array(
         z.object({
             size: z.string().min(1, "Variant name required"),
-            qty: z.coerce.number().min(0, "Qty must be >= 0"),
-            price: z.coerce.number().min(1, "Price required"),
+            qty: z.number().min(0, "Qty must be >= 0"),
+            price: z.number().min(1, "Price required"),
             image: z.string().optional(),
             images: z.array(z.string()).optional(),
         })

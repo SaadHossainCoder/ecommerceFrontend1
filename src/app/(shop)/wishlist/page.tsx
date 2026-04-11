@@ -13,7 +13,6 @@ import {
     ShoppingBag,
     ArrowRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toaster";
 import {
     Select,
@@ -81,35 +80,38 @@ function GridCard({
     onAddToCart: (item: Item) => void;
 }) {
     return (
-        <div className="group bg-white border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300">
+        <div className="group bg-white border border-stone-200 hover:border-amber-700/50 hover:shadow-sm transition-all duration-300 flex flex-col h-full">
             {/* Image area */}
-            <div className="relative aspect-square bg-gray-50 overflow-hidden">
+            <div className="relative aspect-square bg-stone-100 overflow-hidden border-b border-stone-200 flex items-center justify-center">
                 <Link
                     href={`/product/${item.id}`}
-                    className="absolute inset-0 flex items-center justify-center text-6xl"
-                >
-                    {item.image}
-                </Link>
+                    className="absolute inset-0 z-10"
+                    aria-label={`View ${item.name}`}
+                />
+                <span className="text-6xl group-hover:scale-110 transition-transform duration-500">{item.image}</span>
 
                 {/* Badge */}
                 {item.badge && (
-                    <span className="absolute top-3 left-3 bg-stone-900 text-white text-[9px] uppercase tracking-[0.15em] font-bold px-2.5 py-1">
+                    <span className="absolute top-4 left-4 z-20 bg-stone-900 text-white text-[9px] uppercase tracking-[0.2em] font-bold px-3 py-1.5 shadow-sm">
                         {item.badge}
                     </span>
                 )}
 
                 {/* Discount */}
                 {item.originalPrice > item.price && (
-                    <span className="absolute top-3 right-3 bg-red-50 text-red-600 text-[9px] font-bold px-2 py-1">
+                    <span className="absolute top-4 right-4 z-20 bg-amber-100 text-amber-800 text-[9px] font-bold px-2 py-1.5 shadow-sm">
                         -{discount(item.price, item.originalPrice)}%
                     </span>
                 )}
 
                 {/* Hover: Add to cart */}
-                <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-30">
                     <button
-                        onClick={() => onAddToCart(item)}
-                        className="w-full bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.2em] font-bold py-3 flex items-center justify-center gap-2 transition-colors"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            onAddToCart(item);
+                        }}
+                        className="w-full bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.2em] font-bold py-3.5 flex items-center justify-center gap-2 transition-colors"
                     >
                         <ShoppingCart className="w-3.5 h-3.5" />
                         Add to Cart
@@ -118,37 +120,37 @@ function GridCard({
             </div>
 
             {/* Info */}
-            <div className="p-4">
-                <div className="flex items-start justify-between gap-2">
+            <div className="p-5 flex flex-col flex-1">
+                <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="min-w-0">
-                        <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-1">
+                        <p className="text-[9px] uppercase tracking-[0.2em] text-stone-400 font-semibold mb-1.5">
                             {item.category}
                         </p>
-                        <Link href={`/product/${item.id}`}>
-                            <h3 className="text-sm font-semibold text-stone-900 leading-snug line-clamp-2 hover:text-stone-600 transition-colors">
+                        <Link href={`/product/${item.id}`} className="block">
+                            <h3 className="text-sm font-serif font-semibold text-stone-900 leading-snug line-clamp-2 group-hover:text-amber-700 transition-colors">
                                 {item.name}
                             </h3>
                         </Link>
                     </div>
                     <button
                         onClick={() => onRemove(item.id)}
-                        className="shrink-0 text-gray-300 hover:text-red-400 transition-colors mt-0.5"
+                        className="shrink-0 text-stone-300 hover:text-red-500 transition-colors mt-1 relative z-20"
                         aria-label="Remove"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
                 </div>
 
-                <div className="flex items-center gap-1 mt-2">
+                <div className="flex items-center gap-1.5 mt-auto mb-3 pt-2">
                     <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    <span className="text-xs font-semibold text-stone-700">{item.rating}</span>
-                    <span className="text-xs text-gray-400">({item.reviews.toLocaleString()})</span>
+                    <span className="text-[10px] font-bold text-stone-700">{item.rating}</span>
+                    <span className="text-[10px] text-stone-400">({item.reviews.toLocaleString()})</span>
                 </div>
 
-                <div className="flex items-baseline gap-2 mt-3">
+                <div className="flex items-baseline gap-2 pt-3 border-t border-stone-100">
                     <span className="text-base font-bold text-stone-900">${item.price}</span>
                     {item.originalPrice > item.price && (
-                        <span className="text-xs text-gray-400 line-through">${item.originalPrice}</span>
+                        <span className="text-xs text-stone-400 line-through">${item.originalPrice}</span>
                     )}
                 </div>
             </div>
@@ -168,68 +170,70 @@ function ListRow({
     onAddToCart: (item: Item) => void;
 }) {
     return (
-        <div className="flex gap-5 bg-white border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all duration-300 p-4">
+        <div className="flex flex-col sm:flex-row gap-0 sm:gap-6 bg-white border border-stone-200 hover:border-amber-700/50 hover:shadow-sm transition-all duration-300 group">
             {/* Thumbnail */}
-            <Link
-                href={`/product/${item.id}`}
-                className="shrink-0 w-24 h-24 bg-gray-50 flex items-center justify-center text-4xl"
-            >
-                {item.image}
-            </Link>
+            <div className="relative shrink-0 w-full sm:w-40 h-40 sm:h-auto bg-stone-100 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-stone-200 overflow-hidden">
+                <Link
+                    href={`/product/${item.id}`}
+                    className="absolute inset-0 z-10"
+                    aria-label={`View ${item.name}`}
+                />
+                <span className="text-5xl group-hover:scale-110 transition-transform duration-500">{item.image}</span>
+                {item.badge && (
+                    <span className="absolute top-3 left-3 z-20 bg-stone-900 text-white text-[8px] uppercase tracking-[0.2em] font-bold px-2 py-1">
+                        {item.badge}
+                    </span>
+                )}
+            </div>
 
             {/* Content */}
-            <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-5 p-5">
                 <div className="flex-1 min-w-0">
-                    <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-1">
+                    <p className="text-[9px] uppercase tracking-[0.2em] text-stone-400 font-semibold mb-1.5 flex items-center gap-2">
                         {item.category}
-                        {item.badge && (
-                            <span className="ml-2 bg-stone-900 text-white px-1.5 py-0.5 text-[8px]">
-                                {item.badge}
-                            </span>
+                        {item.originalPrice > item.price && (
+                            <>
+                                <span className="w-1 h-1 rounded-full bg-stone-300" />
+                                <span className="text-amber-600 font-bold tracking-widest uppercase">Save {discount(item.price, item.originalPrice)}%</span>
+                            </>
                         )}
                     </p>
-                    <Link href={`/product/${item.id}`}>
-                        <h3 className="text-sm font-semibold text-stone-900 hover:text-stone-600 transition-colors line-clamp-1">
+                    <Link href={`/product/${item.id}`} className="block relative z-10">
+                        <h3 className="text-base font-serif font-semibold text-stone-900 group-hover:text-amber-700 transition-colors line-clamp-1 mb-2">
                             {item.name}
                         </h3>
                     </Link>
-                    <div className="flex items-center gap-1 mt-1">
+                    <div className="flex items-center gap-1.5">
                         <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                        <span className="text-xs font-semibold text-stone-700">{item.rating}</span>
-                        <span className="text-xs text-gray-400">({item.reviews.toLocaleString()})</span>
+                        <span className="text-[10px] font-bold text-stone-700">{item.rating}</span>
+                        <span className="text-[10px] text-stone-400">({item.reviews.toLocaleString()})</span>
                     </div>
                 </div>
 
                 {/* Price + Actions */}
-                <div className="flex items-center gap-6 shrink-0">
-                    <div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-base font-bold text-stone-900">${item.price}</span>
-                            {item.originalPrice > item.price && (
-                                <span className="text-xs text-gray-400 line-through">${item.originalPrice}</span>
-                            )}
-                        </div>
+                <div className="flex items-center justify-between sm:justify-end gap-6 shrink-0 relative z-20 border-t sm:border-t-0 border-stone-100 sm:border-l sm:border-l-stone-100 pt-4 sm:pt-0 sm:pl-6 w-full sm:w-auto">
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-lg font-bold text-stone-900">${item.price}</span>
                         {item.originalPrice > item.price && (
-                            <p className="text-[10px] text-red-500 font-semibold mt-0.5">
-                                Save {discount(item.price, item.originalPrice)}%
-                            </p>
+                            <span className="text-xs text-stone-400 line-through">${item.originalPrice}</span>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => onAddToCart(item)}
-                            className="flex items-center gap-2 bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.2em] font-bold px-4 py-2.5 transition-colors"
-                        >
-                            <ShoppingCart className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Add to Cart</span>
-                        </button>
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => onRemove(item.id)}
-                            className="p-2.5 border border-gray-100 text-gray-400 hover:text-red-400 hover:border-red-100 transition-colors"
+                            className="p-2.5 bg-stone-50 border border-stone-200 text-stone-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 transition-colors"
                             aria-label="Remove"
                         >
                             <Trash2 className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={() => onAddToCart(item)}
+                            className="flex items-center justify-center w-10 h-10 sm:w-auto sm:px-5 sm:py-2.5 gap-2 bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.2em] font-bold transition-colors"
+                            aria-label="Add to cart"
+                        >
+                            <ShoppingCart className="w-4 h-4" />
+                            <span className="hidden sm:inline">Add to Cart</span>
                         </button>
                     </div>
                 </div>
@@ -267,103 +271,111 @@ export default function WishlistPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-14">
-
-                {/* ── Header ── */}
-                <div className="mb-8">
+        <div className="min-h-screen bg-stone-50 flex flex-col">
+            
+            {/* ── Dashboard Hero ── */}
+            <div className="bg-stone-900 py-10 md:py-14">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <Link
                         href="/products"
-                        className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.2em] font-semibold text-gray-400 hover:text-stone-900 transition-colors mb-5"
+                        className="inline-flex items-center gap-1.5 text-[9px] uppercase tracking-[0.25em] font-bold text-stone-500 hover:text-amber-400 transition-colors mb-6"
                     >
                         <ArrowLeft className="w-3.5 h-3.5" />
                         Back to Shop
                     </Link>
 
-                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
                         <div>
-                            <h1 className="text-2xl md:text-3xl font-serif text-stone-900 tracking-tight">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Heart className="h-3.5 w-3.5 text-amber-400" />
+                                <span className="text-[10px] uppercase tracking-[0.45em] font-semibold text-stone-400">
+                                    Your Collection
+                                </span>
+                            </div>
+                            <h1 className="text-3xl md:text-5xl font-serif text-white tracking-tight leading-none mb-3">
                                 Wishlist
                             </h1>
-                            <p className="text-sm text-gray-400 mt-1">
-                                {wishlist.length} {wishlist.length === 1 ? "item" : "items"} saved
+                            <p className="text-xs text-stone-400 font-mono tracking-widest uppercase">
+                                {wishlist.length} {wishlist.length === 1 ? "Item" : "Items"} saved
                             </p>
                         </div>
 
                         {wishlist.length > 0 && (
                             <button
                                 onClick={clearWishlist}
-                                className="self-start sm:self-auto inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-500 transition-colors font-medium"
+                                className="self-start sm:self-auto inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.2em] font-bold text-stone-400 hover:text-red-400 transition-colors bg-stone-800/50 hover:bg-stone-800 px-4 py-3 border border-stone-700 hover:border-red-500/50"
                             >
                                 <Trash2 className="w-3.5 h-3.5" />
-                                Clear all
+                                Clear List
                             </button>
                         )}
                     </div>
                 </div>
+            </div>
 
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-14 w-full flex-1">
                 {/* ── Empty State ── */}
                 {wishlist.length === 0 ? (
-                    <div className="bg-white border border-gray-100 flex flex-col items-center justify-center py-24 text-center px-6">
-                        <div className="w-16 h-16 bg-gray-50 border border-gray-100 flex items-center justify-center mb-6">
-                            <Heart className="w-7 h-7 text-gray-300" />
+                    <div className="bg-white border border-stone-200 flex flex-col items-center justify-center py-32 text-center px-6 shadow-sm">
+                        <div className="w-16 h-16 bg-stone-50 border border-stone-100 flex items-center justify-center mb-6 rounded-full">
+                            <Heart className="w-7 h-7 text-stone-300" />
                         </div>
-                        <h2 className="text-lg font-semibold text-stone-900 mb-2">Your wishlist is empty</h2>
-                        <p className="text-sm text-gray-400 max-w-xs leading-relaxed mb-8">
-                            Save items you love to keep track of them and buy them later.
+                        <h2 className="text-2xl font-serif text-stone-900 mb-3">Your wishlist is empty</h2>
+                        <p className="text-sm text-stone-500 max-w-sm leading-relaxed mb-8 font-light">
+                            Curate a collection of objects you desire. Save items you love to keep track of them and buy them later.
                         </p>
                         <Link
                             href="/products"
-                            className="inline-flex items-center gap-2 bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.3em] font-bold px-8 py-3.5 transition-colors"
+                            className="inline-flex items-center gap-2 bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.3em] font-bold px-8 py-4 transition-colors shadow-sm"
                         >
-                            <ShoppingBag className="w-3.5 h-3.5" />
-                            Explore Products
+                            <ShoppingBag className="w-4 h-4" />
+                            Explore Collection
                         </Link>
                     </div>
                 ) : (
                     <>
                         {/* ── Toolbar ── */}
-                        <div className="flex items-center justify-between gap-3 mb-5">
-                            <p className="text-xs text-gray-400 font-medium hidden sm:block">
+                        <div className="flex items-center justify-between gap-3 mb-6 bg-white border border-stone-200 p-2 sm:p-3 shadow-sm">
+                            <p className="text-[10px] text-stone-500 tracking-[0.1em] font-bold uppercase ml-3 hidden sm:block">
                                 Showing {sorted.length} items
                             </p>
 
                             <div className="flex items-center gap-2 ml-auto">
                                 <Select value={sortBy} onValueChange={setSortBy}>
-                                    <SelectTrigger className="h-8 text-xs border-gray-200 bg-white rounded-none w-40 focus:ring-0">
-                                        <SelectValue placeholder="Sort by" />
+                                    <SelectTrigger className="h-10 text-[10px] uppercase tracking-[0.15em] font-bold border-stone-200 bg-white rounded-none w-48 focus:ring-1 focus:ring-stone-900 text-stone-600">
+                                        <SelectValue placeholder="SORT BY" />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-none">
-                                        <SelectItem value="added-newest">Recently Added</SelectItem>
-                                        <SelectItem value="price-low">Price: Low to High</SelectItem>
-                                        <SelectItem value="price-high">Price: High to Low</SelectItem>
-                                        <SelectItem value="rating">Highest Rated</SelectItem>
+                                    <SelectContent className="rounded-none border-stone-200">
+                                        <SelectItem value="added-newest" className="text-xs hover:bg-stone-50 cursor-pointer">Recently Added</SelectItem>
+                                        <SelectItem value="price-low" className="text-xs hover:bg-stone-50 cursor-pointer">Price: Low to High</SelectItem>
+                                        <SelectItem value="price-high" className="text-xs hover:bg-stone-50 cursor-pointer">Price: High to Low</SelectItem>
+                                        <SelectItem value="rating" className="text-xs hover:bg-stone-50 cursor-pointer">Highest Rated</SelectItem>
                                     </SelectContent>
                                 </Select>
 
                                 {/* View toggle */}
-                                <div className="hidden sm:flex border border-gray-200 bg-white">
+                                <div className="hidden sm:flex border border-stone-200 bg-white items-center p-1 gap-1">
                                     <button
                                         onClick={() => setViewMode("grid")}
                                         className={`p-2 transition-colors ${
                                             viewMode === "grid"
-                                                ? "bg-stone-900 text-white"
-                                                : "text-gray-400 hover:text-stone-900"
+                                                ? "bg-stone-100 text-stone-900"
+                                                : "text-stone-400 hover:text-stone-900"
                                         }`}
                                         aria-label="Grid view"
                                     >
-                                        <Grid3X3 className="w-3.5 h-3.5" />
+                                        <Grid3X3 className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={() => setViewMode("list")}
                                         className={`p-2 transition-colors ${
                                             viewMode === "list"
-                                                ? "bg-stone-900 text-white"
-                                                : "text-gray-400 hover:text-stone-900"
+                                                ? "bg-stone-100 text-stone-900"
+                                                : "text-stone-400 hover:text-stone-900"
                                         }`}
                                         aria-label="List view"
                                     >
-                                        <LayoutList className="w-3.5 h-3.5" />
+                                        <LayoutList className="w-4 h-4" />
                                     </button>
                                 </div>
                             </div>
@@ -371,7 +383,7 @@ export default function WishlistPage() {
 
                         {/* ── Items ── */}
                         {viewMode === "grid" ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                                 {sorted.map((item) => (
                                     <GridCard
                                         key={item.id}
@@ -382,7 +394,7 @@ export default function WishlistPage() {
                                 ))}
                             </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {sorted.map((item) => (
                                     <ListRow
                                         key={item.id}
@@ -395,13 +407,13 @@ export default function WishlistPage() {
                         )}
 
                         {/* ── Footer CTA ── */}
-                        <div className="mt-16 border-t border-gray-200 pt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <p className="text-sm text-gray-400">
-                                Looking for something else?
+                        <div className="mt-16 border-t border-stone-200 pt-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+                            <p className="text-[10px] uppercase font-bold tracking-widest text-stone-400">
+                                Expand Your Collection
                             </p>
                             <Link
                                 href="/products"
-                                className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] font-bold text-stone-900 hover:text-stone-600 transition-colors"
+                                className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-bold bg-white border border-stone-200 text-stone-900 hover:bg-stone-50 hover:border-stone-300 px-6 py-4 transition-colors shadow-sm"
                             >
                                 Browse new arrivals
                                 <ArrowRight className="w-3.5 h-3.5" />

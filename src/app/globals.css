@@ -31,6 +31,9 @@
   --charcoal-ink: 0 0% 17%;
   /* #2B2B2B - Headings */
 
+
+  
+
   /* Semantic Color Mappings - Light Mode */
   --background: var(--ivory-white);
   --foreground: var(--charcoal-ink);
@@ -81,6 +84,50 @@
 
 /* ===== Tailwind Theme ===== */
 @theme inline {
+
+  /*_________________my Custom Css Color code__________________*/
+
+  /*color code*/
+  /* #6E0C23 */
+  --read: 346 80% 24%;
+  /* #34150f - Luxury, depth */
+  --plan: 8 53% 13%;
+  /*  #15302B  */
+  --dark-green: 169 39% 14%;
+  /* #FDFDFD */
+  --white: 0 0% 99%;
+  /*___text___*/
+  /* #0B0B0B */
+  --text-black: 0 0% 4%;
+  /* #343432*/
+  --text-black-light: 60 2% 20%;
+  /* #FDFDFD */
+  --text-white: 0 0% 99%;
+  /*button*/
+  /* #34150f */
+  --button-black: 8 53% 13%;
+  /* #6b2e24 */
+  --button-hover-black: 8 50% 28%;
+  /*#989898*/
+  --button-white: 0 0% 60%;
+  /* #686767*/
+  --button-black: 0 0% 41%;
+  
+  
+  /*Color Mappings */
+
+  /* #3B4A3A */
+  --color-button:hsl(var(--button-black));
+  --color-button-hover:hsl(var(--button-hover-black));
+  --color-button-white:hsl(var(--button-white));
+  --color-button-black:hsl(var(--button-black));
+
+  --color-text-black:hsl(var(--text-black));
+  --color-text-black-light:hsl(var(--text-black-light));
+  --color-text-white:hsl(var(--text-white));
+  
+  /* _____________________________________________________________ */
+
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -487,6 +534,7 @@ p {
     transform: translateX(120%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;

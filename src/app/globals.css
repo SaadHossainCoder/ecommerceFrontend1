@@ -1,7 +1,63 @@
-/* ===== Google Fonts - Shantiniketan Heritage Typography ===== */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
-
 @import "tailwindcss";
+/* ===== Google Fonts - Shantiniketan Heritage Typography ===== */
+/* @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap'); */
+
+@font-face {
+  font-family: 'Makova';
+  src: url('/font/makova.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shanoy';
+  src: url('/font/shanoy-regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shanoy';
+  src: url('/font/shanoy-italic.otf') format('opentype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'anlira';
+  src: url('/font/anlira.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'anlira';
+  src: url('/font/anlira.otf') format('opentype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'glinke';
+  src: url('/font/glinke.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'ground';
+  src: url('/font/ground.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'goldens';
+  src: url('/font/goldens.otf') format('opentype');
+  font-weight: normal;  
+  font-style: normal;
+}
+
 
 /* ===== Shantiniketan Heritage Design System ===== */
 :root {
@@ -60,12 +116,26 @@
   --ring: var(--antique-gold);
   --radius: 14px;
 
+
   /* Typography System */
-  --font-heading: 'Cormorant Garamond', serif;
-  /* Elegant, poetic, intellectual */
-  --font-sub-heading: 'Playfair Display', serif;
-  /* Royal, classic */
-  --font-body: 'Inter', sans-serif;
+  /* --font-heading: 'Shanoy', serif; */
+  /* --font-heading: 'anlira', serif; */
+  /* --font-heading: 'Shanoy', serif; */
+  --font-heading: 'Makova', serif;
+
+  /* --font-sub-heading: 'Shanoy', serif; */
+  /* --font-sub-heading: 'anlira', serif; */
+  /* --font-sub-heading: 'Shanoy', serif; */
+  --font-sub-heading: 'Makova', serif;
+  /* --font-sub-heading: 'ground', sans-serif; */
+
+
+  /* --font-body: 'Makova', sans-serif; */
+  --font-body: 'goldens', sans-serif;
+  /* --font-body: 'anlira', sans-serif; */
+  /* --font-body: 'ground', sans-serif; */
+  /* --font-body: 'glinke', sans-serif; */
+  /* --font-body: 'shanoy', serif; */
   /* Clean, readable, modern */
   --font-quote: 'Libre Baskerville', serif;
   /* Artisan stories, cultural descriptions */
@@ -255,19 +325,21 @@ h5, h6 {
   font-weight: 600;
 }
 
-body {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  /* 16px */
-  line-height: 1.7;
-  font-weight: 400;
-}
+
 
 p {
   font-family: var(--font-body);
   line-height: 1.7;
   font-weight: 400;
 }
+
+/* body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  
+  line-height: 1.7;
+  font-weight: 400;
+} */
 
 .text-small {
   /* font-size: 0.875rem;        14px */

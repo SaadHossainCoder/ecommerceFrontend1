@@ -235,7 +235,7 @@ export default function ProductsPage() {
             {/* ── Hero ── */}
             <section className="relative h-[60vh] overflow-hidden">
                 <Image
-                    src="https://i.pinimg.com/1200x/3e/30/e9/3e30e9ef564f8335b406efa344e5ede9.jpg"
+                    src="https://i.pinimg.com/1200x/ad/79/c3/ad79c36ce98ce078efcd634718811b42.jpg"
                     alt="Collection"
                     fill
                     className="object-cover"

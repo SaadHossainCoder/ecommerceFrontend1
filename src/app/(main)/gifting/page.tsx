@@ -13,6 +13,7 @@ import {
     // Instagram,
     ArrowRight,
     Phone,
+    Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,8 +26,8 @@ import {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const features = [
-    { icon: Heart, title: "Personalized",  description: "Add a personal touch to every box with custom messages and monograms." },
-    { icon: Gift,  title: "Gift Cards",   description: "Choose from our curated digital and physical gift cards." },
+    { icon: Heart, title: "Personalized", description: "Add a personal touch to every box with custom messages and monograms." },
+    { icon: Gift, title: "Gift Cards", description: "Choose from our curated digital and physical gift cards." },
     { icon: Truck, title: "Across India", description: "Seamless, insured delivery of your heritage pieces nationwide." },
 ];
 
@@ -64,33 +65,33 @@ const giftShowcase = [
 ];
 
 const goBranchesGifts = [
-    { title: "Classic Box",  image: "https://images.unsplash.com/photo-1549465220-1d8c9d9c6703?q=80&w=400&auto=format&fit=crop", price: "₹1,299" },
-    { title: "Bespoke Set",  image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=400&auto=format&fit=crop", price: "₹2,149" },
+    { title: "Classic Box", image: "https://images.unsplash.com/photo-1549465220-1d8c9d9c6703?q=80&w=400&auto=format&fit=crop", price: "₹1,299" },
+    { title: "Bespoke Set", image: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?q=80&w=400&auto=format&fit=crop", price: "₹2,149" },
     { title: "Heritage Box", image: "https://images.unsplash.com/photo-1511177545613-b150c99da9ac?q=80&w=400&auto=format&fit=crop", price: "₹3,450" },
-    { title: "Grand Gift",   image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400&auto=format&fit=crop", price: "₹4,999" },
+    { title: "Grand Gift", image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400&auto=format&fit=crop", price: "₹4,999" },
 ];
 
 const productCategories = [
-    { name: "Saree",    image: "https://images.unsplash.com/photo-1583391733956-6c78276477e2?q=80&w=800&auto=format&fit=crop",  description: "Pure Silk & Hand-woven" },
-    { name: "Kurta",    image: "https://images.unsplash.com/photo-1597983073453-ef45a63968db?q=80&w=800&auto=format&fit=crop",  description: "Artisanally Tailored" },
-    { name: "Wallet",   image: "https://images.unsplash.com/photo-1627123430984-717da62dc183?q=80&w=800&auto=format&fit=crop",  description: "Full-grain Leather" },
-    { name: "Clutch",   image: "https://images.unsplash.com/photo-1566150905458-1bf1fd113961?q=80&w=800&auto=format&fit=crop",  description: "Hand-crafted Eveningwear" },
-    { name: "Jewelry",  image: "https://images.unsplash.com/photo-1515562141207-7a1886ce96c3?q=80&w=800&auto=format&fit=crop",  description: "Timeless Heritage" },
-    { name: "Notebook", image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=800&auto=format&fit=crop",  description: "Hand-pressed Paper" },
+    { name: "Saree", image: "https://images.unsplash.com/photo-1583391733956-6c78276477e2?q=80&w=800&auto=format&fit=crop", description: "Pure Silk & Hand-woven" },
+    { name: "Kurta", image: "https://images.unsplash.com/photo-1597983073453-ef45a63968db?q=80&w=800&auto=format&fit=crop", description: "Artisanally Tailored" },
+    { name: "Wallet", image: "https://images.unsplash.com/photo-1627123430984-717da62dc183?q=80&w=800&auto=format&fit=crop", description: "Full-grain Leather" },
+    { name: "Clutch", image: "https://images.unsplash.com/photo-1566150905458-1bf1fd113961?q=80&w=800&auto=format&fit=crop", description: "Hand-crafted Eveningwear" },
+    { name: "Jewelry", image: "https://images.unsplash.com/photo-1515562141207-7a1886ce96c3?q=80&w=800&auto=format&fit=crop", description: "Timeless Heritage" },
+    { name: "Notebook", image: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=800&auto=format&fit=crop", description: "Hand-pressed Paper" },
 ];
 
 const priceBlocks = [
     { label: "Gifts Under", value: "₹1,000", href: "/products?price=1000" },
     { label: "Gifts Under", value: "₹2,500", href: "/products?price=2500" },
     { label: "Gifts Under", value: "₹5,000", href: "/products?price=5000" },
-    { label: "Premium",     value: "Gifts",  href: "/products?price=premium" },
+    { label: "Premium", value: "Gifts", href: "/products?price=premium" },
 ];
 
 const stats = [
     { value: "12,000+", label: "Gifts Delivered" },
-    { value: "500+",    label: "Artisan Partners" },
-    { value: "4.9",     label: "Average Rating" },
-    { value: "1947",    label: "Established" },
+    { value: "500+", label: "Artisan Partners" },
+    { value: "4.9", label: "Average Rating" },
+    { value: "1947", label: "Established" },
 ];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -100,7 +101,42 @@ export default function GiftingPage() {
         <div className="bg-white min-h-screen">
 
             {/* ── Hero ────────────────────────────────────────────────────── */}
-            <section className="relative h-[85vh] w-full overflow-hidden">
+            <section
+                className="relative h-[70vh] w-full overflow-hidden"
+            >
+                <div className="absolute inset-0">
+                    <Image
+                        // src="https://i.pinimg.com/736x/fb/13/37/fb13370a632617b6de7d824a5d2e7ca6.jpg"
+                        // src="https://i.pinimg.com/1200x/32/05/74/32057465a30623726d71b5a18ae479ff.jpg"
+                        src="https://i.pinimg.com/1200x/7d/71/09/7d7109264f47ab4fc02cea74e317d3fb.jpg"
+                        alt="Artisanal Gifting"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-black/20" />
+                </div>
+
+                {/* Hero Title Block (Right Aligned to mirror Artist page) */}
+                <div className="absolute bottom-0 right-0 w-full max-w-2xl p-8 md:p-16 h-[43vh] bg-stone-900">
+                    <div
+                        className="space-y-6"
+                    >
+                        <div className="inline-flex items-center gap-2 text-stone-400 text-xs tracking-[0.3em] uppercase font-bold">
+                            <Sparkles className="h-4 w-4 text-[#C5A25D]" />
+                            Our Heritage
+                        </div>
+                        <h1 className="text-4xl md:text-7xl font-serif tracking-tight text-stone-100 leading-[1.1]">
+                            Crafting <br />
+                            <span className="italic font-light text-[#C5A25D]">Pure Legacy</span>
+                        </h1>
+                        <p className="text-stone-400 font-light leading-relaxed text-lg max-w-md">
+                            A collective dedicated to preserving traditional craftsmanship through contemporary design.
+                        </p>
+                    </div>
+                </div>
+            </section>
+            {/* <section className="relative h-[85vh] w-full overflow-hidden">
                 <Image
                     src="https://images.unsplash.com/photo-1512909006721-3d6018887383?q=80&w=2000&auto=format&fit=crop"
                     alt="Artisanal Gifting"
@@ -133,7 +169,7 @@ export default function GiftingPage() {
                         </div>
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             {/* ── Stats Bar ───────────────────────────────────────────────── */}
             <section className="bg-stone-900 py-8">
@@ -438,10 +474,10 @@ export default function GiftingPage() {
 
                             <div className="border-t border-stone-100 pt-10 grid grid-cols-2 gap-8">
                                 {[
-                                    { label: "Origin",  value: "Shantiniketan, India" },
+                                    { label: "Origin", value: "Shantiniketan, India" },
                                     { label: "Founded", value: "1947" },
                                     { label: "Delivery", value: "Pan India" },
-                                    { label: "Support",  value: "7 Days a Week" },
+                                    { label: "Support", value: "7 Days a Week" },
                                 ].map(({ label, value }) => (
                                     <div key={label}>
                                         <p className="text-[9px] uppercase tracking-[0.3em] text-stone-400 font-semibold mb-1">{label}</p>

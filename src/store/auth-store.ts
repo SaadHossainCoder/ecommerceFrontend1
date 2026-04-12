@@ -48,14 +48,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     user: _stored
         ? {
               id: _stored.id,
-              username: "",
-              email: "",
+              username: _stored.username,
+              email: _stored.email,
               role: _stored.role,
-              isEmailVerified: false,
-              isBlocked: false,
-              lockedUntil: null,
-              createdAt: "",
-              updatedAt: "",
+              isEmailVerified: _stored.isEmailVerified,
+              isBlocked: _stored.isBlocked,
+              lockedUntil: _stored.lockedUntil,
+              createdAt: _stored.createdAt,
+              updatedAt: _stored.updatedAt,
           }
         : null,
     isAuthenticated: !!_stored,

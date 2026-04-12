@@ -244,7 +244,7 @@ export default function ProductsPage() {
                             ))}
                         </SelectContent>
                     </Select>
-                    
+
                     <div className="flex bg-background p-1.5 rounded-2xl shadow-sm border border-primary/10">
                         <Button variant={viewMode === "table" ? "default" : "ghost"} size="icon" className={`rounded-xl h-11 w-11 ${viewMode === "table" ? "shadow-md bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setViewMode("table")}>
                             <List className="h-5 w-5" />
@@ -373,7 +373,7 @@ export default function ProductsPage() {
                                         <img src={mainImg} alt={product.title} className="w-full h-full object-cover" />
                                     ) : <div className="w-full h-full flex items-center justify-center text-6xl">📦</div>}
                                     <div className="absolute inset-0 bg-linear-to-t from-background via-background/20 to-transparent opacity-80 group-hover:opacity-90" />
-                                    
+
                                     {/* Grid Action Overlay */}
                                     <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 backdrop-blur-sm bg-black/20">
                                         <Button size="icon" variant="secondary" className="h-12 w-12 rounded-full shadow-2xl" onClick={() => handleViewDetails(product)}>
@@ -393,7 +393,7 @@ export default function ProductsPage() {
                                         <span className="text-[10px] font-mono font-bold text-muted-foreground bg-background/80 px-2 py-1 rounded-md">{product.sku}</span>
                                     </div>
                                     <h4 className="font-black text-lg mb-2 line-clamp-2 leading-tight group-hover:text-primary transition-colors">{product.title}</h4>
-                                    
+
                                     <div className="mt-auto pt-4 flex items-end justify-between border-t border-primary/10">
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Starting Price</span>

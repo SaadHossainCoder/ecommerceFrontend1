@@ -6,8 +6,11 @@ import { ShareholderReports } from "@/app/(main)/home/_components/carousel";
 // import { getTrendingProducts, getSeasonChoices, getReports } from "@/services/product-service";
 import ProductCard from "./_components/ProductCard";
 import { TestimonialsSection } from "./_components/TestimonialsSection";
+import { FeatureGrid } from "./_components/FeatureGrid";
 import { Suspense } from "react";
 import {LoaderCircleIcon as LoaderCircle} from "@/components/icon/loader-circle"
+
+import { Hero } from "./_components/Hero";
 
 export default async function HomePage() {
     // const trendingProducts = await getTrendingProducts();
@@ -18,136 +21,13 @@ export default async function HomePage() {
 
         <div className="bg-background">
             {/* --- SECTON: HERO --- */}
-            {/* --- SECTON: HERO CAROUSEL --- */}
-            {/* Video Hero Section */}
-            <section className="relative w-full h-150 overflow-hidden bg-stone-900">
-                {/* Auto-playing Muted Video Background */}
-                <Suspense fallback={<LoaderCircle className="text-black"/>}>
-                <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover opacity-60"
-                >
-                    <source src="https://cdn.pixabay.com/video/2018/10/25/18897-297379518_large.mp4" type="video/mp4" />
-                    Your browser does not support the video tag.
-                </video>
-                </Suspense>
-
-
-                {/* Overlay for better text visibility */}
-                <div className="absolute inset-0 bg-black/10" />
-
-                {/* Centered Text with Negative Filter */}
-                <div className="relative z-10 h-full flex items-center justify-center">
-                    <div className="text-center px-4">
-                        <h1
-                            className="text-6xl md:text-8xl lg:text-9xl font-heading font-black uppercase tracking-tight"
-                            style={{ mixBlendMode: 'difference', color: 'white' }}
-                        >
-                            FASHION IS ART
-                        </h1>
-                        <p
-                            className="text-2xl md:text-4xl font-heading font-medium mt-4"
-                            style={{ mixBlendMode: 'difference', color: 'white' }}
-                        >
-                            Wearable Masterpieces
-                        </p>
-                        <p
-                            className="text-xl md:text-2xl font-light mt-2"
-                            style={{ mixBlendMode: 'difference', color: 'white' }}
-                        >
-                            First time
-                        </p>
-                    </div>
-                </div>
-            </section>
+            <Hero />
             
             <section>
                 <hr />
 
                 {/* --- SECTION: FEATURE GRID --- */}
-                {/* Feature Grid Section */}
-                <section className=" relative container-custom py-20">
-                    <Suspense fallback={<LoaderCircle className="text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"/>}>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                        {/* Row 1 - Three equal items */}
-                        <div className="relative overflow-hidden group bg-white border border-primary/5 aspect-4/5 md:aspect-square">
-                            <Link href="/products" className="block h-full">
-                                <div className="relative h-full w-full">
-                                    <Image
-                                        src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80"
-                                        alt="Watch"
-                                        fill
-                                        sizes="(max-width: 768px) 100vw, 33vw"
-                                        priority
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                </div>
-                            </Link>
-                        </div>
-
-                        <div className="relative overflow-hidden group bg-white border border-primary/5 aspect-4/5 md:aspect-square">
-                            <Link href="/products" className="block h-full">
-                                <div className="relative h-full w-full">
-                                    <Image
-                                        src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80"
-                                        alt="Necklace"
-                                        fill
-                                        sizes="(max-width: 768px) 100vw, 33vw"
-                                        priority
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                </div>
-                            </Link>
-                        </div>
-
-                        <div className="relative overflow-hidden group bg-white border border-primary/5 aspect-4/5 md:aspect-square">
-                            <Link href="/products" className="block h-full">
-                                <div className="relative h-full w-full">
-                                    <Image
-                                        src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80"
-                                        alt="Pearl Necklace"
-                                        fill
-                                        sizes="(max-width: 768px) 100vw, 33vw"
-                                        priority
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                </div>
-                            </Link>
-                        </div>
-
-
-                        {/* Row 2 - Two wider items */}
-                        <div className="md:col-span-2 relative overflow-hidden group bg-white border border-primary/5">
-                            <Link href="/products" className="block h-full">
-                                <div className="relative h-64 md:h-80">
-                                    <Image
-                                        src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80"
-                                        alt="Clothing Store"
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                </div>
-                            </Link>
-                        </div>
-
-                        <div className="relative overflow-hidden group bg-white border border-primary/5">
-                            <Link href="/products" className="block h-full">
-                                <div className="relative h-64 md:h-80">
-                                    <Image
-                                        src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80"
-                                        alt="Headphones"
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                </div>
-                            </Link>
-                        </div>
-                    </div>
-                    </Suspense>
-                </section>
+                <FeatureGrid />
                 <hr />
 
                 {/* --- BRAND LOGOS --- */}

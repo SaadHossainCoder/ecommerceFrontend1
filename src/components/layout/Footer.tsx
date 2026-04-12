@@ -128,7 +128,7 @@ export function Footer() {
                                     <Link
                                         href={link.href}
                                         className={cn(
-                                            "text-xs transition-colors font-light relative group inline-block",
+                                            "md:text-4 transition-colors font-light relative group inline-block",
                                             pathname === link.href ? "text-white font-medium" : "text-stone-400 hover:text-white"
                                         )}
                                     >
@@ -152,7 +152,7 @@ export function Footer() {
                                     <Link
                                         href={link.href}
                                         className={cn(
-                                            "text-xs transition-colors font-light relative group inline-block",
+                                            "md:text-4 transition-colors font-light relative group inline-block",
                                             pathname === link.href ? "text-white font-medium" : "text-stone-400 hover:text-white"
                                         )}
                                     >
@@ -176,7 +176,7 @@ export function Footer() {
                                     <Link
                                         href={link.href}
                                         className={cn(
-                                            "text-xs transition-colors font-light relative group inline-block",
+                                            "md:text-4 transition-colors font-light relative group inline-block",
                                             pathname === link.href ? "text-white font-medium" : "text-stone-400 hover:text-white"
                                         )}
                                     >
@@ -201,7 +201,7 @@ export function Footer() {
                                     href={social.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-10 h-10 rounded-full border border-stone-700 bg-white/5 flex items-center justify-center text-stone-400 hover:bg-white hover:text-stone-900 transition-all duration-500 group"
+                                    className="w-10 h-10 rounded-full  flex items-center justify-center text-stone-400 transition-all duration-500 group"
                                     aria-label={social.label}
                                 >
                                     <social.icon className="w-4 h-4 fill-current group-hover:fill-current" />

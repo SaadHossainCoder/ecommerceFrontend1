@@ -8,7 +8,11 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSearchStore } from "@/store/search-store";
 import { Badge } from "@/components/ui/badge";
-
+import { useAuthStore } from "@/store/auth-store";
+import { LogOut } from "lucide-react";
+import { useState, useEffect, Suspense } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 const navLinks = [
     { href: "/home", label: "Home" },
@@ -19,6 +23,14 @@ const navLinks = [
 ];
 
 export function Navbar() {
+    const { user, isAuthenticated } = useAuthStore();
+    console.log(user);
+
+    const [hasMounted, setHasMounted] = useState(false);
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
+
     const pathname = usePathname();
     const { openSearch } = useSearchStore();
     const cartItemCount = 3; // Replace with actual cart item count from state or context
@@ -62,10 +74,10 @@ export function Navbar() {
                     </div>
 
                     {/* Right Actions */}
-                    <div className="flex items-end gap-1 md:gap-2">
+                    <div className="flex items-end gap-1 md:gap-5">
                         {/* Search Icon (Mobile/Tablet) */}
                         <Button
-                            variant="ghost"
+                            variant="outline"
                             size="icon"
                             className=" border-none"
                             onClick={openSearch}
@@ -76,14 +88,13 @@ export function Navbar() {
 
 
                         {/* Profile - Hidden on mobile */}
-                        <Button variant="ghost" size="icon" className="hidden md:flex hover:bg-transparent border-none" asChild>
+                        <Button variant="outline" size="icon" className="hidden md:flex border-none" asChild>
                             <Link href="/myAccount">
                                 <User/>
                             </Link>
                         </Button>
-
                         {/* Cart - Hidden on mobile */}
-                        <Button variant="ghost" size="icon" className="relative hidden md:flex hover:bg-transparent border-none " asChild>
+                        <Button variant="outline" size="icon" className="relative hidden md:flex border-none " asChild>
                             <Link href="/cart">
                                 <ShoppingBag className="" />
                                 {cartItemCount > 0 && (

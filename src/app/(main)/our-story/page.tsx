@@ -55,7 +55,7 @@ export default function OurStoryPage() {
             <div className="bg-white min-h-screen font-sans selection:bg-stone-200">
                 {/* Hero Section */}
                 <section
-                    className="relative h-[90vh] w-full overflow-hidden"
+                    className="relative h-[70vh] w-full overflow-hidden"
                 >
                     <div className="absolute inset-0">
                         <Image
@@ -69,7 +69,7 @@ export default function OurStoryPage() {
                     </div>
 
                     {/* Hero Title Block (Right Aligned to mirror Artist page) */}
-                    <div className="absolute bottom-0 right-0 w-full max-w-2xl bg-white p-8 md:p-16 border-t border-l border-stone-200">
+                    <div className="absolute bottom-0 right-0 w-full max-w-2xl p-8 md:p-16 border-t border-l border-stone-200 h-[43vh] bg-stone-50">
                         <div
                             className="space-y-6"
                         >

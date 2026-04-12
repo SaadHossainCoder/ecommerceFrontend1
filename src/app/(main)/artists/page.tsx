@@ -14,7 +14,7 @@ export default function ArtistsPage() {
                         <section className="relative w-full h-100 text-white flex flex-col items-center justify-center overflow-hidden">
                             <div className="absolute inset-0 z-0 select-none pointer-events-none">
                                 <Image
-                                    src="https://images.stockcake.com/public/a/1/c/a1c9dea5-f380-4668-98d2-b8c922dfbfd2_large/shadows-tell-stories-stockcake.jpg"
+                                    src="https://i.pinimg.com/736x/e2/da/0c/e2da0c18aedaa49818f623b29e97b7b2.jpg"
                                     alt="Footer Background"
                                     fill
                                     className="object-cover"

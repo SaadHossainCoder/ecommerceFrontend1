@@ -3,11 +3,23 @@ export interface User {
   username: string;
   email: string;
   role: string;
+  isEmailVerified: boolean;
+  isBlocked: boolean;
+  lockedUntil: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 type StoredUser = {
   id: string;
   role: string;
+  username: string;
+  email: string;
+  isEmailVerified: boolean;
+  isBlocked: boolean;
+  lockedUntil: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 const USER_KEY = "clint";
@@ -26,19 +38,29 @@ const decode = (encoded: string): string => {
 };
 
 export const userLocalStorageData = {
-  // ✅ Store only user id
+  // ✅ Store user id, role, username, and email
   setUser: (user: User) => {
     if (typeof window === "undefined") return;
 
     try {
-      const encoded = encode(JSON.stringify({ id: user.id, role: user.role }));
+      const encoded = encode(JSON.stringify({ 
+        id: user.id, 
+        role: user.role,
+        username: user.username,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+        isBlocked: user.isBlocked,
+        lockedUntil: user.lockedUntil,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }));
       localStorage.setItem(USER_KEY, encoded);
     } catch (err) {
       console.error("Failed to store user:", err);
     }
   },
 
-  // ✅ Get only id safely
+  // ✅ Get user safely
   getUser: (): StoredUser | null => {
     if (typeof window === "undefined") return null;
 
@@ -52,7 +74,18 @@ export const userLocalStorageData = {
       const parsed = JSON.parse(decoded);
 
       // ✅ validate shape
-      if (parsed && typeof parsed.id === "string" && typeof parsed.role === "string") {
+      if (
+        parsed && 
+        typeof parsed.id === "string" && 
+        typeof parsed.role === "string" &&
+        typeof parsed.username === "string" &&
+        typeof parsed.email === "string" &&
+        typeof parsed.isEmailVerified === "boolean" &&
+        typeof parsed.isBlocked === "boolean" &&
+        (parsed.lockedUntil === null || typeof parsed.lockedUntil === "string") &&
+        typeof parsed.createdAt === "string" &&
+        typeof parsed.updatedAt === "string"
+      ) {
         return parsed;
       }
 

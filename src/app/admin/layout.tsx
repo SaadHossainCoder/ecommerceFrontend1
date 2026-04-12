@@ -269,7 +269,7 @@ export default function AdminLayout({
                     <main className="p-4 lg:p-8">{children}</main>
                 </div>
             </div>
-        // </AdminGuard>
+        // {/* </AdminGuard> */}
     );
 }
 

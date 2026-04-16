@@ -5,6 +5,7 @@ export type BannerType = "HOME" | "CATEGORY" | "PRODUCT";
 export interface Banner {
     id: string;
     title: string;
+    slug: string;
     description: string;
     image: string;
     link: string;
@@ -15,6 +16,7 @@ export interface Banner {
 
 export interface CreateBannerData {
     title: string;
+    slug: string;
     description: string;
     image: string;
     link: string;
@@ -23,6 +25,7 @@ export interface CreateBannerData {
 
 export interface UpdateBannerData {
     title?: string;
+    slug?: string;
     description?: string;
     image?: string;
     link?: string;

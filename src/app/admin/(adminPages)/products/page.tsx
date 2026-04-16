@@ -45,6 +45,23 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
 import { toast } from "@/components/ui/toaster";
 import EditProductForm from "./_components/addProduct";
 import { useProductStore } from "@/store/product-store";
@@ -55,6 +72,7 @@ const getStatusColor = (status: string) => {
         case "Published": return "success";
         case "Low Stock": return "warning";
         case "Out of Stock": return "destructive";
+        case "Disabled": return "secondary";
         case "Draft": return "secondary";
         default: return "default";
     }
@@ -72,6 +90,10 @@ export default function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
 
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
+
     // Modal States
     const [isAddEditOpen, setIsAddEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -79,12 +101,14 @@ export default function ProductsPage() {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
     const loadData = useCallback(async () => {
-        await fetchProducts();
+        await fetchProducts({ showDisabled: true });
     }, [fetchProducts]);
 
     useEffect(() => {
-        loadData();
-    }, [loadData]);
+        if (products.length === 0) {
+            loadData();
+        }
+    }, [loadData, products.length]);
 
     const filteredProducts = useMemo(() => {
         return products.filter((product) => {
@@ -98,6 +122,17 @@ export default function ProductsPage() {
             return matchesSearch && matchesCategory;
         });
     }, [products, searchTerm, categoryFilter]);
+
+    // Reset pagination when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, categoryFilter]);
+
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const paginatedProducts = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredProducts.slice(start, start + itemsPerPage);
+    }, [filteredProducts, currentPage, itemsPerPage]);
 
     const handleEditProduct = (product: Product) => {
         setSelectedProduct(product);
@@ -116,6 +151,29 @@ export default function ProductsPage() {
 
     const handleRefresh = async () => {
         await fetchProducts(undefined, true);
+    };
+
+    const toggleDisableProduct = async (product: Product) => {
+        const id = product._id || product.id;
+        if (!id) return;
+
+        // Ensure category and vendor are strings (extracting ID from populated objects)
+        const payloadToEdit = { 
+            ...product, 
+            category: typeof product.category === 'object' ? (product.category.id || (product.category as any)._id) : product.category,
+            vendor: typeof product.vendor === 'object' ? (product.vendor.id || (product.vendor as any)._id) : product.vendor,
+            disableProduct: !product.disableProduct 
+        };
+
+        const success = await editProduct(id, payloadToEdit);
+        if (success) {
+            await loadData();
+            toast({
+                title: payloadToEdit.disableProduct ? "Product Disabled" : "Product Enabled",
+                description: `Product status has been updated successfully.`,
+                variant: "success",
+            });
+        }
     };
 
     const handleSaveProduct = async (data: any) => {
@@ -161,11 +219,11 @@ export default function ProductsPage() {
     const stats = useMemo(() => {
         const total = products.length;
         const lowStock = products.filter(p => {
-            const stock = p.sizes?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
+            const stock = (p.subProducts || p.sizes)?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
             return stock > 0 && stock <= 10;
         }).length;
         const outOfStock = products.filter(p => {
-            const stock = p.sizes?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
+            const stock = (p.subProducts || p.sizes)?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
             return stock === 0;
         }).length;
         const published = total - outOfStock;
@@ -278,91 +336,112 @@ export default function ProductsPage() {
                     <p className="text-muted-foreground max-w-sm mx-auto">We couldn't find any products matching your current search parameters. Try adjusting your filters.</p>
                 </Card>
             ) : viewMode === "table" ? (
-                <div className="space-y-4 pt-2">
-                    {/* Floating Header */}
-                    <div className="hidden lg:grid grid-cols-12 gap-6 px-8 text-xs font-black uppercase tracking-widest text-muted-foreground mb-2">
-                        <div className="col-span-4">Product Details</div>
-                        <div className="col-span-2">Category</div>
-                        <div className="col-span-2">Inventory</div>
-                        <div className="col-span-1">Price</div>
-                        <div className="col-span-2 text-center">Status</div>
-                        <div className="col-span-1 text-right">Actions</div>
-                    </div>
-                    {/* Rows */}
-                    <div className="space-y-3">
-                        {filteredProducts.map((product) => {
-                            const mainImg = product.images?.[0]?.url || product.images?.[0] || "📦";
-                            const totalStock = product.sizes?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
-                            const prices = product.sizes?.map((s: any) => Number(s.price)) || [0];
-                            const minPrice = Math.min(...prices);
-                            const status = totalStock > 10 ? "Published" : totalStock > 0 ? "Low Stock" : "Out of Stock";
+                <Card className="overflow-hidden border-none shadow-sm rounded-3xl bg-card">
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="bg-muted/30 hover:bg-muted/30 border-b-primary/10">
+                                <TableHead className="w-[300px] px-8 py-4 text-xs font-black uppercase tracking-widest text-muted-foreground">Product Details</TableHead>
+                                <TableHead className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted-foreground">Category</TableHead>
+                                <TableHead className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted-foreground">Inventory</TableHead>
+                                <TableHead className="px-6 py-4 text-xs font-black uppercase tracking-widest text-muted-foreground">Price</TableHead>
+                                <TableHead className="px-6 py-4 text-center text-xs font-black uppercase tracking-widest text-muted-foreground">Status</TableHead>
+                                <TableHead className="px-8 py-4 text-right text-xs font-black uppercase tracking-widest text-muted-foreground">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedProducts.map((product) => {
+                                const mainImg = product.generalImages?.[0]?.url || product.generalImages?.[0] || 
+                                               product.images?.[0]?.url || product.images?.[0] || "📦";
+                                const totalStock = (product.subProducts || product.sizes)?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
+                                const prices = (product.subProducts || product.sizes)?.map((s: any) => Number(s.price)) || [0];
+                                const minPrice = Math.min(...prices);
+                                const status = product.disableProduct ? "Disabled" : totalStock > 10 ? "Published" : totalStock > 0 ? "Low Stock" : "Out of Stock";
 
-                            return (
-                                <Card key={product._id || product.id} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center p-4 lg:px-8 rounded-3xl hover:bg-muted/30 hover:shadow-xl border border-transparent hover:border-primary/20">
-                                    <div className="col-span-4 flex items-center gap-5">
-                                        <div className="h-16 w-16 rounded-2xl bg-muted overflow-hidden flex items-center justify-center shrink-0 border border-primary/10 relative group-hover:shadow-md">
-                                            {typeof mainImg === 'string' && mainImg.startsWith('http') ? (
-                                                <img src={mainImg} alt={product.title} className="w-full h-full object-cover" />
-                                            ) : <span className="text-3xl">📦</span>}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <p className="font-bold text-base truncate">{product.title}</p>
-                                            <p className="text-xs text-muted-foreground font-mono mt-1">{product.sku}</p>
-                                        </div>
-                                    </div>
-                                    <div className="col-span-2">
-                                        <Badge variant="secondary" className="font-semibold bg-background border px-3 py-1 text-xs">
-                                            {getName(product.category)}
-                                        </Badge>
-                                    </div>
-                                    <div className="col-span-2 flex flex-col justify-center">
-                                        <span className="font-bold text-sm text-foreground">{product.sizes?.length || 0} Variant(s)</span>
-                                        <span className="text-xs text-muted-foreground mt-0.5">{totalStock} total units</span>
-                                    </div>
-                                    <div className="col-span-1 font-black text-base text-primary">
-                                        ${minPrice.toFixed(2)}
-                                    </div>
-                                    <div className="col-span-2 text-center">
-                                        <Badge variant={getStatusColor(status) as any} className="px-4 py-1.5 shadow-sm text-xs font-bold uppercase tracking-wider">
-                                            {status}
-                                        </Badge>
-                                    </div>
-                                    <div className="col-span-1 flex justify-end gap-2">
-                                        <Button variant="ghost" size="icon" onClick={() => handleViewDetails(product)} className="h-10 w-10 rounded-xl hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors">
-                                            <Eye className="h-5 w-5" />
-                                        </Button>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-muted">
-                                                    <MoreHorizontal className="h-5 w-5" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-primary/10">
-                                                <DropdownMenuItem className="py-2.5 rounded-xl cursor-pointer" onClick={() => handleEditProduct(product)}>
-                                                    <Edit2 className="h-4 w-4 mr-3 text-primary" /> Modify Profile
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="py-2.5 rounded-xl text-destructive focus:bg-destructive/10 cursor-pointer mt-1" onClick={() => handleDeleteClick(product)}>
-                                                    <Trash2 className="h-4 w-4 mr-3" /> Retire Product
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                </Card>
-                            );
-                        })}
-                    </div>
-                </div>
+                                return (
+                                    <TableRow key={product._id || product.id} className={`group hover:bg-muted/30 transition-colors border-b-primary/5 last:border-0 cursor-default ${product.disableProduct ? 'opacity-60 grayscale-[0.3]' : ''}`}>
+                                        <TableCell className="px-8 py-4">
+                                            <div className="flex items-center gap-5">
+                                                <div className="h-16 w-16 rounded-2xl bg-muted overflow-hidden flex items-center justify-center shrink-0 border border-primary/10 group-hover:shadow-md transition-all">
+                                                    {typeof mainImg === 'string' && mainImg.startsWith('http') ? (
+                                                        <img src={mainImg} alt={product.title} className="w-full h-full object-cover" />
+                                                    ) : <span className="text-3xl">📦</span>}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-bold text-base truncate group-hover:text-primary transition-colors">{product.title}</p>
+                                                    <p className="text-xs text-muted-foreground font-mono mt-1">{product.sku}</p>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="px-6 py-4">
+                                            <Badge variant="default" className="bg-background px-3 py-1 text-xs text-black">
+                                                {getName(product.category)}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="px-6 py-4">
+                                            <div className="flex flex-col justify-center">
+                                                <span className="font-bold text-sm text-foreground">{(product.subProducts || product.sizes)?.length || 0} Variant(s)</span>
+                                                <span className="text-xs text-muted-foreground mt-0.5">{totalStock} total units</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="px-6 py-4 font-black text-base text-primary whitespace-nowrap">
+                                            ${minPrice.toFixed(2)}
+                                        </TableCell>
+                                        <TableCell className="px-6 py-4 text-center">
+                                            <Badge variant={getStatusColor(status) as any} className="px-4 py-1.5 shadow-sm text-xs font-bold uppercase tracking-wider whitespace-nowrap inline-flex">
+                                                {status}
+                                            </Badge>
+                                        </TableCell>
+
+                                        <TableCell className="px-8 py-4 flex justify-end gap-2 items-center min-h-[5rem]">
+                                            <Button variant="ghost" size="icon" onClick={() => handleViewDetails(product)} className="h-10 w-10 rounded-xl hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors">
+                                                <Eye className="h-5 w-5" />
+                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-muted text-muted-foreground">
+                                                        <MoreHorizontal className="h-5 w-5" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-primary/10">
+                                                    <DropdownMenuItem className="py-2.5 rounded-xl cursor-pointer" onClick={() => handleEditProduct(product)}>
+                                                        <Edit2 className="h-4 w-4 mr-3 text-primary" /> Modify Profile
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className="py-2.5 rounded-xl cursor-pointer" onClick={() => toggleDisableProduct(product)}>
+                                                        {product.disableProduct ? (
+                                                            <>
+                                                                <CheckCircle2 className="h-4 w-4 mr-3 text-emerald-500" /> Re-enable Sales
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <AlertCircle className="h-4 w-4 mr-3 text-amber-500" /> Suspend Listing
+                                                            </>
+                                                        )}
+                                                    </DropdownMenuItem>
+
+                                                    <DropdownMenuItem className="py-2.5 rounded-xl text-destructive focus:bg-destructive/10 cursor-pointer mt-1" onClick={() => handleDeleteClick(product)}>
+                                                        <Trash2 className="h-4 w-4 mr-3" /> Retire Product
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </Card>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {filteredProducts.map((product) => {
-                        const mainImg = product.images?.[0]?.url || product.images?.[0] || "📦";
-                        const totalStock = product.sizes?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
-                        const prices = product.sizes?.map((s: any) => Number(s.price)) || [0];
+                    {paginatedProducts.map((product) => {
+                        const mainImg = product.generalImages?.[0]?.url || product.generalImages?.[0] || 
+                                       product.images?.[0]?.url || product.images?.[0] || "📦";
+                        const totalStock = (product.subProducts || product.sizes)?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
+                        const prices = (product.subProducts || product.sizes)?.map((s: any) => Number(s.price)) || [0];
                         const minPrice = Math.min(...prices);
-                        const status = totalStock > 10 ? "Published" : totalStock > 0 ? "Low Stock" : "Out of Stock";
+                        const status = product.disableProduct ? "Disabled" : totalStock > 10 ? "Published" : totalStock > 0 ? "Low Stock" : "Out of Stock";
 
                         return (
-                            <Card key={product._id || product.id} className="rounded-3xl overflow-hidden group hover:shadow-2xl border border-transparent hover:border-primary/30 bg-card flex flex-col relative">
+                            <Card key={product._id || product.id} className={`rounded-3xl overflow-hidden group hover:shadow-2xl border border-transparent hover:border-primary/30 bg-card flex flex-col relative ${product.disableProduct ? 'opacity-60 shadow-none' : ''}`}>
                                 <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
                                     <Badge variant={getStatusColor(status) as any} className="shadow-lg backdrop-blur-md px-3 py-1 font-bold text-[10px] uppercase tracking-widest">
                                         {status}
@@ -408,6 +487,49 @@ export default function ProductsPage() {
                             </Card>
                         );
                     })}
+                </div>
+            )}
+
+            {/* Pagination UI */}
+            {totalPages > 1 && (
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-primary/10">
+                    <p className="text-sm text-muted-foreground font-medium order-2 md:order-1">
+                        Showing <span className="text-foreground font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-foreground font-bold">{Math.min(currentPage * itemsPerPage, filteredProducts.length)}</span> of <span className="text-foreground font-bold">{filteredProducts.length}</span> products
+                    </p>
+                    <div className="order-1 md:order-2">
+                        <Pagination>
+                            <PaginationContent className="bg-background rounded-2xl border border-primary/10 p-1 shadow-sm">
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        href="#"
+                                        onClick={(e) => { e.preventDefault(); if (currentPage > 1) setCurrentPage(currentPage - 1); }}
+                                        className={`rounded-xl h-10 px-4 hover:bg-primary/10 hover:text-primary transition-all ${currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+                                    />
+                                </PaginationItem>
+
+                                {Array.from({ length: totalPages }).map((_, i) => (
+                                    <PaginationItem key={i + 1}>
+                                        <PaginationLink
+                                            href="#"
+                                            onClick={(e) => { e.preventDefault(); setCurrentPage(i + 1); }}
+                                            isActive={currentPage === i + 1}
+                                            className={`rounded-xl h-10 w-10 flex items-center justify-center transition-all ${currentPage === i + 1 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30' : 'hover:bg-primary/10 hover:text-primary'}`}
+                                        >
+                                            {i + 1}
+                                        </PaginationLink>
+                                    </PaginationItem>
+                                ))}
+
+                                <PaginationItem>
+                                    <PaginationNext
+                                        href="#"
+                                        onClick={(e) => { e.preventDefault(); if (currentPage < totalPages) setCurrentPage(currentPage + 1); }}
+                                        className={`rounded-xl h-10 px-4 hover:bg-primary/10 hover:text-primary transition-all ${currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    </div>
                 </div>
             )}
 
@@ -466,9 +588,13 @@ export default function ProductsPage() {
                             <DialogHeader>
                                 <div className="flex items-start gap-6">
                                     <div className="h-32 w-32 rounded-2xl bg-muted border overflow-hidden shrink-0 shadow-inner flex items-center justify-center">
-                                        {selectedProduct.images?.[0]?.startsWith('http') ? (
-                                            <img src={selectedProduct.images[0]} alt={selectedProduct.title} className="h-full w-full object-cover" />
-                                        ) : <Package className="h-12 w-12 text-muted-foreground opacity-30" />}
+                                        {(() => {
+                                            const img = selectedProduct.generalImages?.[0] || selectedProduct.images?.[0];
+                                            const url = typeof img === 'string' ? img : img?.url;
+                                            return url?.startsWith('http') ? (
+                                                <img src={url} alt={selectedProduct.title} className="h-full w-full object-cover" />
+                                            ) : <Package className="h-12 w-12 text-muted-foreground opacity-30" />;
+                                        })()}
                                     </div>
                                     <div className="flex-1">
                                         <div className="flex items-center justify-between">
@@ -485,11 +611,11 @@ export default function ProductsPage() {
                                 <Card className="p-5 bg-muted/20 border-none">
                                     <h5 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Stock & Pricing</h5>
                                     <div className="space-y-4">
-                                        {selectedProduct.sizes?.map((size: any, i: number) => (
+                                        {(selectedProduct.subProducts || selectedProduct.sizes)?.map((size: any, i: number) => (
                                             <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-background border shadow-sm">
                                                 <div>
-                                                    <p className="font-bold">{size.size}</p>
-                                                    <p className="text-xs text-muted-foreground">{size.qty} available</p>
+                                                    <p className="font-bold">{size.type || size.size}</p>
+                                                    <p className="text-xs text-muted-foreground">{size.qty} available {size.sku ? `(${size.sku})` : ''}</p>
                                                 </div>
                                                 <p className="text-lg font-black text-primary">${Number(size.price).toFixed(2)}</p>
                                             </div>
@@ -558,11 +684,14 @@ export default function ProductsPage() {
                                 <div>
                                     <h5 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">Product Media Gallery</h5>
                                     <div className="grid grid-cols-4 gap-3">
-                                        {selectedProduct.images?.map((url: string, i: number) => (
-                                            <div key={i} className="aspect-square rounded-xl border overflow-hidden bg-muted group relative">
-                                                <img src={url} alt="Gallery" className="w-full h-full object-cover" />
-                                            </div>
-                                        ))}
+                                        {(selectedProduct.generalImages || selectedProduct.images)?.map((img: any, i: number) => {
+                                            const url = typeof img === 'string' ? img : img?.url;
+                                            return url && (
+                                                <div key={i} className="aspect-square rounded-xl border overflow-hidden bg-muted group relative">
+                                                    <img src={url} alt="Gallery" className="w-full h-full object-cover" />
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>

@@ -12,10 +12,42 @@ import {LoaderCircleIcon as LoaderCircle} from "@/components/icon/loader-circle"
 
 import { Hero } from "./_components/Hero";
 
+const reportsData = [
+  {
+    id: "1",
+    name: "Elegance Collection",
+    artName: "Classic Timepieces",
+    period: "2024",
+    imageSrc: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80",
+    isNew: true,
+  },
+  {
+    id: "2",
+    name: "Essential Artisanal",
+    artName: "Gold Jewelry",
+    period: "2024",
+    imageSrc: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
+  },
+  {
+    id: "3",
+    name: "Oceanic Edit",
+    artName: "Selected Pearls",
+    period: "2023",
+    imageSrc: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
+  },
+  {
+    id: "4",
+    name: "Modern Acoustics",
+    artName: "Studio Audio",
+    period: "2024",
+    imageSrc: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80",
+    isNew: true,
+  }
+];
+
 export default async function HomePage() {
     // const trendingProducts = await getTrendingProducts();
     // const seasonChoices = await getSeasonChoices();
-    // const reportsData = await getReports();
 
     return (
 
@@ -145,7 +177,7 @@ export default async function HomePage() {
                 {/* --- SECTION:  --- */}
                 <section className=" py-16">
                     <div className="w-full bg-background">
-                        {/* <ShareholderReports reports={reportsData} /> */}
+                        <ShareholderReports reports={reportsData} />
                     </div>
                 </section>
                 <hr />

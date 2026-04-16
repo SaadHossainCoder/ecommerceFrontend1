@@ -84,7 +84,7 @@ function GridCard({
             {/* Image area */}
             <div className="relative aspect-square bg-stone-50 overflow-hidden border-b border-stone-200 flex items-center justify-center">
                 <Link
-                    href={`/products/${item.id}`}
+                    href={`/products/${(item as any).slug ?? item.id}`}
                     className="absolute inset-0 z-10"
                     aria-label={`View ${item.name}`}
                 />
@@ -127,7 +127,7 @@ function GridCard({
                         <p className="text-[9px] uppercase tracking-[0.25em] text-stone-400 font-bold mb-2">
                             {item.category}
                         </p>
-                        <Link href={`/products/${item.id}`} className="block relative z-10">
+                        <Link href={`/products/${(item as any).slug ?? item.id}`} className="block relative z-10">
                             <h3 className="text-sm font-serif font-semibold text-stone-900 leading-snug line-clamp-2 group-hover:text-amber-700 transition-colors">
                                 {item.name}
                             </h3>
@@ -175,7 +175,7 @@ function ListRow({
             {/* Thumbnail */}
             <div className="relative shrink-0 w-full sm:w-56 h-56 sm:h-auto bg-stone-50 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-stone-200 overflow-hidden">
                 <Link
-                    href={`/products/${item.id}`}
+                    href={`/products/${(item as any).slug ?? item.id}`}
                     className="absolute inset-0 z-10"
                     aria-label={`View ${item.name}`}
                 />
@@ -198,7 +198,7 @@ function ListRow({
                     <p className="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-bold mb-2.5 flex items-center gap-2">
                         {item.category}
                     </p>
-                    <Link href={`/product/${item.id}`} className="block relative z-10 mb-3">
+                    <Link href={`/products/${(item as any).slug ?? item.id}`} className="block relative z-10 mb-3">
                         <h3 className="text-xl md:text-2xl font-serif font-semibold text-stone-900 group-hover:text-amber-700 transition-colors line-clamp-2">
                             {item.name}
                         </h3>

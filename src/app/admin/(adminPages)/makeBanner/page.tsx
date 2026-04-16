@@ -82,6 +82,7 @@ export default function MakeBannerPage() {
         resolver: zodResolver(bannerSchema),
         defaultValues: {
             title: "",
+            slug: "",
             description: "",
             image: "",
             link: "",
@@ -89,8 +90,20 @@ export default function MakeBannerPage() {
         },
     });
 
+    const watchedTitle = watch("title");
     const watchedImage = watch("image");
     const watchedType = watch("type");
+
+    // Auto-generate slug from title
+    useEffect(() => {
+        if (!isEditOpen) {
+            const slug = watchedTitle
+                .toLowerCase()
+                .replace(/ /g, "-")
+                .replace(/[^\w-]+/g, "");
+            setValue("slug", slug, { shouldValidate: true });
+        }
+    }, [watchedTitle, setValue, isEditOpen]);
 
     // Initial load
     useEffect(() => {
@@ -146,6 +159,7 @@ export default function MakeBannerPage() {
         setSelectedBanner(banner);
         reset({
             title: banner.title,
+            slug: banner.slug,
             description: banner.description,
             image: banner.image,
             link: banner.link,

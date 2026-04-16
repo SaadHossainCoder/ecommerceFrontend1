@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -10,25 +10,13 @@ import {
     Search as SearchIcon,
     X,
     ChevronDown,
+    Loader2,
+    AlertCircle,
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { useProductStore } from "@/store/product-store";
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const curatedProducts = [
-    { id: 1,  name: "Imperial Gilded Bookcase",     price: 1250, originalPrice: 1500, category: "Furniture", tags: ["Artisan Crafted", "Limited"], image: "https://i.pinimg.com/1200x/95/8d/b5/958db5d1a83e0bbc8ff5fc50269e1550.jpg", rating: 5, isNew: true  },
-    { id: 2,  name: "Victorian Gold-Leaf Mirror",   price: 850,  originalPrice: null, category: "Furniture", tags: ["Rare Find"],                  image: "https://i.pinimg.com/1200x/97/7c/2d/977c2d33614d92abc218bec9a00f95b7.jpg", rating: 4, isNew: false },
-    { id: 3,  name: "Empire Mahogany Clock",        price: 4200, originalPrice: null, category: "Clocks",    tags: ["Masterpiece"],                 image: "https://i.pinimg.com/1200x/65/0a/50/650a50eb4f3a6ea1aae6bdd6d35acdb6.jpg", rating: 5, isNew: true  },
-    { id: 4,  name: "Bronze Athena Sculpture",      price: 320,  originalPrice: 450,  category: "Art",       tags: ["Bronze"],                      image: "https://i.pinimg.com/736x/6b/02/9e/6b029e5cf7c18fb32a86ab6f74075162.jpg", rating: 4, isNew: false },
-    { id: 5,  name: "Renaissance Ceramic Vase",     price: 180,  originalPrice: null, category: "Ceramics",  tags: ["Hand Painted"],                image: "https://i.pinimg.com/736x/2e/00/c6/2e00c639b9320301808e578cd411f731.jpg", rating: 5, isNew: true  },
-    { id: 6,  name: "Heritage Scholar's Desk",      price: 2800, originalPrice: null, category: "Furniture", tags: ["Heirloom"],                    image: "https://i.pinimg.com/1200x/56/b8/1b/56b81bf885a58febe005905f3aa7cacf.jpg", rating: 5, isNew: false },
-    { id: 7,  name: "Royal Porcelain Set",          price: 640,  originalPrice: 800,  category: "Ceramics",  tags: ["Imperial"],                    image: "https://i.pinimg.com/1200x/6b/eb/70/6beb70678df1f575795a88c489bddca5.jpg", rating: 4, isNew: false },
-    { id: 8,  name: "Vintage Navigational Compass", price: 210,  originalPrice: null, category: "Artifacts", tags: ["Antique"],                     image: "https://i.pinimg.com/1200x/b3/30/7c/b3307c64993cb1d2ab91f07c370caacb.jpg", rating: 4, isNew: true  },
-    { id: 9,  name: "Aged Brass Telescope",         price: 210,  originalPrice: null, category: "Artifacts", tags: ["Antique"],                     image: "https://i.pinimg.com/736x/eb/84/d7/eb84d740b1a400dddb80ec78d39c3ec1.jpg", rating: 4, isNew: true  },
-    { id: 10, name: "Vintage Apothecary Bottles",   price: 210,  originalPrice: null, category: "Artifacts", tags: ["Antique"],                     image: "https://i.pinimg.com/736x/18/bd/5d/18bd5d06e343c2b808110aef4dc2a8de.jpg", rating: 4, isNew: true  },
-    { id: 11, name: "Hand-woven Linen Shirt",        price: 210,  originalPrice: null, category: "Textiles",  tags: ["Handcrafted"],                 image: "https://i.pinimg.com/736x/74/8c/44/748c4477bd4d407a4fcff6f15e6823a2.jpg", rating: 4, isNew: true  },
-    { id: 12, name: "Embossed Leather Bookmark",    price: 210,  originalPrice: null, category: "Artifacts", tags: ["Antique"],                     image: "https://i.pinimg.com/736x/44/37/20/4437200512f21b40f6b403a768f9e322.jpg", rating: 4, isNew: true  },
-];
+// ─── Categories ───────────────────────────────────────────────────────────────
 
 const categories = [
     { label: "All",       value: null         },
@@ -119,20 +107,29 @@ function Sidebar({
 
 // ─── Product Card ─────────────────────────────────────────────────────────────
 
-function ProductCard({ product }: { product: typeof curatedProducts[0] }) {
-    const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-    const pct = hasDiscount
-        ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
-        : null;
+function ProductCard({ product }: { product: any }) {
+    const price = (product.subProducts || product.sizes)?.[0]?.price ?? product.price ?? 0;
+    const discountPct = product.discount ?? 0;
+    const originalPrice = discountPct > 0 ? Math.round(price / (1 - discountPct / 100)) : null;
+    
+    // Prioritize first sub-product's image as cover, then generalImages, then fallback
+    const variantImg = product.subProducts?.[0]?.images?.[0];
+    const generalImg = (product.generalImages || product.images)?.[0];
+    const imgData = variantImg || generalImg;
+    
+    const image = (typeof imgData === 'string' ? imgData : imgData?.url) ?? "https://placehold.co/600x800/png?text=Product";
+    const id = product._id ?? product.id;
+    const slug = product.slug ?? id;
+    const categoryName = typeof product.category === "object" ? product.category?.name : product.category;
 
     return (
         <div className="group">
             {/* Image */}
             <div className="relative aspect-[3/4] overflow-hidden bg-stone-100 mb-4">
-                <Link href={`/products/${product.id}`}>
+                <Link href={`/products/${slug}`}>
                     <Image
-                        src={product.image}
-                        alt={product.name}
+                        src={image}
+                        alt={product.title ?? product.name ?? "Product"}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
@@ -140,31 +137,31 @@ function ProductCard({ product }: { product: typeof curatedProducts[0] }) {
 
                 {/* Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                    {product.isNew && (
+                    {product.featured && (
                         <span className="bg-stone-900 text-white text-[8px] uppercase tracking-[0.2em] font-bold px-2.5 py-1">
-                            New
+                            Featured
                         </span>
                     )}
-                    {pct && (
+                    {discountPct > 0 && (
                         <span className="bg-red-600 text-white text-[8px] uppercase tracking-[0.2em] font-bold px-2.5 py-1">
-                            -{pct}%
+                            -{discountPct}%
                         </span>
                     )}
                 </div>
 
                 {/* Hover actions */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-button-black hover:text-text-white transition-colors shadow-sm">
+                    <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-stone-900 hover:text-white transition-colors shadow-sm">
                         <Heart className="w-3.5 h-3.5" />
                     </button>
-                    <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-button-black hover:text-text-white transition-colors shadow-sm">
+                    <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-stone-900 hover:text-white transition-colors shadow-sm">
                         <ShoppingBag className="w-3.5 h-3.5" />
                     </button>
                 </div>
 
                 {/* Bottom CTA */}
                 <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                    <button className="w-full bg-button-black hover:bg-button-hover text-text-white text-[9px] uppercase tracking-[0.2em] font-bold py-3 transition-colors">
+                    <button className="w-full bg-stone-900 hover:bg-stone-800 text-white text-[9px] uppercase tracking-[0.2em] font-bold py-3 transition-colors">
                         Add to Cart
                     </button>
                 </div>
@@ -173,20 +170,20 @@ function ProductCard({ product }: { product: typeof curatedProducts[0] }) {
             {/* Info */}
             <div>
                 <p className="text-[9px] uppercase tracking-[0.15em] text-stone-400 font-medium mb-1">
-                    {product.category}
+                    {categoryName}
                 </p>
-                <Link href={`/products/${product.id}`}>
+                <Link href={`/products/${slug}`}>
                     <h3 className="text-sm font-semibold text-stone-900 leading-snug hover:text-stone-500 transition-colors line-clamp-2 mb-2">
-                        {product.name}
+                        {product.title ?? product.name}
                     </h3>
                 </Link>
                 <div className="flex items-baseline gap-2">
                     <span className="text-sm font-bold text-stone-900">
-                        ₹{product.price.toLocaleString()}
+                        ₹{price.toLocaleString()}
                     </span>
-                    {hasDiscount && (
+                    {originalPrice && (
                         <span className="text-xs text-stone-400 line-through">
-                            ₹{product.originalPrice!.toLocaleString()}
+                            ₹{originalPrice.toLocaleString()}
                         </span>
                     )}
                 </div>
@@ -198,36 +195,51 @@ function ProductCard({ product }: { product: typeof curatedProducts[0] }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ProductsPage() {
+    const { products, pagination, isLoading, error, fetchProducts, clearProducts } = useProductStore();
+
     const [priceRange, setPriceRange]   = useState([0, 10000]);
     const [selectedCat, setSelectedCat] = useState<string | null>(null);
     const [searchTerm, setSearchTerm]   = useState("");
     const [sortBy, setSortBy]           = useState("featured");
+    const [page, setPage]               = useState(1);
     const [drawerOpen, setDrawerOpen]   = useState(false);
+
+    const loadProducts = useCallback(() => {
+        const params: Record<string, any> = {
+            page,
+            limit: 12,
+        };
+        if (selectedCat)           params.category  = selectedCat;
+        if (searchTerm.trim())     params.search    = searchTerm.trim();
+        if (priceRange[0] > 0)    params.minPrice  = priceRange[0];
+        if (priceRange[1] < 10000) params.maxPrice  = priceRange[1];
+        if (sortBy !== "featured") {
+            if (sortBy === "price-low")  { params.sort = "price"; params.order = "asc"; }
+            if (sortBy === "price-high") { params.sort = "price"; params.order = "desc"; }
+            if (sortBy === "newest")     { params.sort = "createdAt"; params.order = "desc"; }
+        }
+        fetchProducts(params);
+    }, [page, selectedCat, searchTerm, priceRange, sortBy, fetchProducts]);
+
+    useEffect(() => {
+        loadProducts();
+    }, [loadProducts]);
+
+    // Reset to page 1 when filters change
+    const handleCategoryChange = (v: string | null) => { setSelectedCat(v); setPage(1); };
+    const handleSortChange     = (v: string)         => { setSortBy(v);      setPage(1); };
+    const handleSearchChange   = (v: string)         => { setSearchTerm(v);  setPage(1); };
+    const handlePriceChange    = (v: number[])       => { setPriceRange(v);  setPage(1); };
 
     const reset = () => {
         setSelectedCat(null);
         setPriceRange([0, 10000]);
         setSearchTerm("");
         setSortBy("featured");
+        setPage(1);
     };
 
-    const filtered = [...curatedProducts]
-        .filter((p) => {
-            if (selectedCat && p.category !== selectedCat) return false;
-            if (p.price < priceRange[0] || p.price > priceRange[1]) return false;
-            if (searchTerm) {
-                const t = searchTerm.toLowerCase();
-                if (!p.name.toLowerCase().includes(t) && !p.tags.some((g) => g.toLowerCase().includes(t)))
-                    return false;
-            }
-            return true;
-        })
-        .sort((a, b) => {
-            if (sortBy === "price-low")  return a.price - b.price;
-            if (sortBy === "price-high") return b.price - a.price;
-            if (sortBy === "newest")     return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
-            return 0;
-        });
+    const totalCount = pagination?.total ?? products.length;
 
     return (
         <div className="min-h-screen bg-stone-50">
@@ -258,7 +270,7 @@ export default function ProductsPage() {
                 </div>
             </section>
 
-            {/* ── Category Pills (below hero) ── */}
+            {/* ── Category Pills ── */}
             <div className="bg-white border-b border-stone-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide">
@@ -267,7 +279,7 @@ export default function ProductsPage() {
                             return (
                                 <button
                                     key={cat.label}
-                                    onClick={() => setSelectedCat(cat.value)}
+                                    onClick={() => handleCategoryChange(cat.value)}
                                     className={`shrink-0 px-5 py-4 text-[10px] uppercase tracking-[0.2em] font-semibold border-b-2 transition-colors ${
                                         active
                                             ? "border-stone-900 text-stone-900"
@@ -294,9 +306,9 @@ export default function ProductsPage() {
                             </p>
                             <Sidebar
                                 selectedCat={selectedCat}
-                                setSelectedCat={setSelectedCat}
+                                setSelectedCat={handleCategoryChange}
                                 priceRange={priceRange}
-                                setPriceRange={setPriceRange}
+                                setPriceRange={handlePriceChange}
                                 onReset={reset}
                             />
                         </div>
@@ -318,8 +330,7 @@ export default function ProductsPage() {
                                 </button>
 
                                 <p className="text-xs text-stone-400 font-medium">
-                                    {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
-                                    {selectedCat ? ` · ${selectedCat}` : ""}
+                                    {isLoading ? "Loading…" : `${totalCount} ${totalCount === 1 ? "piece" : "pieces"}${selectedCat ? ` · ${selectedCat}` : ""}`}
                                 </p>
                             </div>
 
@@ -331,7 +342,7 @@ export default function ProductsPage() {
                                         type="text"
                                         placeholder="Search…"
                                         value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onChange={(e) => handleSearchChange(e.target.value)}
                                         className="pl-8 pr-3 py-2 text-xs bg-white border border-stone-200 focus:border-stone-900 focus:outline-none w-40 transition-colors"
                                     />
                                 </div>
@@ -340,7 +351,7 @@ export default function ProductsPage() {
                                 <div className="relative">
                                     <select
                                         value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value)}
+                                        onChange={(e) => handleSortChange(e.target.value)}
                                         className="appearance-none bg-white border border-stone-200 focus:border-stone-900 focus:outline-none pl-3 pr-8 py-2 text-xs font-medium transition-colors cursor-pointer"
                                     >
                                         <option value="featured">Featured</option>
@@ -359,7 +370,7 @@ export default function ProductsPage() {
                                 <span className="text-[9px] uppercase tracking-[0.2em] text-stone-400 font-semibold">Active:</span>
                                 {selectedCat && (
                                     <button
-                                        onClick={() => setSelectedCat(null)}
+                                        onClick={() => handleCategoryChange(null)}
                                         className="inline-flex items-center gap-1 bg-stone-900 text-white text-[9px] uppercase tracking-[0.15em] font-semibold px-2.5 py-1 hover:bg-stone-700 transition-colors"
                                     >
                                         {selectedCat} <X className="w-2.5 h-2.5" />
@@ -367,15 +378,15 @@ export default function ProductsPage() {
                                 )}
                                 {searchTerm && (
                                     <button
-                                        onClick={() => setSearchTerm("")}
+                                        onClick={() => handleSearchChange("")}
                                         className="inline-flex items-center gap-1 bg-stone-900 text-white text-[9px] uppercase tracking-[0.15em] font-semibold px-2.5 py-1 hover:bg-stone-700 transition-colors"
                                     >
-                                        "{searchTerm}" <X className="w-2.5 h-2.5" />
+                                        &quot;{searchTerm}&quot; <X className="w-2.5 h-2.5" />
                                     </button>
                                 )}
                                 {(priceRange[0] > 0 || priceRange[1] < 10000) && (
                                     <button
-                                        onClick={() => setPriceRange([0, 10000])}
+                                        onClick={() => handlePriceChange([0, 10000])}
                                         className="inline-flex items-center gap-1 bg-stone-900 text-white text-[9px] uppercase tracking-[0.15em] font-semibold px-2.5 py-1 hover:bg-stone-700 transition-colors"
                                     >
                                         ₹{priceRange[0].toLocaleString()} – ₹{priceRange[1].toLocaleString()} <X className="w-2.5 h-2.5" />
@@ -387,11 +398,28 @@ export default function ProductsPage() {
                             </div>
                         )}
 
-                        {/* Grid */}
-                        {filtered.length > 0 ? (
+                        {/* Content States */}
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center py-32 text-stone-400">
+                                <Loader2 className="w-8 h-8 animate-spin mb-4" />
+                                <p className="text-xs uppercase tracking-[0.2em]">Curating Collection…</p>
+                            </div>
+                        ) : error ? (
+                            <div className="flex flex-col items-center justify-center py-32 text-center text-red-500">
+                                <AlertCircle className="w-10 h-10 mb-4 opacity-50" />
+                                <h3 className="text-base font-semibold mb-2">Collection Unavailable</h3>
+                                <p className="text-sm opacity-80 mb-6">{error}</p>
+                                <button
+                                    onClick={loadProducts}
+                                    className="text-[10px] uppercase tracking-[0.2em] font-bold border border-red-200 px-6 py-3 hover:bg-red-50 transition-colors"
+                                >
+                                    Retry Connection
+                                </button>
+                            </div>
+                        ) : products.length > 0 ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10">
-                                {filtered.map((p) => (
-                                    <ProductCard key={p.id} product={p} />
+                                {products.map((p) => (
+                                    <ProductCard key={p._id ?? p.id} product={p} />
                                 ))}
                             </div>
                         ) : (
@@ -411,18 +439,31 @@ export default function ProductsPage() {
                         )}
 
                         {/* Pagination */}
-                        {filtered.length > 0 && (
-                            <div className="mt-16 pt-8 border-t border-stone-200 flex items-center justify-center gap-2">
-                                <button className="w-9 h-9 border border-stone-200 text-stone-300 text-xs font-semibold cursor-not-allowed">
+                        {!isLoading && pagination && pagination.totalPages > 1 && (
+                            <div className="mt-16 pt-8 border-t border-stone-200 flex items-center justify-center gap-2 flex-wrap">
+                                <button
+                                    disabled={page === 1}
+                                    onClick={() => setPage(page - 1)}
+                                    className={`w-9 h-9 border border-stone-200 text-stone-500 text-xs font-semibold transition-colors ${page === 1 ? "opacity-30 cursor-not-allowed" : "hover:border-stone-900 hover:text-stone-900"}`}
+                                >
                                     ←
                                 </button>
-                                <button className="w-9 h-9 bg-button-black text-text-white text-xs font-bold">
-                                    1
-                                </button>
-                                <button className="w-9 h-9 border border-stone-200 text-stone-500 hover:border-button-black hover:text-text-white text-xs font-semibold transition-colors">
-                                    2
-                                </button>
-                                <button className="w-9 h-9 border border-stone-200 text-stone-500 hover:border-button-black hover:text-text-white text-xs font-semibold transition-colors">
+
+                                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+                                    <button
+                                        key={p}
+                                        onClick={() => setPage(p)}
+                                        className={`w-9 h-9 text-xs font-bold transition-all ${page === p ? "bg-stone-900 text-white" : "border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900"}`}
+                                    >
+                                        {p}
+                                    </button>
+                                ))}
+
+                                <button
+                                    disabled={page === pagination.totalPages}
+                                    onClick={() => setPage(page + 1)}
+                                    className={`w-9 h-9 border border-stone-200 text-stone-500 text-xs font-semibold transition-colors ${page === pagination.totalPages ? "opacity-30 cursor-not-allowed" : "hover:border-stone-900 hover:text-stone-900"}`}
+                                >
                                     →
                                 </button>
                             </div>
@@ -445,9 +486,9 @@ export default function ProductsPage() {
                         <div className="p-6">
                             <Sidebar
                                 selectedCat={selectedCat}
-                                setSelectedCat={setSelectedCat}
+                                setSelectedCat={handleCategoryChange}
                                 priceRange={priceRange}
-                                setPriceRange={setPriceRange}
+                                setPriceRange={handlePriceChange}
                                 onReset={reset}
                                 onClose={() => setDrawerOpen(false)}
                             />

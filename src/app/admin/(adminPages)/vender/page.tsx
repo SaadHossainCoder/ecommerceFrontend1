@@ -57,6 +57,16 @@ export default function VendorPage() {
     // Manual slug control state
     const [isSlugSynced, setIsSlugSynced] = useState(true);
 
+    const defaultVendorFormValues: VendorFormData = {
+        name: "",
+        slug: "",
+        description: "",
+        longDescription: "",
+        vendorProductType: "",
+        imageUrls: [{ url: "" }],
+        descImageUrls: [{ url: "" }],
+    };
+
     // ─── Form Setup ───
     const {
         register,
@@ -68,15 +78,7 @@ export default function VendorPage() {
         formState: { errors },
     } = useForm<VendorFormData>({
         resolver: zodResolver(vendorSchema),
-        defaultValues: {
-            name: "",
-            slug: "",
-            description: "",
-            longDescription: "",
-            vendorProductType: "",
-            imageUrls: [{ url: "" }],
-            descImageUrls: [{ url: "" }],
-        },
+        defaultValues: defaultVendorFormValues,
     });
 
     // Auto-generate slug logic
@@ -99,6 +101,7 @@ export default function VendorPage() {
 
     // Watching for previews
     const watchedImageUrls = watch("imageUrls");
+    const watchedDescImageUrls = watch("descImageUrls");
 
     // Initial load
     useEffect(() => {
@@ -130,7 +133,7 @@ export default function VendorPage() {
             });
             setIsAddOpen(false);
             setIsEditOpen(false);
-            reset();
+            reset(defaultVendorFormValues);
             setIsSlugSynced(true);
         } else {
             toast({
@@ -178,7 +181,7 @@ export default function VendorPage() {
                     <Button variant="outline" size="icon" onClick={() => fetchVendors(true)} disabled={isLoading} title="Refresh">
                         <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
                     </Button>
-                    <Button variant="gradient" onClick={() => { reset(); setIsSlugSynced(true); setIsAddOpen(true); }}>
+                    <Button variant="gradient" onClick={() => { reset(defaultVendorFormValues); setIsSlugSynced(true); setIsAddOpen(true); }}>
                         <Plus className="h-4 w-4 mr-2" /> Add Vendor
                     </Button>
                 </div>
@@ -243,7 +246,7 @@ export default function VendorPage() {
                         <Store className="w-12 h-12 opacity-30" />
                         <p className="font-semibold text-lg">{searchTerm ? "No vendors match your search" : "No vendors yet"}</p>
                         {!searchTerm && (
-                            <Button variant="gradient" onClick={() => { reset(); setIsSlugSynced(true); setIsAddOpen(true); }}>
+                            <Button variant="gradient" onClick={() => { reset(defaultVendorFormValues); setIsSlugSynced(true); setIsAddOpen(true); }}>
                                 <Plus className="h-4 w-4 mr-2" /> Add Your First Vendor
                             </Button>
                         )}
@@ -310,6 +313,7 @@ export default function VendorPage() {
                         setIsSlugSynced={setIsSlugSynced}
                         handleSyncSlug={handleSyncSlug}
                         watchedImageUrls={watchedImageUrls}
+                        watchedDescImageUrls={watchedDescImageUrls}
                     />
                     <DialogFooter className="pt-2">
                         <Button variant="outline" onClick={() => setIsAddOpen(false)} disabled={isLoading}>Cancel</Button>
@@ -336,6 +340,7 @@ export default function VendorPage() {
                         setIsSlugSynced={setIsSlugSynced}
                         handleSyncSlug={handleSyncSlug}
                         watchedImageUrls={watchedImageUrls}
+                        watchedDescImageUrls={watchedDescImageUrls}
                     />
                     <DialogFooter className="pt-2">
                         <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={isLoading}>Cancel</Button>
@@ -367,7 +372,7 @@ export default function VendorPage() {
                         <>
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-3">
-                                    <h2 className="text-xl font-bold">{selectedVendor.name}</h2>
+                                    <span className="text-xl font-bold">{selectedVendor.name}</span>
                                     <Badge variant="secondary">{selectedVendor.vendorProductType}</Badge>
                                 </DialogTitle>
                                 <p className="text-xs font-mono text-muted-foreground mt-1">Slug: /{selectedVendor.slug}</p>

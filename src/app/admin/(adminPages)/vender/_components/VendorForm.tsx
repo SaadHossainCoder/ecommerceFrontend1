@@ -134,6 +134,7 @@ interface VendorFormProps {
     setIsSlugSynced: (val: boolean) => void;
     handleSyncSlug: () => void;
     watchedImageUrls: { url: string }[];
+    watchedDescImageUrls: { url: string }[];
 }
 
 export const VendorForm = ({
@@ -146,6 +147,7 @@ export const VendorForm = ({
     setIsSlugSynced,
     handleSyncSlug,
     watchedImageUrls,
+    watchedDescImageUrls,
 }: VendorFormProps) => {
     return (
         <form id="vendor-form" onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-2">
@@ -240,10 +242,16 @@ export const VendorForm = ({
                 />
             </div>
             
-            {/* Live Preview for Main Images */}
-             <div className="mt-2 pt-2 border-t">
-                <p className="text-xs font-semibold text-muted-foreground mb-2">Live Preview (Vendor Images)</p>
-                <ImageGallery urls={watchedImageUrls?.map(i => i.url) || []} label="Vendor Image" />
+            {/* Live Preview for Images */}
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-2 pt-4 border-t">
+                <div>
+                     <p className="text-xs font-semibold text-muted-foreground mb-2">Live Preview (Vendor Images)</p>
+                     <ImageGallery urls={watchedImageUrls?.map(i => i.url) || []} label="Vendor Image" />
+                </div>
+                <div>
+                     <p className="text-xs font-semibold text-muted-foreground mb-2">Live Preview (Description Images)</p>
+                     <ImageGallery urls={watchedDescImageUrls?.map(i => i.url) || []} label="Description Image" />
+                </div>
              </div>
         </form>
     );

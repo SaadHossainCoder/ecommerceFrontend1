@@ -9,7 +9,7 @@ export const Hero = () => {
     return (
         <section className="relative w-full h-[85vh] min-h-[600px] overflow-hidden bg-stone-900 group">
             {/* Video Background with Poster for Performance */}
-            <Suspense fallback={<LoaderCircle className="text-black"/>}>
+            <Suspense fallback={<LoaderCircle className="text-black" />}>
                 <video
                     autoPlay
                     muted
@@ -23,7 +23,7 @@ export const Hero = () => {
             </Suspense>
 
             {/* Premium Gradients */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+            <div className="absolute inset-0 bg-linear-to-b from-black/40 via-transparent to-black/60" />
             <div className="absolute inset-0 bg-radial-gradient from-transparent to-black/20" />
 
             {/* Centered Content */}
@@ -34,7 +34,7 @@ export const Hero = () => {
                             Spring / Summer 2024
                         </p>
                         <h2 className="text-5xl md:text-9xl font-heading font-black uppercase tracking-tighter text-white leading-[0.9]">
-                            Fashion <br /> 
+                            Fashion <br />
                             <span className="italic font-light text-white/90">Is Art</span>
                         </h2>
                     </div>

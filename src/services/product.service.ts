@@ -4,18 +4,21 @@ export interface ProductImage {
     url: string;
 }
 
-export interface ProductVariant {
-    size: string;
+export interface SubProduct {
+    sku: string;
+    type: string;
     qty: number;
     price: number;
-    image?: string;
+    images: string[];
+    size: string[];
+    sold?: number;
 }
 
 export interface CreateProductData {
     title: string;
     slug?: string;
     description: string;
-    longDescription: string;
+    longDescription?: string;
     brand: string;
     vendorId: string;
     sku: string;
@@ -23,10 +26,12 @@ export interface CreateProductData {
     categoryId: string;
     subcategory: string;
     featured: boolean;
-    sizes: ProductVariant[];
+    disableProduct?: boolean;
+    disableProductDate?: string | Date | null;
+    subProducts: SubProduct[];
     benefits: string[];
     ingredients: string[];
-    images: string[];
+    generalImages: string[];
     descriptionImages: string[];
 }
 
@@ -35,10 +40,11 @@ export interface Product extends Omit<CreateProductData, 'categoryId' | 'vendorI
     _id?: string;
     category: { id: string; name: string; slug: string } | string;
     vendor: { id: string; name: string } | string;
-    images: string[];
-    descriptionImages: string[];
     createdAt: string;
     updatedAt: string;
+    // Legacy fields for transition
+    sizes?: any[];
+    images?: any[];
 }
 
 export const productService = {
@@ -52,9 +58,14 @@ export const productService = {
         return response.data;
     },
 
-    // GET /products/:id — Public
     getProductById: async (id: string): Promise<{ ok: boolean; message: string; data: Product }> => {
         const response = await api.get(`products/${id}`);
+        return response.data;
+    },
+
+    // GET /products/slug/:slug — Public
+    getProductBySlug: async (slug: string): Promise<{ ok: boolean; message: string; data: Product }> => {
+        const response = await api.get(`products/slug/${slug}`);
         return response.data;
     },
 

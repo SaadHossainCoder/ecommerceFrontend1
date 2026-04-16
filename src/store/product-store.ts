@@ -1,33 +1,62 @@
 import { create } from "zustand";
 import { productService } from "@/services/product.service";
 
+export interface SubProduct {
+    sku: string;
+    type: string;
+    qty: number;
+    price: number;
+    images: string[];
+    size: string[];
+    sold?: number;
+}
+
 interface ProductStoreState {
     products: any[];
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    } | null;
     isLoading: boolean;
     error: string | null;
+    lastParams: string | null;
     fetchProducts: (params?: Record<string, any>, refresh?: boolean) => Promise<void>;
     addProduct: (data: any) => Promise<boolean>;
     editProduct: (id: string, data: any) => Promise<boolean>;
     removeProduct: (id: string) => Promise<boolean>;
+    clearProducts: () => void;
 }
 
 export const useProductStore = create<ProductStoreState>((set, get) => ({
     products: [],
+    pagination: null,
     isLoading: false,
     error: null,
+    lastParams: null,
 
     fetchProducts: async (params, refresh = false) => {
-        // Only fetch if products are empty, or it's a forced refresh, or we have new params
-        if (!refresh && get().products.length > 0 && !params) return;
+        const paramsStr = JSON.stringify(params || {});
+        
+        // Skip fetch if:
+        // 1. Not a forced refresh
+        // 2. We already have products
+        // 3. The parameters (filters/page) haven't changed since last fetch
+        if (!refresh && get().products.length > 0 && paramsStr === get().lastParams) {
+            return;
+        }
 
         set({ isLoading: true, error: null });
         try {
             const res = await productService.getAllProducts(params);
-            // The actual array is in res.data.data
+            // The structure is { ok: true, message: "...", data: { data: [...], pagination: {...} } }
             const products = res.data?.data || [];
-            set({ products, isLoading: false });
+            const pagination = res.data?.pagination || null;
+            set({ products, pagination, lastParams: paramsStr, isLoading: false });
         } catch (error: any) {
-            set({ error: error.message || "Failed to fetch products", isLoading: false });
+            const msg = error.response?.data?.error || error.response?.data?.message || error.message || "Failed to fetch products";
+            set({ error: msg, isLoading: false });
         }
     },
 
@@ -47,15 +76,21 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
                 categoryId: data.category,
                 vendorId: data.vendor,
                 featured: data.featured,
-                images: data.images?.filter(Boolean) || [],
-                descriptionImages: data.images?.filter(Boolean) || [],
+                disableProduct: data.disableProduct || false,
+                disableProductDate: data.disableProduct ? (data.disableProductDate ? new Date(data.disableProductDate).toISOString() : new Date().toISOString()) : null,
+                generalImages: data.generalImages?.filter((img: string) => img && img.trim() !== "")?.length > 0
+                    ? data.generalImages.filter((img: string) => img && img.trim() !== "")
+                    : ["https://placehold.co/600x400/png?text=Product"],
+                descriptionImages: data.generalImages?.filter((img: string) => img && img.trim() !== "") || [],
                 benefits: data.benefits?.map((b: any) => b.value).filter(Boolean) || [],
                 ingredients: data.ingredients?.map((i: any) => i.value).filter(Boolean) || [],
-                sizes: data.sizes?.filter((s: any) => s.size).map((size: any) => ({
-                    size: size.size,
-                    qty: Number(size.qty),
-                    price: Number(size.price),
-                    image: size.image || ""
+                subProducts: data.subProducts?.filter((s: any) => s.type).map((subProduct: any) => ({
+                    sku: subProduct.sku || `${data.sku}-${subProduct.type?.toUpperCase()}`,
+                    type: subProduct.type,
+                    qty: Number(subProduct.qty),
+                    price: Number(subProduct.price),
+                    images: subProduct.images || (subProduct.image ? [subProduct.image] : []),
+                    size: subProduct.size || []
                 }))
             };
 
@@ -69,7 +104,8 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
             }
             throw new Error(res.message);
         } catch (error: any) {
-            set({ error: error.message || "Failed to add product", isLoading: false });
+            const msg = error.response?.data?.error || error.response?.data?.message || error.message || "Failed to add product";
+            set({ error: msg, isLoading: false });
             return false;
         }
     },
@@ -89,15 +125,21 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
                 categoryId: data.category,
                 vendorId: data.vendor,
                 featured: data.featured,
-                images: data.images?.filter(Boolean) || [],
-                descriptionImages: data.images?.filter(Boolean) || [],
+                disableProduct: data.disableProduct ?? false,
+                disableProductDate: data.disableProduct ? (data.disableProductDate ? new Date(data.disableProductDate).toISOString() : new Date().toISOString()) : null,
+                generalImages: data.generalImages?.filter((img: string) => img && img.trim() !== "")?.length > 0
+                    ? data.generalImages.filter((img: string) => img && img.trim() !== "")
+                    : ["https://placehold.co/600x400/png?text=Product"],
+                descriptionImages: data.generalImages?.filter((img: string) => img && img.trim() !== "") || [],
                 benefits: data.benefits?.map((b: any) => b.value).filter(Boolean) || [],
                 ingredients: data.ingredients?.map((i: any) => i.value).filter(Boolean) || [],
-                sizes: data.sizes?.filter((s: any) => s.size).map((size: any) => ({
-                    size: size.size,
-                    qty: Number(size.qty),
-                    price: Number(size.price),
-                    image: size.image || ""
+                subProducts: data.subProducts?.filter((s: any) => s.type).map((subProduct: any) => ({
+                    sku: subProduct.sku || `${data.sku}-${subProduct.type?.toUpperCase()}`,
+                    type: subProduct.type,
+                    qty: Number(subProduct.qty),
+                    price: Number(subProduct.price),
+                    images: subProduct.images || (subProduct.image ? [subProduct.image] : []),
+                    size: subProduct.size || []
                 }))
             };
 
@@ -111,7 +153,8 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
             }
             throw new Error(res.message);
         } catch (error: any) {
-            set({ error: error.message || "Failed to edit product", isLoading: false });
+            const msg = error.response?.data?.error || error.response?.data?.message || error.message || "Failed to edit product";
+            set({ error: msg, isLoading: false });
             return false;
         }
     },
@@ -129,8 +172,11 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
             }
             throw new Error(res.message);
         } catch (error: any) {
-            set({ error: error.message || "Failed to delete product", isLoading: false });
+            const msg = error.response?.data?.error || error.response?.data?.message || error.message || "Failed to delete product";
+            set({ error: msg, isLoading: false });
             return false;
         }
-    }
+    },
+
+    clearProducts: () => set({ products: [], pagination: null, error: null })
 }));

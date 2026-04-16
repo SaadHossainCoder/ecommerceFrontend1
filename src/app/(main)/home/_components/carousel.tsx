@@ -2,9 +2,8 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils"; // Your utility for merging Tailwind classes
+import { cn } from "@/lib/utils";
 
-// Define the type for a single report item
 export interface Report {
   id: string;
   name: string;
@@ -14,7 +13,6 @@ export interface Report {
   isNew?: boolean;
 }
 
-// Define the props for the main component
 interface ShareholderReportsProps {
   reports: Report[];
   title?: string;
@@ -26,22 +24,23 @@ interface ShareholderReportsProps {
 export const ShareholderReports = React.forwardRef<
   HTMLDivElement,
   ShareholderReportsProps
->(({ reports, title = "Shareholders' Letter and Results", subtitle = "Powering India's changing lifestyles", className, ...props }, ref) => {
+>(({ reports, title = "Our Artist", subtitle = "Masterful craftsmanship", className, ...props }, ref) => {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = React.useState(false);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(true);
 
-  // Function to handle scrolling and update arrow visibility
   const checkScrollability = React.useCallback(() => {
     const container = scrollContainerRef.current;
     if (container) {
       const { scrollLeft, scrollWidth, clientWidth } = container;
       setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1); // -1 for precision
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
     }
   }, []);
 
   React.useEffect(() => {
+    setIsMounted(true);
     const container = scrollContainerRef.current;
     if (container) {
       checkScrollability();
@@ -54,11 +53,10 @@ export const ShareholderReports = React.forwardRef<
     };
   }, [reports, checkScrollability]);
 
-  // Scroll handler for navigation buttons
   const scroll = (direction: "left" | "right") => {
     const container = scrollContainerRef.current;
     if (container) {
-      const scrollAmount = container.clientWidth * 0.8; // Scroll by 80% of the visible width
+      const scrollAmount = container.clientWidth * 0.8;
       container.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -69,72 +67,77 @@ export const ShareholderReports = React.forwardRef<
   return (
     <section
       ref={ref}
-      className={cn("w-full py-8", className)}
+      className={cn("w-full py-12 border-y border-ash-brown/5", className)}
       aria-labelledby="reports-heading"
       {...props}
     >
-      <div className="flex items-center justify-between px-4 sm:px-6 mb-4 container-custom">
-        <h2 id="reports-heading" className="text-2xl font-semibold tracking-tight text-foreground">
-          Our Artist
-        </h2>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between px-4 sm:px-6 md:px-8 mb-8 container-custom gap-4">
+        <div className="flex items-center gap-4">
+          <h2 id="reports-heading" className="text-xl md:text-2xl font-heading font-medium tracking-tight text-foreground">
+            {title}
+          </h2>
+          <div className="h-px w-12 bg-antique-gold/30 hidden md:block"></div>
+        </div>
+        
         <div className="hidden sm:flex items-center gap-2">
-          {/* Left Arrow Button */}
           <button
             onClick={() => scroll("left")}
-            disabled={!canScrollLeft}
+            disabled={!isMounted || !canScrollLeft}
             aria-label="Scroll left"
             className={cn(
-              "p-2 rounded-full border border-border bg-card text-card-foreground transition-opacity duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted"
+              "p-2 rounded-full border border-ash-brown/20 bg-background text-foreground transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-stone-50"
             )}
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4" />
           </button>
-          {/* Right Arrow Button */}
           <button
             onClick={() => scroll("right")}
-            disabled={!canScrollRight}
+            disabled={!isMounted || !canScrollRight}
             aria-label="Scroll right"
             className={cn(
-              "p-2 rounded-full border border-border bg-card text-card-foreground transition-opacity duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted"
+              "p-2 rounded-full border border-ash-brown/20 bg-background text-foreground transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-stone-50"
             )}
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-4 w-4" />
           </button>
         </div>
       </div>
-      <hr className="pb-10" />
+      
       <div
         ref={scrollContainerRef}
-        className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide space-x-4 md:space-x-6 px-10 sm:px-6"
+        className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide gap-3 sm:gap-5 px-4 sm:px-6 md:px-8 pb-4"
       >
         {reports.map((report) => (
           <div
             key={report.id}
-            className="shrink-0 w-[240px] sm:w-[280px] snap-start"
+            className="shrink-0 w-[75vw] sm:w-[280px] md:w-[340px] snap-start"
           >
-            {/* Report Card */}
-            <div className="group cursor-pointer ">
-              <div className="relative overflow-hidden rounded-lg bg-card border border-border mb-3 transition-all duration-300 ease-in-out group-hover:shadow-lg group-hover:-translate-y-1">
-                <img
-                  src={report.imageSrc}
-                  alt={`Report for ${report.name}`}
-                  className="w-full h-[320px] sm:h-[380px] object-cover"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent p-4 flex flex-col justify-end text-white">
-                  {/* <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider">Shareholders&apos; Letter and Results</h3>
-                    <p className="text-xs text-white/80">{report.period}</p>
-                  </div> */}
-                  <p className="text-sm font-medium">{report.artName}</p>
+            <div className="group cursor-pointer">
+              <div className="relative overflow-hidden rounded-sm bg-card border-none mb-4 transition-all duration-700 ease-in-out group-hover:shadow-royal">
+                <div className="aspect-[4/5] sm:aspect-[3/4] w-full">
+                  <img
+                    src={report.imageSrc}
+                    alt={`Information for ${report.name}`}
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                  />
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <h4 className="font-semibold text-foreground text-sm sm:text-base">{report.name}</h4>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5 flex flex-col justify-end text-white group-hover:from-black/90 transition-colors duration-500">
+                  <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                    <p className="text-antique-gold text-[9px] tracking-[0.3em] font-medium uppercase mb-1.5 opacity-90">{report.period}</p>
+                    <p className="text-lg md:text-xl font-heading font-medium leading-tight">{report.artName || subtitle}</p>
+                  </div>
+                </div>
+                
                 {report.isNew && (
-                  <span className="text-xs font-semibold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
-                    NEW
-                  </span>
+                  <div className="absolute top-4 right-4 z-10">
+                    <span className="glass px-2 py-0.5 text-[8px] tracking-widest font-black uppercase text-charcoal-ink shadow-sm">
+                      NEW
+                    </span>
+                  </div>
                 )}
+              </div>
+              <div className="flex items-center justify-between px-1">
+                <h4 className="font-heading font-medium tracking-wide text-foreground text-base sm:text-lg">{report.name}</h4>
               </div>
             </div>
           </div>

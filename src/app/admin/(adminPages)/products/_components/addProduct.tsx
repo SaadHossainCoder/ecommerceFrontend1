@@ -2,7 +2,7 @@
 
 import { useForm, useFieldArray, Controller, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -126,6 +126,66 @@ function MultiUrlInput({
     );
 }
 
+// Helper: Tag/String Input for small values (e.g. Sizes)
+function TagInput({
+    label,
+    values,
+    onChange,
+    placeholder = "e.g. XL",
+}: {
+    label: string;
+    values: string[];
+    onChange: (newValues: string[]) => void;
+    placeholder?: string;
+}) {
+    const addRow = () => onChange([...values, ""]);
+    const removeRow = (i: number) => {
+        const next = values.filter((_, idx) => idx !== i);
+        onChange(next.length === 0 ? [""] : next);
+    };
+    const updateRow = (i: number, val: string) => {
+        const next = [...values];
+        next[i] = val;
+        onChange(next);
+    };
+
+    return (
+        <div className="space-y-2">
+            <div className="flex items-center justify-between">
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</Label>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={addRow}
+                    className="h-5 text-[9px] text-primary hover:bg-primary/5 uppercase font-bold px-1"
+                >
+                    <Plus className="h-2.5 w-2.5 mr-1" /> Add
+                </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+                {values.map((val, i) => (
+                    <div key={i} className="flex items-center gap-1 bg-muted/50 pl-2 pr-1 py-1 rounded-md border border-stone-200">
+                        <input
+                            placeholder={placeholder}
+                            value={val}
+                            onChange={(e) => updateRow(i, e.target.value)}
+                            className="bg-transparent border-none outline-none text-[10px] w-16 font-bold uppercase tracking-wider"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => removeRow(i)}
+                            className="text-muted-foreground hover:text-destructive transition-colors"
+                        >
+                            <X className="h-3 w-3" />
+                        </button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export default function EditProductForm({
     onClose,
     onSave,
@@ -140,7 +200,40 @@ export default function EditProductForm({
     }, [fetchTree, fetchVendors]);
 
     // Map initial images from objects to strings
-    const initialImages = initialData?.images?.map((img: any) => typeof img === 'string' ? img : img.url) || [""];
+    const initialImages = useMemo(() => {
+        const imgs = initialData?.generalImages || initialData?.images;
+        const mapped = Array.isArray(imgs) 
+            ? imgs.map((img: any) => typeof img === 'string' ? img : img.url) 
+            : [];
+        return mapped.length > 0 ? mapped : [""];
+    }, [initialData]);
+
+    const defaultFormState = useMemo(() => ({
+        title: initialData?.title || "",
+        description: initialData?.description || "",
+        longDescription: initialData?.longDescription || "",
+        brand: initialData?.brand || initialData?.ingredients?.brand || "",
+        vendor: typeof initialData?.vendor === 'object' ? initialData.vendor.id : initialData?.vendor || "",
+        sku: initialData?.sku || "",
+        slug: initialData?.slug || "",
+        discount: initialData?.discount || 0,
+        category: typeof initialData?.category === 'object' ? initialData.category.id : initialData?.category || "",
+        subcategory: initialData?.subcategory || initialData?.ingredients?.subcategory || "",
+        featured: initialData?.featured || false,
+        disableProduct: initialData?.disableProduct || false,
+        disableProductDate: initialData?.disableProductDate || null,
+        subProducts: (initialData?.subProducts || initialData?.sizes)?.map((s: any) => ({
+            sku: s.sku || "",
+            type: s.type || s.size || "",
+            qty: Number(s.qty || 0),
+            price: Number(s.price || 0),
+            images: Array.isArray(s.images) && s.images.length ? s.images : (s.image ? [s.image] : [""]),
+            size: Array.isArray(s.size) ? s.size : (typeof s.size === 'string' ? [s.size] : [""])
+        })) || [{ sku: "", type: "", qty: 0, price: 0, images: [""], size: [""] }],
+        benefits: (Array.isArray(initialData?.benefits) ? initialData.benefits : (Array.isArray(initialData?.ingredients?.benefits) ? initialData.ingredients.benefits : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
+        ingredients: (Array.isArray(initialData?.ingredients) ? initialData.ingredients : (Array.isArray(initialData?.ingredients?.details) ? initialData.ingredients.details : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
+        generalImages: initialImages,
+    }), [initialData, initialImages]);
 
     const {
         register,
@@ -148,47 +241,53 @@ export default function EditProductForm({
         handleSubmit,
         setValue,
         watch,
+        reset,
         formState: { isSubmitting, errors },
     } = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema),
-        defaultValues: {
-            title: initialData?.title || "",
-            description: initialData?.description || "",
-            longDescription: initialData?.longDescription || "",
-            brand: initialData?.brand || initialData?.ingredients?.brand || "",
-            vendor: typeof initialData?.vendor === 'object' ? initialData.vendor.id : initialData?.vendor || "",
-            sku: initialData?.sku || "",
-            discount: initialData?.discount || 0,
-            category: typeof initialData?.category === 'object' ? initialData.category.id : initialData?.category || "",
-            subcategory: initialData?.subcategory || initialData?.ingredients?.subcategory || "",
-            featured: initialData?.featured || false,
-            sizes: initialData?.sizes?.map((s: any) => ({
-                size: s.size || "",
-                qty: Number(s.qty || 0),
-                price: Number(s.price || 0),
-                image: s.image || "",
-                images: s.images && s.images.length ? s.images : (s.image ? [s.image] : [""])
-            })) || [{ size: "", qty: 0, price: 0, image: "", images: [""] }],
-            benefits: (Array.isArray(initialData?.benefits) ? initialData.benefits : (Array.isArray(initialData?.ingredients?.benefits) ? initialData.ingredients.benefits : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
-            ingredients: (Array.isArray(initialData?.ingredients) ? initialData.ingredients : (Array.isArray(initialData?.ingredients?.details) ? initialData.ingredients.details : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
-            images: initialImages,
-        },
+        defaultValues: defaultFormState,
     });
 
-    const { fields: sizeFields, append: appendSize, remove: removeSize } = useFieldArray({ control, name: "sizes" });
+    // Sync form with initialData if it changes (e.g. after fetch)
+    useEffect(() => {
+        if (initialData) {
+            reset(defaultFormState);
+        }
+    }, [initialData, reset, defaultFormState]);
+
+    const { fields: subProductFields, append: appendSubProduct, remove: removeSubProduct } = useFieldArray({ control, name: "subProducts" });
     const { fields: benefitFields, append: appendBenefit, remove: removeBenefit } = useFieldArray({ control, name: "benefits" });
     const { fields: ingredientFields, append: appendIngredient, remove: removeIngredient } = useFieldArray({ control, name: "ingredients" });
 
-    const watchImages = watch("images");
+    const watchGeneralImages = watch("generalImages");
+    const watchTitle = watch("title");
+
+    useEffect(() => {
+        if (!initialData?._id && !initialData?.id && watchTitle) {
+            const generatedSlug = watchTitle
+                .toLowerCase()
+                .trim()
+                .replace(/[^a-z0-9\s-]/g, "")
+                .replace(/\s+/g, "-")
+                .replace(/-+/g, "-");
+            setValue("slug", generatedSlug, { shouldValidate: true });
+        }
+    }, [watchTitle, setValue, initialData]);
 
     const onSubmit: SubmitHandler<ProductFormValues> = async (data: ProductFormValues) => {
-        // Sync the first variant image as the primary image for legacy backend queries
-        data.sizes = data.sizes.map(s => ({
+        // Filter empty strings from all array fields
+        data.generalImages = (data.generalImages || []).filter(v => typeof v === "string" && v.trim() !== "");
+        
+        data.subProducts = (data.subProducts || []).map(s => ({
             ...s,
-            image: s.images && s.images[0] ? s.images[0] : (s.image || ""),
-            images: (s.images || []).filter(v => v.trim() !== "")
+            images: (s.images || []).filter(v => typeof v === "string" && v.trim() !== ""),
+            size: (s.size || []).filter(v => typeof v === "string" && v.trim() !== "")
         }));
-        console.log("Form submission started:", data);
+
+        data.benefits = (data.benefits || []).filter(b => b.value.trim() !== "");
+        data.ingredients = (data.ingredients || []).filter(i => i.value.trim() !== "");
+
+        console.log("Form submission data (sanitized):", data);
         try {
             if (onSave) {
                 await onSave(data);
@@ -310,20 +409,56 @@ export default function EditProductForm({
                                 {errors.sku && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.sku.message as string}</p>}
                             </div>
                             <div>
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="slug" className="text-xs font-semibold">URL SLUG *</Label>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-4 p-0 text-[10px] text-primary hover:text-primary hover:bg-transparent uppercase font-bold"
+                                        onClick={() => {
+                                            const generatedSlug = watchTitle
+                                                ?.toLowerCase()
+                                                .trim()
+                                                .replace(/[^a-z0-9\s-]/g, "")
+                                                .replace(/\s+/g, "-")
+                                                .replace(/-+/g, "-");
+                                            setValue("slug", generatedSlug || "", { shouldValidate: true, shouldDirty: true });
+                                        }}
+                                    >
+                                        Sync with Title
+                                    </Button>
+                                </div>
+                                <Input id="slug" {...register("slug")} placeholder="e.g. wireless-headphones" className="mt-1 font-mono" />
+                                {errors.slug && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.slug.message as string}</p>}
+                            </div>
+                            <div>
                                 <Label htmlFor="discount" className="text-xs font-semibold">FLAT DISCOUNT (%)</Label>
                                 <Input id="discount" type="number" {...register("discount", { valueAsNumber: true })} className="mt-1" />
                                 {errors.discount && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.discount.message as string}</p>}
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl border border-dashed border-primary/20">
-                            <Controller
-                                name="featured"
-                                control={control}
-                                render={({ field }) => (
-                                    <Switch id="featured" checked={field.value} onCheckedChange={field.onChange} />
-                                )}
-                            />
-                            <Label htmlFor="featured" className="cursor-pointer font-bold text-xs uppercase">Mark as Featured Product</Label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl border border-dashed border-primary/20">
+                                <Controller
+                                    name="featured"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Switch id="featured" checked={field.value} onCheckedChange={field.onChange} />
+                                    )}
+                                />
+                                <Label htmlFor="featured" className="cursor-pointer font-bold text-xs uppercase text-primary">Mark as Featured</Label>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-xl border border-dashed border-destructive/20">
+                                <Controller
+                                    name="disableProduct"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Switch id="disableProduct" checked={field.value} onCheckedChange={field.onChange} className="data-[state=checked]:bg-destructive" />
+                                    )}
+                                />
+                                <Label htmlFor="disableProduct" className="cursor-pointer font-bold text-xs uppercase text-destructive">Disable Product</Label>
+                            </div>
                         </div>
                     </section>
 
@@ -345,50 +480,54 @@ export default function EditProductForm({
                     <section className="p-6 bg-muted/20 rounded-2xl border border-dashed border-primary/20 space-y-6">
                         <MultiUrlInput
                             label="Product Media Gallery"
-                            values={watchImages}
-                            onChange={(vals) => setValue("images", vals, { shouldValidate: true })}
+                            values={watchGeneralImages}
+                            onChange={(vals) => setValue("generalImages", vals, { shouldValidate: true })}
                             placeholder="https://images.unsplash.com/photo-..."
                         />
-                        {errors.images && <p className="text-destructive text-[10px] uppercase font-bold text-center">{errors.images.message}</p>}
+                        {errors.generalImages && <p className="text-destructive text-[10px] uppercase font-bold text-center">{errors.generalImages.message}</p>}
                     </section>
 
                     <section className="space-y-4">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-primary">
+                                <div className="flex items-center gap-2 text-primary">
                                 <List className="h-5 w-5" />
                                 <h3 className="font-bold uppercase tracking-wider">Variants & Inventory</h3>
                             </div>
-                            <Button type="button" variant="outline" size="sm" onClick={() => appendSize({ size: "", qty: 0, price: 0, image: "", images: [""] })} className="h-7 text-xs gap-1 border-primary/30">
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendSubProduct({ sku: "", type: "", qty: 0, price: 0, images: [""], size: [""] })} className="h-7 text-xs gap-1 border-primary/30">
                                 <Plus className="h-3 w-3" /> Add Variant
                             </Button>
                         </div>
                         <div className="space-y-3">
-                            {sizeFields.map((field, index) => (
+                            {subProductFields.map((field, index) => (
                                 <Card key={field.id} className="p-4 bg-background border-primary/10 shadow-sm relative group overflow-hidden">
                                     <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                                     <div className="grid gap-3">
                                         <div className="flex items-center gap-3">
                                             <div className="flex-1">
-                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Variant Name</Label>
-                                                <Input placeholder="Small, Red, 1TB..." {...register(`sizes.${index}.size`)} className="mt-0.5 h-8 text-xs" />
+                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Sub-SKU</Label>
+                                                <Input placeholder="e.g. SKU-RED-L" {...register(`subProducts.${index}.sku`)} className="mt-0.5 h-8 text-xs font-mono" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Variant Type</Label>
+                                                <Input placeholder="Small, Red, 1TB..." {...register(`subProducts.${index}.type`)} className="mt-0.5 h-8 text-xs" />
+                                            </div>
+                                            <div className="w-16">
+                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Qty</Label>
+                                                <Input type="number" placeholder="0" {...register(`subProducts.${index}.qty`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
                                             </div>
                                             <div className="w-20">
-                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Qty</Label>
-                                                <Input type="number" placeholder="0" {...register(`sizes.${index}.qty`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
-                                            </div>
-                                            <div className="w-24">
                                                 <Label className="text-[10px] font-bold text-muted-foreground uppercase">Price ($)</Label>
-                                                <Input type="number" step="0.01" placeholder="0.00" {...register(`sizes.${index}.price`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
+                                                <Input type="number" step="0.01" placeholder="0.00" {...register(`subProducts.${index}.price`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
                                             </div>
-                                            {sizeFields.length > 1 && (
-                                                <Button type="button" variant="ghost" size="icon" onClick={() => removeSize(index)} className="mt-4 h-8 w-8 text-destructive hover:bg-destructive/5 shrink-0">
+                                            {subProductFields.length > 1 && (
+                                                <Button type="button" variant="ghost" size="icon" onClick={() => removeSubProduct(index)} className="mt-4 h-8 w-8 text-destructive hover:bg-destructive/5 shrink-0">
                                                     <Trash2 className="h-3.5 w-3.5" />
                                                 </Button>
                                             )}
                                         </div>
-                                        <div className="mt-2 pt-2 border-t border-dashed">
+                                        <div className="mt-2 pt-2 border-t border-dashed space-y-4">
                                             <Controller
-                                                name={`sizes.${index}.images`}
+                                                name={`subProducts.${index}.images`}
                                                 control={control}
                                                 render={({ field }) => (
                                                     <MultiUrlInput
@@ -399,6 +538,21 @@ export default function EditProductForm({
                                                     />
                                                 )}
                                             />
+                                            <div>
+                                                <Controller
+                                                    name={`subProducts.${index}.size`}
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <TagInput 
+                                                            label="Available sizes / options"
+                                                            values={field.value || [""]}
+                                                            onChange={(vals) => field.onChange(vals)}
+                                                            placeholder="Size..."
+                                                        />
+                                                    )}
+                                                />
+                                                {errors.subProducts?.[index]?.size && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.subProducts[index].size.message}</p>}
+                                            </div>
                                         </div>
                                     </div>
                                 </Card>

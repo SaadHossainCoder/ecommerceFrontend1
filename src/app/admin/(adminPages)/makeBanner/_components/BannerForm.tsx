@@ -37,10 +37,18 @@ export const BannerForm = ({
 }: BannerFormProps) => {
     return (
         <form id="banner-form" onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-2">
-            <div className="grid gap-2">
-                <Label htmlFor="b-title">Title <span className="text-destructive">*</span></Label>
-                <Input id="b-title" placeholder="e.g. Summer Sale — Up to 50% Off" {...register("title")} className={errors.title ? "border-destructive" : ""} />
-                {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
+            <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                    <Label htmlFor="b-title">Title <span className="text-destructive">*</span></Label>
+                    <Input id="b-title" placeholder="e.g. Summer Sale" {...register("title")} className={errors.title ? "border-destructive" : ""} />
+                    {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
+                </div>
+
+                <div className="grid gap-2">
+                    <Label htmlFor="b-slug">Slug <span className="text-destructive">*</span></Label>
+                    <Input id="b-slug" placeholder="summer-sale" {...register("slug")} className={errors.slug ? "border-destructive" : "font-mono text-xs"} />
+                    {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
+                </div>
             </div>
 
             <div className="grid gap-2">

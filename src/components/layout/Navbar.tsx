@@ -13,6 +13,7 @@ import { LogOut } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { cartLocalStorageData } from "@/localStorage/cartData";
 
 const navLinks = [
     { href: "/home", label: "Home" },
@@ -27,13 +28,22 @@ export function Navbar() {
     console.log(user);
 
     const [hasMounted, setHasMounted] = useState(false);
+    const [cartItemCount, setCartItemCount] = useState(0);
+
     useEffect(() => {
         setHasMounted(true);
+        setCartItemCount(cartLocalStorageData.getCartCount());
+
+        const handleCartUpdate = () => {
+            setCartItemCount(cartLocalStorageData.getCartCount());
+        };
+
+        window.addEventListener("cartUpdated", handleCartUpdate);
+        return () => window.removeEventListener("cartUpdated", handleCartUpdate);
     }, []);
 
     const pathname = usePathname();
     const { openSearch } = useSearchStore();
-    const cartItemCount = 3; // Replace with actual cart item count from state or context
 
     return (
         <header className="sticky top-0 z-50 w-base h-20 w-full border-b bg-background/80 backdrop-blur-lg flex items-center">

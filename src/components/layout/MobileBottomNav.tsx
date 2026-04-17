@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, LayoutGrid, Heart, ShoppingBag, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { cartLocalStorageData } from "@/localStorage/cartData";
 
 const navItems = [
     { icon: Home, label: "Home", href: "/home" },
@@ -13,10 +15,20 @@ const navItems = [
     { icon: User, label: "Profile", href: "/myAccount" },
 ];
 
-const cartItemCount = 3;
-
 export function MobileBottomNav() {
     const pathname = usePathname();
+    const [cartItemCount, setCartItemCount] = useState(0);
+
+    useEffect(() => {
+        setCartItemCount(cartLocalStorageData.getCartCount());
+
+        const handleCartUpdate = () => {
+            setCartItemCount(cartLocalStorageData.getCartCount());
+        };
+
+        window.addEventListener("cartUpdated", handleCartUpdate);
+        return () => window.removeEventListener("cartUpdated", handleCartUpdate);
+    }, []);
 
     return (
         <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-stone-200 pb-safe">

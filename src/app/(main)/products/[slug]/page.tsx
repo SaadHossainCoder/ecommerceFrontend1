@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/components/ui/toaster";
 import { productService } from "@/services/product.service";
+import { cartLocalStorageData } from "@/localStorage/cartData";
 
 // ─── Zoom Component ───────────────────────────────────────────────────────────
 
@@ -114,6 +115,7 @@ export default function ProductDetailsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [fetchError, setFetchError] = useState<string | null>(null);
 
+    const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(0);
@@ -130,6 +132,7 @@ export default function ProductDetailsPage() {
     // ── Derived values ─────────────────────────────────────────────────────────
     const name = product?.title ?? product?.name ?? "Unnamed";
     const categoryName = typeof product?.category === "object" ? product?.category?.name : product?.category;
+    const parentCategory = typeof product?.category === "object" ? product?.category?.parentCategory : null;
     const sku = product?.sku ?? "—";
     const description = product?.description ?? "";
     const details = product?.benefits ?? [];
@@ -179,6 +182,22 @@ export default function ProductDetailsPage() {
             })
             .finally(() => setIsLoading(false));
     }, [slug]);
+
+    // ── Fetch related products ───────────────────────────────
+    useEffect(() => {
+        if (!product?.category) return;
+        const catId = typeof product.category === "object" ? product.category.id : product.category;
+        
+        productService.getAllProducts({ categoryId: catId, limit: 5 })
+            .then((res) => {
+                // Filter out current product and keep top 4
+                const others = res.data.data.filter((p: any) => p.slug !== slug);
+                setRelatedProducts(others.slice(0, 4));
+            })
+            .catch((err) => {
+                console.error("Failed to fetch curated alternatives", err);
+            });
+    }, [product?.category, slug]);
 
     // Update sub-size if variant changes
     useEffect(() => {
@@ -254,8 +273,16 @@ export default function ProductDetailsPage() {
                         <Link href="/" className="hover:text-stone-900 transition-colors">Home</Link>
                         <ChevronRight className="w-3 h-3 text-stone-300" />
                         <Link href="/products" className="hover:text-stone-900 transition-colors">Vault</Link>
+                        {parentCategory && (
+                            <>
+                                <ChevronRight className="w-3 h-3 text-stone-300" />
+                                <Link href={`/products?category=${parentCategory.id}`} className="hover:text-stone-900 transition-colors">
+                                    {parentCategory.name}
+                                </Link>
+                            </>
+                        )}
                         <ChevronRight className="w-3 h-3 text-stone-300" />
-                        <Link href="/products" className="hover:text-stone-900 transition-colors">{categoryName}</Link>
+                        <Link href={`/products?category=${typeof product?.category === "object" ? product.category.id : ""}`} className="hover:text-stone-900 transition-colors">{categoryName}</Link>
                         <ChevronRight className="w-3 h-3 text-stone-300" />
                         <span className="text-stone-900 truncate max-w-xs">{name}</span>
                     </div>
@@ -333,7 +360,7 @@ export default function ProductDetailsPage() {
                         <div>
                             <div className="flex items-center justify-between mb-3">
                                 <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-stone-400">
-                                    {categoryName} · {sku}
+                                    {parentCategory ? `${parentCategory.name} · ${categoryName}` : categoryName} · {sku}
                                 </p>
                                 <button
                                     onClick={() => setWishlisted(w => !w)}
@@ -491,7 +518,21 @@ export default function ProductDetailsPage() {
 
                                 {/* Add to cart */}
                                 <button
-                                    onClick={() => toast({ title: "Added to Cart", description: `${name} · ${selectedSize}${selectedSubSize ? ` (${selectedSubSize})` : ''} added to your collection.` })}
+                                    onClick={() => {
+                                        const newItem = {
+                                            id: `${product.id}-${currentVariant?.type || 'default'}-${selectedSubSize || 'default'}`,
+                                            productId: product.id,
+                                            variantType: currentVariant?.type,
+                                            subSize: selectedSubSize,
+                                            name: name,
+                                            price: price,
+                                            quantity: quantity,
+                                            image: primaryImg,
+                                            category: categoryName
+                                        };
+                                        cartLocalStorageData.addToCart(newItem);
+                                        toast({ title: "Added to Cart", description: `${name} · ${selectedSize}${selectedSubSize ? ` (${selectedSubSize})` : ''} added to your collection.` });
+                                    }}
                                     disabled={currentVariant?.qty <= 0}
                                     className="flex-1 h-12 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 disabled:cursor-not-allowed text-white text-[10px] uppercase tracking-[0.25em] font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-sm"
                                 >
@@ -576,8 +617,8 @@ export default function ProductDetailsPage() {
                                     <h3 className="text-3xl font-serif leading-tight mb-8">{product.brand ?? "Gemini"}<br /><span className="text-stone-400 italic font-light">Heritage</span></h3>
                                     <div className="space-y-5 text-xs text-stone-300 font-mono tracking-widest uppercase">
                                         <div className="flex justify-between border-b border-stone-700/50 pb-3">
-                                            <span className="text-stone-500">Category</span>
-                                            <span>{categoryName}</span>
+                                            <span className="text-stone-500">Classification</span>
+                                            <span>{parentCategory ? `${parentCategory.name} · ${categoryName}` : categoryName}</span>
                                         </div>
                                         <div className="flex justify-between border-b border-stone-700/50 pb-3">
                                             <span className="text-stone-500">SKU</span>
@@ -791,6 +832,64 @@ export default function ProductDetailsPage() {
                             Explore Archive <ChevronRight className="w-3.5 h-3.5" />
                         </Link>
                     </div>
+
+                    {relatedProducts.length > 0 ? (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            {relatedProducts.map((p) => {
+                                const pPrice = p.subProducts?.[0]?.price ?? 0;
+                                const pOrigPrice = p.discount > 0 ? Math.round(pPrice / (1 - p.discount / 100)) : null;
+                                const pCategoryName = typeof p.category === "object" ? p.category.name : p.category;
+
+                                return (
+                                    <Link key={p.id} href={`/products/${p.slug}`} className="group space-y-4 block">
+                                        <div className="relative aspect-[4/5] overflow-hidden bg-stone-100 border border-stone-200/60 shadow-sm transition-all duration-500 hover:shadow-xl">
+                                            <Image
+                                                src={p.generalImages?.[0] || "https://placehold.co/800x1000"}
+                                                alt={p.title}
+                                                fill
+                                                className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                                            />
+                                            {p.discount > 0 && (
+                                                <div className="absolute top-3 left-3 z-10">
+                                                    <span className="bg-emerald-900/90 backdrop-blur-sm text-white text-[8px] uppercase tracking-[0.2em] font-bold px-2 py-1 shadow-sm">
+                                                        -{p.discount}%
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/5 transition-colors duration-500" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <p className="text-[9px] uppercase tracking-[0.25em] font-bold text-stone-400">
+                                                {pCategoryName}
+                                            </p>
+                                            <h3 className="text-sm font-serif text-stone-900 leading-snug group-hover:text-amber-700 transition-colors duration-300">
+                                                {p.title}
+                                            </h3>
+                                            <div className="flex items-baseline gap-2.5">
+                                                <span className="text-xs font-bold text-stone-900">₹{pPrice.toLocaleString()}</span>
+                                                {pOrigPrice && (
+                                                    <span className="text-[10px] text-stone-400 line-through font-medium">₹{pOrigPrice.toLocaleString()}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            {[...Array(4)].map((_, i) => (
+                                <div key={i} className="space-y-4 animate-pulse">
+                                    <div className="aspect-[4/5] bg-stone-200 border border-stone-100" />
+                                    <div className="space-y-2">
+                                        <div className="h-2 w-16 bg-stone-200" />
+                                        <div className="h-3 w-full bg-stone-300" />
+                                        <div className="h-2 w-12 bg-stone-200" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -828,7 +927,21 @@ export default function ProductDetailsPage() {
                             <p className="text-xl font-serif text-stone-900 leading-none">₹{price.toLocaleString()}</p>
                         </div>
                         <button
-                            onClick={() => toast({ title: "Added to Cart", description: `${name} added.` })}
+                            onClick={() => {
+                                const newItem = {
+                                    id: `${product.id}-${currentVariant?.type || 'default'}-${selectedSubSize || 'default'}`,
+                                    productId: product.id,
+                                    variantType: currentVariant?.type,
+                                    subSize: selectedSubSize,
+                                    name: name,
+                                    price: price,
+                                    quantity: quantity,
+                                    image: primaryImg,
+                                    category: categoryName
+                                };
+                                cartLocalStorageData.addToCart(newItem);
+                                toast({ title: "Added to Cart", description: `${name} added.` });
+                            }}
                             className="flex-1 h-12 bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.2em] font-bold flex items-center justify-center gap-2 transition-colors shadow-sm"
                         >
                             <ShoppingCart className="w-3.5 h-3.5" /> Acquire

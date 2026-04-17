@@ -312,8 +312,8 @@ export default function VendorPage() {
                         isSlugSynced={isSlugSynced}
                         setIsSlugSynced={setIsSlugSynced}
                         handleSyncSlug={handleSyncSlug}
-                        watchedImageUrls={watchedImageUrls}
-                        watchedDescImageUrls={watchedDescImageUrls}
+                        watchedImageUrls={watchedImageUrls || []}
+                        watchedDescImageUrls={watchedDescImageUrls || []}
                     />
                     <DialogFooter className="pt-2">
                         <Button variant="outline" onClick={() => setIsAddOpen(false)} disabled={isLoading}>Cancel</Button>
@@ -339,8 +339,8 @@ export default function VendorPage() {
                         isSlugSynced={isSlugSynced}
                         setIsSlugSynced={setIsSlugSynced}
                         handleSyncSlug={handleSyncSlug}
-                        watchedImageUrls={watchedImageUrls}
-                        watchedDescImageUrls={watchedDescImageUrls}
+                        watchedImageUrls={watchedImageUrls || []}
+                        watchedDescImageUrls={watchedDescImageUrls || []}
                     />
                     <DialogFooter className="pt-2">
                         <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={isLoading}>Cancel</Button>

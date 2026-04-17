@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 // import { motion, AnimatePresence } from "framer-motion";
@@ -16,44 +16,24 @@ import { Button } from "@/components/ui/button";
 // import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toaster";
 // import { PageTransition } from "@/components/layout/PageTransition";
-
-// Mock cart items with high-end furniture imagery
-const initialCartItems = [
-    {
-        id: 1,
-        name: "Mungaru Gallery Chair",
-        price: 1250,
-        quantity: 1,
-        image: "https://i.pinimg.com/1200x/56/b8/1b/56b81bf885a58febe005905f3aa7cacf.jpg",
-        category: "Seating",
-    },
-    {
-        id: 2,
-        name: "Teak Daybed (Rattan)",
-        price: 2400,
-        quantity: 1,
-        image: "https://i.pinimg.com/1200x/97/7c/2d/977c2d33614d92abc218bec9a00f95b7.jpg",
-        category: "Bedroom",
-    },
-    {
-        id: 3,
-        name: "V-Leg Office Chair",
-        price: 850,
-        quantity: 2,
-        image: "https://i.pinimg.com/1200x/95/8d/b5/958db5d1a83e0bbc8ff5fc50269e1550.jpg",
-        category: "Office",
-    },
-];
-
-// const itemVariants = {
-//     initial: { opacity: 0, y: 10 },
-//     animate: { opacity: 1, y: 0 },
-//     exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
-// };
+import { cartLocalStorageData, CartItem } from "@/localStorage/cartData";
 
 export default function CartPage() {
-    const [cartItems, setCartItems] = useState(initialCartItems);
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [giftCode, setGiftCode] = useState("");
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setCartItems(cartLocalStorageData.getCart());
+        setIsLoaded(true);
+        
+        const handleCartUpdate = () => {
+            setCartItems(cartLocalStorageData.getCart());
+        };
+        
+        window.addEventListener("cartUpdated", handleCartUpdate);
+        return () => window.removeEventListener("cartUpdated", handleCartUpdate);
+    }, []);
 
     const handleGiftCodeSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,26 +47,22 @@ export default function CartPage() {
         }
     };
 
-    const updateQuantity = (id: number, delta: number) => {
-        setCartItems((items) =>
-            items.map((item) =>
-                item.id === id
-                    ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-                    : item
-            )
-        );
+    const updateQuantity = (id: string, delta: number) => {
+        cartLocalStorageData.updateQuantity(id, delta);
     };
 
-    const removeItem = (id: number) => {
-        setCartItems((items) => items.filter((item) => item.id !== id));
+    const removeItem = (id: string) => {
+        cartLocalStorageData.removeItem(id);
     };
 
     const subtotal = cartItems.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
     );
-    const shipping = 250;
+    const shipping = cartItems.length > 0 ? 250 : 0;
     const total = subtotal + shipping;
+
+    if (!isLoaded) return null;
 
     if (cartItems.length === 0) {
         return (

@@ -38,7 +38,7 @@ export interface CreateProductData {
 export interface Product extends Omit<CreateProductData, 'categoryId' | 'vendorId'> {
     id: string;
     _id?: string;
-    category: { id: string; name: string; slug: string } | string;
+    category: { id: string; name: string; slug: string; parentCategory?: { id: string; name: string; slug: string } } | string;
     vendor: { id: string; name: string } | string;
     createdAt: string;
     updatedAt: string;

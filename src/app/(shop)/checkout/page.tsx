@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 // import { motion, AnimatePresence } from "framer-motion";
@@ -25,19 +25,27 @@ import { Label } from "@/components/ui/label";
 //     SelectValue,
 // } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
-// Mock Data
-const orderSummary = {
-    items: 3,
-    subtotal: 4500,
-    shipping: 250,
-    total: 4750,
-};
+import { cartLocalStorageData, CartItem } from "@/localStorage/cartData";
 
 export default function CheckoutPage() {
     const [step, setStep] = useState(1); // 1: Delivery, 2: Payment, 3: Success
     const [paymentMethod, setPaymentMethod] = useState("card");
     const [isProcessing, setIsProcessing] = useState(false);
+    
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setCartItems(cartLocalStorageData.getCart());
+        setIsLoaded(true);
+    }, []);
+
+    const subtotal = cartItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+    );
+    const shipping = cartItems.length > 0 ? 250 : 0;
+    const total = subtotal + shipping;
 
     const handleContinue = () => {
         setStep(2);
@@ -50,6 +58,7 @@ export default function CheckoutPage() {
         await new Promise((resolve) => setTimeout(resolve, 2000));
         setIsProcessing(false);
         setStep(3);
+        cartLocalStorageData.clearCart();
         window.scrollTo(0, 0);
     };
 
@@ -315,44 +324,47 @@ export default function CheckoutPage() {
 
                                 {/* Items Brief */}
                                 <div className="space-y-6">
-                                    <div className="flex items-start gap-4 pb-6 border-b border-stone-100">
-                                        <div className="relative h-16 w-12 bg-stone-100 border border-stone-200">
-                                            <Image
-                                                src="https://i.pinimg.com/1200x/56/b8/1b/56b81bf885a58febe005905f3aa7cacf.jpg"
-                                                alt="item"
-                                                fill
-                                                className="object-cover grayscale"
-                                            />
-                                            <div className="absolute -top-2 -right-2 h-5 w-5 bg-stone-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold">1</div>
+                                    {cartItems.slice(0, 1).map((item) => (
+                                        <div key={item.id} className="flex items-start gap-4 pb-6 border-b border-stone-100">
+                                            <div className="relative h-16 w-12 bg-stone-100 border border-stone-200">
+                                                <Image
+                                                    src={item.image}
+                                                    alt="item"
+                                                    fill
+                                                    className="object-cover grayscale"
+                                                />
+                                                <div className="absolute -top-2 -right-2 h-5 w-5 bg-stone-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold">{item.quantity}</div>
+                                            </div>
+                                            <div className="space-y-1 flex-1">
+                                                <span className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block pt-1 leading-none">{item.category || "Item"}</span>
+                                                <h4 className="text-sm font-serif text-stone-900">{item.name}</h4>
+                                            </div>
+                                            <span className="text-sm text-stone-900 font-light italic pt-1">₹{item.price.toLocaleString()}</span>
                                         </div>
-                                        <div className="space-y-1 flex-1">
-                                            <span className="text-[10px] uppercase tracking-widest text-stone-400 font-bold block pt-1 leading-none">Seating</span>
-                                            <h4 className="text-sm font-serif text-stone-900">Mungaru Gallery Chair</h4>
-                                        </div>
-                                        <span className="text-sm text-stone-900 font-light italic pt-1">₹1,250</span>
-                                    </div>
-                                    {/* ... more items could go here ... */}
-                                    <button className="w-full text-[10px] uppercase tracking-widest font-bold text-stone-400 hover:text-stone-900 transition-colors py-2 text-center border-b border-stone-100">
-                                        + 2 other pieces
-                                    </button>
+                                    ))}
+                                    {cartItems.length > 1 && (
+                                        <button className="w-full text-[10px] uppercase tracking-widest font-bold text-stone-400 hover:text-stone-900 transition-colors py-2 text-center border-b border-stone-100">
+                                            + {cartItems.length - 1} other pieces
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/* Totals */}
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-end pb-4 border-b border-stone-100/50">
                                         <span className="text-xs uppercase tracking-widest text-stone-400 font-bold">Inventory</span>
-                                        <span className="text-lg text-stone-900 font-light italic">₹{orderSummary.subtotal.toLocaleString()}</span>
+                                        <span className="text-lg text-stone-900 font-light italic">₹{subtotal.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between items-end pb-4 border-b border-stone-100/50">
                                         <span className="text-xs uppercase tracking-widest text-stone-400 font-bold">Acquisition Fee</span>
-                                        <span className="text-lg text-stone-900 font-light italic">₹{orderSummary.shipping.toLocaleString()}</span>
+                                        <span className="text-lg text-stone-900 font-light italic">₹{shipping.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between items-center pt-4">
-                                        <span className="text-xs uppercase tracking-widest text-stone-900 font-bold">Acquisition Fee</span>
+                                        <span className="text-xs uppercase tracking-widest text-stone-900 font-bold">Total</span>
                                         <span
                                             className="text-3xl font-serif text-stone-900 italic"
                                         >
-                                            ₹{orderSummary.total.toLocaleString()}
+                                            ₹{total.toLocaleString()}
                                         </span>
                                     </div>
                                 </div>

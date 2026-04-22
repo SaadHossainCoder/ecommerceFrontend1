@@ -39,7 +39,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// import { AdminGuard } from "@/hooks/admin-guard";
+import { AdminGuard } from "@/hooks/admin-guard";
 // import { useAuthGuard } from "@/hooks/use-auth-guard";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -66,31 +66,31 @@ const sidebarLinks = [
         href: "/admin/customers",
         icon: Users,
     },
-    {
-        label: "Analytics",
-        href: "/admin/analytics",
-        icon: LineChart,
-    },
+    // {
+    //     label: "Analytics",
+    //     href: "/admin/analytics",
+    //     icon: LineChart,
+    // },
     {
         label: "Categories",
         href: "/admin/categories",
         icon: Folders,
     },
-    {
-        label: "reports",
-        href: "/admin/reports",
-        icon: TriangleAlert,
-    },
-    {
-        label: "Inventory",
-        href: "/admin/inventory",
-        icon: ShelvingUnit,
-    },
-    {
-        label: "system actions",
-        href: "/admin/system",
-        icon: MonitorCog,
-    },
+    // {
+    //     label: "reports",
+    //     href: "/admin/reports",
+    //     icon: TriangleAlert,
+    // },
+    // {
+    //     label: "Inventory",
+    //     href: "/admin/inventory",
+    //     icon: ShelvingUnit,
+    // },
+    // {
+    //     label: "system actions",
+    //     href: "/admin/system",
+    //     icon: MonitorCog,
+    // },
     {
         label: "discounts",
         href: "/admin/discounts",
@@ -124,7 +124,7 @@ export default function AdminLayout({
     const pathname = usePathname();
 
     return (
-        // <AdminGuard>
+        <AdminGuard>
             <div className="min-h-screen bg-muted/30">
                 {/* Mobile Overlay */}
                 {mobileOpen && (
@@ -269,7 +269,7 @@ export default function AdminLayout({
                     <main className="p-4 lg:p-8">{children}</main>
                 </div>
             </div>
-        // {/* </AdminGuard> */}
+        </AdminGuard>
     );
 }
 

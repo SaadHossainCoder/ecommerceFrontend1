@@ -195,13 +195,34 @@ function ProductCard({ product }: { product: any }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ProductsPage() {
-    const { products, pagination, isLoading, error, fetchProducts, clearProducts } = useProductStore();
+    const { products, pagination, isLoading, error, fetchProducts, clearProducts, lastParams } = useProductStore();
 
-    const [priceRange, setPriceRange]   = useState([0, 10000]);
-    const [selectedCat, setSelectedCat] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm]   = useState("");
-    const [sortBy, setSortBy]           = useState("featured");
-    const [page, setPage]               = useState(1);
+    const [priceRange, setPriceRange]   = useState<number[]>(() => {
+        if (!lastParams) return [0, 10000];
+        try { const p = JSON.parse(lastParams); return [p.minPrice || 0, p.maxPrice || 10000]; } catch { return [0, 10000]; }
+    });
+    const [selectedCat, setSelectedCat] = useState<string | null>(() => {
+        if (!lastParams) return null;
+        try { return JSON.parse(lastParams).category || null; } catch { return null; }
+    });
+    const [searchTerm, setSearchTerm]   = useState(() => {
+        if (!lastParams) return "";
+        try { return JSON.parse(lastParams).search || ""; } catch { return ""; }
+    });
+    const [sortBy, setSortBy]           = useState(() => {
+        if (!lastParams) return "featured";
+        try {
+            const p = JSON.parse(lastParams);
+            if (p.sort === "price" && p.order === "asc") return "price-low";
+            if (p.sort === "price" && p.order === "desc") return "price-high";
+            if (p.sort === "createdAt") return "newest";
+            return "featured";
+        } catch { return "featured"; }
+    });
+    const [page, setPage]               = useState(() => {
+        if (!lastParams) return 1;
+        try { return JSON.parse(lastParams).page || 1; } catch { return 1; }
+    });
     const [drawerOpen, setDrawerOpen]   = useState(false);
 
     const loadProducts = useCallback(() => {

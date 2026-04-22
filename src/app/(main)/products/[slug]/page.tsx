@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/components/ui/toaster";
 import { productService } from "@/services/product.service";
+import { categoryService } from "@/services/category.service";
 import { cartLocalStorageData } from "@/localStorage/cartData";
 
 // ─── Zoom Component ───────────────────────────────────────────────────────────
@@ -186,18 +187,79 @@ export default function ProductDetailsPage() {
     // ── Fetch related products ───────────────────────────────
     useEffect(() => {
         if (!product?.category) return;
-        const catId = typeof product.category === "object" ? product.category.id : product.category;
-        
-        productService.getAllProducts({ categoryId: catId, limit: 5 })
-            .then((res) => {
-                // Filter out current product and keep top 4
-                const others = res.data.data.filter((p: any) => p.slug !== slug);
+
+        const categoryIdQuery = typeof product.category === 'object' ? product.category.id : product.category;
+
+        if (!categoryIdQuery) return;
+
+        const fetchRelated = async () => {
+            try {
+                // Fetch a bit more to ensure we can find items in the same subcategory
+                const res = await productService.getAllProducts({ categoryId: categoryIdQuery, limit: 12 });
+                let others = res.data.data.filter((p: any) => p.slug !== slug);
+
+                // Fetch the category to get its SubCategories
+                let fetchedSubCategories: any[] = [];
+                try {
+                    const catRes = await categoryService.getSubCategories(categoryIdQuery);
+                    if (catRes.data?.subCategories) {
+                        fetchedSubCategories = catRes.data.subCategories;
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch subcategories", err);
+                }
+
+                // Prioritize items in the same subcategory
+                let subCatId = product?.ingredients?.subcategory;
+                
+                // If subCatId is a name, find its actual ID from the fetched SubCategories
+                if (subCatId && fetchedSubCategories.length > 0) {
+                    const match = fetchedSubCategories.find(s => s.id === subCatId || s.name === subCatId || s.slug === subCatId);
+                    if (match) subCatId = match.id;
+                }
+
+                if (!subCatId && typeof product.category === 'object') {
+                    if (Array.isArray(product.category.subCategories) && product.category.subCategories.length > 0) {
+                        subCatId = product.category.subCategories[0].id;
+                    } else if (fetchedSubCategories.length > 0) {
+                        subCatId = fetchedSubCategories[0].id;
+                    }
+                }
+
+                if (subCatId) {
+                    const sameSubCat = others.filter((p: any) => {
+                        let pSubCat = p?.ingredients?.subcategory;
+                        if (pSubCat && fetchedSubCategories.length > 0) {
+                             const match = fetchedSubCategories.find(s => s.id === pSubCat || s.name === pSubCat || s.slug === pSubCat);
+                             if (match) pSubCat = match.id;
+                        }
+                        if (!pSubCat && typeof p?.category === 'object' && Array.isArray(p?.category?.subCategories)) {
+                             pSubCat = p.category.subCategories[0]?.id;
+                        }
+                        return pSubCat === subCatId;
+                    });
+                    const diffSubCat = others.filter((p: any) => {
+                        let pSubCat = p?.ingredients?.subcategory;
+                        if (pSubCat && fetchedSubCategories.length > 0) {
+                             const match = fetchedSubCategories.find(s => s.id === pSubCat || s.name === pSubCat || s.slug === pSubCat);
+                             if (match) pSubCat = match.id;
+                        }
+                        if (!pSubCat && typeof p?.category === 'object' && Array.isArray(p?.category?.subCategories)) {
+                             pSubCat = p.category.subCategories[0]?.id;
+                        }
+                        return pSubCat !== subCatId;
+                    });
+                    others = [...sameSubCat, ...diffSubCat];
+                }
+
                 setRelatedProducts(others.slice(0, 4));
-            })
-            .catch((err) => {
+            } catch (err) {
                 console.error("Failed to fetch curated alternatives", err);
-            });
-    }, [product?.category, slug]);
+            }
+        };
+
+        fetchRelated();
+    }, [product?.category, product?.ingredients, slug]);
 
     // Update sub-size if variant changes
     useEffect(() => {
@@ -486,8 +548,8 @@ export default function ProductDetailsPage() {
                                             key={sz}
                                             onClick={() => setSelectedSubSize(sz)}
                                             className={`h-9 px-4 text-[9px] font-bold uppercase tracking-wider border transition-all ${selectedSubSize === sz
-                                                    ? "bg-stone-100 border-stone-900 text-stone-900"
-                                                    : "bg-white border-stone-200 text-stone-400 hover:border-stone-400"
+                                                ? "bg-stone-100 border-stone-900 text-stone-900"
+                                                : "bg-white border-stone-200 text-stone-400 hover:border-stone-400"
                                                 }`}
                                         >
                                             {sz}

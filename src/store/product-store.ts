@@ -49,6 +49,7 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
 
         set({ isLoading: true, error: null });
         try {
+            console.log("Fetching products with params:", params);
             const res = await productService.getAllProducts(params);
             // The structure is { ok: true, message: "...", data: { data: [...], pagination: {...} } }
             const products = res.data?.data || [];

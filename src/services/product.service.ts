@@ -66,10 +66,11 @@ export const productService = {
     // GET /products/slug/:slug — Public
     getProductBySlug: async (slug: string): Promise<{ ok: boolean; message: string; data: Product }> => {
         const response = await api.get(`products/slug/${slug}`);
+        // console.log("Product fetched successfully", response.data);
         return response.data;
     },
 
-    // POST /products — Admin only
+    //  /products — Admin only
     createProduct: async (data: CreateProductData): Promise<{ ok: boolean; message: string; data: Product }> => {
         const response = await api.post("products", data);
         return response.data;

@@ -49,6 +49,11 @@ export const categoryService = {
         return response.data;
     },
 
+    getSubCategories: async (id: string) => {
+        const response = await api.get<{ ok: boolean; data: Category }>(`categories/${id}/subcategories`);
+        return response.data;
+    },
+
     getCategoryBySlug: async (slug: string) => {
         const response = await api.get<{ ok: boolean; data: Category }>(`categories/slug/${slug}`);
         return response.data;

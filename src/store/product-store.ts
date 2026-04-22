@@ -178,6 +178,30 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
             return false;
         }
     },
-
     clearProducts: () => set({ products: [], pagination: null, error: null })
+}));
+
+interface FeaturedProductStoreState {
+    featuredProducts: any[];
+    isLoading: boolean;
+    error: string | null;
+    fetchFeaturedProducts: (categoryId?: string) => Promise<void>;
+    clearFeaturedProducts: () => void;
+}
+
+export const useFeaturedProducts = create<FeaturedProductStoreState>((set) => ({
+    featuredProducts: [],
+    isLoading: false,
+    error: null,
+    fetchFeaturedProducts: async (categoryId?: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await productService.getFeaturedProducts(categoryId);
+            set({ featuredProducts: res.data, isLoading: false });
+        } catch (error: any) {
+            const msg = error.response?.data?.error || error.response?.data?.message || error.message || "Failed to fetch featured products";
+            set({ error: msg, isLoading: false });
+        }
+    },
+    clearFeaturedProducts: () => set({ featuredProducts: [], isLoading: false, error: null })
 }));

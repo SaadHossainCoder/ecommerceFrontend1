@@ -63,6 +63,13 @@ export const productService = {
         return response.data;
     },
 
+    // GET /products/featured — Public
+    getFeaturedProducts: async (categoryId?: string): Promise<{ ok: boolean; message: string; data: Product[] }> => {
+        const url = categoryId ? `products/featured?categoryId=${categoryId}` : "products/featured";
+        const response = await api.get(url);
+        return response.data;
+    },
+
     // GET /products/slug/:slug — Public
     getProductBySlug: async (slug: string): Promise<{ ok: boolean; message: string; data: Product }> => {
         const response = await api.get(`products/slug/${slug}`);
@@ -85,6 +92,32 @@ export const productService = {
     // DELETE /products/:id — Admin only
     deleteProduct: async (id: string): Promise<{ ok: boolean; message: string; data: Product }> => {
         const response = await api.delete(`products/${id}`);
+        return response.data;
+    },
+
+    getProductReviews: async (id: string): Promise<{ ok: boolean; message: string; data: any[] }> => {
+        const response = await api.get(`products/${id}/reviews`);
+        return response.data;
+    },
+
+    addReview: async (id: string, data: { rating: number; comment: string }): Promise<{ ok: boolean; message: string; data: any }> => {
+        const response = await api.post(`products/${id}/review`, data);
+        return response.data;
+    },
+
+    // Admin Review endpoints
+    getAllReviews: async (): Promise<{ ok: boolean; message: string; data: any[] }> => {
+        const response = await api.get(`products/reviews`);
+        return response.data;
+    },
+
+    updateReview: async (reviewId: string, data: { rating: number; comment: string }): Promise<{ ok: boolean; message: string; data: any }> => {
+        const response = await api.put(`products/review/${reviewId}`, data);
+        return response.data;
+    },
+
+    deleteReview: async (reviewId: string): Promise<{ ok: boolean; message: string; data: any }> => {
+        const response = await api.delete(`products/review/${reviewId}`);
         return response.data;
     },
 };

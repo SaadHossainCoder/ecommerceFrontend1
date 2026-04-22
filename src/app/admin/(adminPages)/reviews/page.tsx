@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Star,
     Search,
@@ -15,6 +15,7 @@ import {
     Send,
     Trash2,
     Flag,
+    Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,31 +46,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toaster";
-
-const initialReviews = [
-    {
-        id: 1,
-        customer: "Alice Johnson",
-        avatar: "/avatars/01.png",
-        product: "Wireless Headphones",
-        rating: 5,
-        comment: "Absolutely love these headphones! The base is incredible and they are so comfortable for long sessions.",
-        date: "2024-03-18",
-        status: "Published",
-        helpful: 12
-    },
-    {
-        id: 2,
-        customer: "Mark Spencer",
-        avatar: "/avatars/02.png",
-        product: "Smart Watch Pro",
-        rating: 4,
-        comment: "Great watch, but the battery life could be a bit better. Overall very satisfied with the health tracking.",
-        date: "2024-03-17",
-        status: "Pending",
-        helpful: 5
-    },
-];
+import { productService } from "@/services/product.service";
 
 const StarRating = ({ rating }: { rating: number }) => {
     return (
@@ -85,6 +62,8 @@ const StarRating = ({ rating }: { rating: number }) => {
 };
 
 export default function ReviewsPage() {
+    const [reviews, setReviews] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
 
@@ -92,8 +71,40 @@ export default function ReviewsPage() {
     const [isReplyOpen, setIsReplyOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedReview, setSelectedReview] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    const filteredReviews = initialReviews.filter((review) => {
+    const fetchReviews = async () => {
+        try {
+            setIsLoading(true);
+            const res = await productService.getAllReviews();
+            if (res.data) {
+                // Map backend reviews to UI format
+                const mapped = res.data.map((r: any) => ({
+                    id: r.id,
+                    customer: r.user?.username || "Unknown",
+                    avatar: "/avatars/01.png", // placeholder
+                    product: r.product?.title || "Unknown Product",
+                    rating: r.rating,
+                    comment: r.comment,
+                    date: new Date(r.createdAt).toLocaleDateString(),
+                    status: r.isApproved ? "Published" : "Pending",
+                    helpful: 0,
+                    raw: r // keep raw reference if needed
+                }));
+                setReviews(mapped);
+            }
+        } catch (error: any) {
+            toast({ title: "Error", description: "Failed to load reviews.", variant: "destructive" });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchReviews();
+    }, []);
+
+    const filteredReviews = reviews.filter((review) => {
         const matchesSearch =
             review.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
             review.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,12 +132,18 @@ export default function ReviewsPage() {
         });
     };
 
-    const handlePublish = (review: any) => {
-        toast({
-            title: "Content Verified",
-            description: `Review by ${review.customer} is now visible to the public.`,
-            variant: "success",
-        });
+    const handlePublish = async (review: any) => {
+        try {
+            await productService.updateReview(review.id, { rating: review.rating, comment: review.comment });
+            toast({
+                title: "Content Verified",
+                description: `Review by ${review.customer} is now visible to the public.`,
+                variant: "success",
+            });
+            fetchReviews();
+        } catch (error: any) {
+             toast({ title: "Error", description: "Failed to publish review.", variant: "destructive" });
+        }
     };
 
     const confirmReply = () => {
@@ -138,14 +155,28 @@ export default function ReviewsPage() {
         });
     };
 
-    const confirmDelete = () => {
-        setIsDeleteOpen(false);
-        toast({
-            title: "Review Removed",
-            description: "Content has been purged from the product page.",
-            variant: "destructive",
-        });
+    const confirmDelete = async () => {
+        if (!selectedReview) return;
+        setIsDeleting(true);
+        try {
+            await productService.deleteReview(selectedReview.id);
+            toast({
+                title: "Review Removed",
+                description: "Content has been purged from the product page.",
+                variant: "success",
+            });
+            setIsDeleteOpen(false);
+            fetchReviews();
+        } catch (error: any) {
+             toast({ title: "Error", description: "Failed to delete review.", variant: "destructive" });
+        } finally {
+             setIsDeleting(false);
+        }
     };
+
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0 ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1) : "0.0";
+    const pendingReviews = reviews.filter(r => r.status === "Pending").length;
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -163,17 +194,17 @@ export default function ReviewsPage() {
                 <Card className="p-6">
                     <p className="text-sm text-muted-foreground font-medium">Average Rating</p>
                     <div className="flex items-center gap-2 mt-2">
-                        <h3 className="text-3xl font-bold">4.8</h3>
+                        <h3 className="text-3xl font-bold">{averageRating}</h3>
                         <Star className="w-6 h-6 fill-amber-400 text-amber-400" />
                     </div>
                 </Card>
                 <Card className="p-6">
                     <p className="text-sm text-muted-foreground font-medium">Total Reviews</p>
-                    <h3 className="text-3xl font-bold mt-2">1,248</h3>
+                    <h3 className="text-3xl font-bold mt-2">{totalReviews}</h3>
                 </Card>
                 <Card className="p-6 text-amber-600">
                     <p className="text-sm text-muted-foreground font-medium">Pending Approval</p>
-                    <h3 className="text-3xl font-bold mt-2">12</h3>
+                    <h3 className="text-3xl font-bold mt-2">{pendingReviews}</h3>
                 </Card>
                 <Card className="p-6">
                     <p className="text-sm text-muted-foreground font-medium">Recent Growth</p>
@@ -208,8 +239,12 @@ export default function ReviewsPage() {
                 </div>
 
                 <div className="divide-y">
-                    <>
-                        {filteredReviews.map((review) => (
+                    {isLoading ? (
+                        <div className="flex justify-center p-10">
+                            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                        </div>
+                    ) : filteredReviews.length > 0 ? (
+                        filteredReviews.map((review) => (
                             <div
                                 key={review.id}
                                 className="p-6 hover:bg-muted/50 transition-colors"
@@ -281,8 +316,12 @@ export default function ReviewsPage() {
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </>
+                        ))
+                    ) : (
+                        <div className="p-10 text-center text-muted-foreground">
+                            No reviews found.
+                        </div>
+                    )}
                 </div>
             </Card>
 

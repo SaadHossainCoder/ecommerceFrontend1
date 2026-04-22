@@ -7,6 +7,7 @@ import { ShareholderReports } from "@/app/(main)/home/_components/carousel";
 import ProductCard from "./_components/ProductCard";
 import { TestimonialsSection } from "./_components/TestimonialsSection";
 import { FeatureGrid } from "./_components/FeatureGrid";
+import { FeaturedProductsList } from "./_components/FeaturedProductsList";
 import { Suspense } from "react";
 import {LoaderCircleIcon as LoaderCircle} from "@/components/icon/loader-circle"
 
@@ -44,6 +45,8 @@ const reportsData = [
     isNew: true,
   }
 ];
+
+
 
 export default async function HomePage() {
     // const trendingProducts = await getTrendingProducts();
@@ -83,9 +86,7 @@ export default async function HomePage() {
                     <hr className="pb-10 h-3" />
                     <Suspense fallback={<LoaderCircle className="text-black"/>}>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 container-custom">
-                            {/* {trending   Products.map((p) => (
-                                <ProductCard key={p.id} {...p} />
-                            ))} */}
+                            <FeaturedProductsList limit={4} />
                         </div>
                     </Suspense>
                 </section>
@@ -126,9 +127,8 @@ export default async function HomePage() {
                     <hr className="pb-10 h-3" />
                     <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 container-custom">
-                            {/* {seasonChoices.map((p) => (
-                                <ProductCard key={p.id} {...p} />
-                            ))} */}
+                            {/* If there's a specific category ID for Dresses, it can be passed here like: categoryId="dresses_id" */}
+                            <FeaturedProductsList limit={4} />
                         </div>
                     </Suspense>
                 </section>

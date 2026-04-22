@@ -28,6 +28,7 @@ import {
     Store,
     Megaphone,
     BellRing,
+    UserStar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,41 +63,25 @@ const sidebarLinks = [
         icon: Package,
     },
     {
+        label: "review",
+        href: "/admin/reviews",
+        icon: UserStar,
+    },
+    {
         label: "Customers",
         href: "/admin/customers",
         icon: Users,
     },
-    // {
-    //     label: "Analytics",
-    //     href: "/admin/analytics",
-    //     icon: LineChart,
-    // },
     {
         label: "Categories",
         href: "/admin/categories",
         icon: Folders,
     },
-    // {
-    //     label: "reports",
-    //     href: "/admin/reports",
-    //     icon: TriangleAlert,
-    // },
-    // {
-    //     label: "Inventory",
-    //     href: "/admin/inventory",
-    //     icon: ShelvingUnit,
-    // },
-    // {
-    //     label: "system actions",
-    //     href: "/admin/system",
-    //     icon: MonitorCog,
-    // },
     {
         label: "discounts",
         href: "/admin/discounts",
         icon: TicketPercent,
     },
-    
     {
         label: "Vendors",
         href: "/admin/vender",
@@ -112,10 +97,31 @@ const sidebarLinks = [
         href: "/admin/notificationBar",
         icon: BellRing,
     }
+    // {
+    //     label: "Analytics",
+    //     href: "/admin/analytics",
+    //     icon: LineChart,
+    // },
+    
+    // {
+    //     label: "reports",
+    //     href: "/admin/reports",
+    //     icon: TriangleAlert,
+    // },
+    // {
+    //     label: "Inventory",
+    //     href: "/admin/inventory",
+    //     icon: ShelvingUnit,
+    // },
+    // {
+    //     label: "system actions",
+    //     href: "/admin/system",
+    //     icon: MonitorCog,
+    // },
 ];
 
 export default function AdminLayout({
- children,
+    children,
 }: {
     children: React.ReactNode;
 }) {

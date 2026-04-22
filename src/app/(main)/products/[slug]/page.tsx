@@ -92,19 +92,7 @@ function Stars({ rating, size = "sm" }: { rating: number; size?: "sm" | "xs" }) 
 
 // ─── Static breakdown data ─────────────────────────────────────────────────────
 
-const staticReviews = [
-    { id: 1, user: "Lady Victoria", avatar: "LV", rating: 5, date: "2 weeks ago", content: "The craftsmanship is unparalleled. A true heirloom." },
-    { id: 2, user: "Arthur Penhaligon", avatar: "AP", rating: 5, date: "1 month ago", content: "One can feel the tradition in the fine engravings. Truly a distinguished piece." },
-    { id: 3, user: "Lord Saxon", avatar: "LS", rating: 5, date: "3 days ago", content: "Exceptional craftsmanship that perfectly fits my collection vault." },
-];
 
-const ratingBreakdown = [
-    { label: "5", count: 989, pct: 85 },
-    { label: "4", count: 4500, pct: 70 },
-    { label: "3", count: 50, pct: 15 },
-    { label: "2", count: 16, pct: 8 },
-    { label: "1", count: 8, pct: 5 },
-];
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -129,6 +117,59 @@ export default function ProductDetailsPage() {
     const [showSticky, setShowSticky] = useState(false);
     const [autoPlay, setAutoPlay] = useState(true);
     const [lightbox, setLightbox] = useState(false);
+
+    const [reviews, setReviews] = useState<any[]>([]);
+    const [reviewComment, setReviewComment] = useState("");
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+    const handleReviewSubmit = async () => {
+        if (!reviewRating || !reviewComment.trim()) {
+            toast({ title: "Incomplete", description: "Please provide both a rating and a manuscript.", variant: "destructive" });
+            return;
+        }
+
+        try {
+            setIsSubmittingReview(true);
+            const res = await productService.addReview(product.id, {
+                rating: reviewRating,
+                comment: reviewComment
+            });
+            toast({ title: "Success", description: "Your assessment has been submitted." });
+            setReviewRating(0);
+            setReviewComment("");
+            // Refresh reviews
+            const newReviews = await productService.getProductReviews(product.id);
+            if (newReviews.data) setReviews(newReviews.data);
+        } catch (err: any) {
+            const msg = err.response?.data?.message || err.message || "Failed to submit review";
+            toast({ title: "Error", description: msg, variant: "destructive" });
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    };
+
+    // ── Derived Reviews values ───────────────────────────────────────────────
+    const averageRating = useMemo(() => {
+        if (!reviews.length) return 0;
+        const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+        return (sum / reviews.length).toFixed(1);
+    }, [reviews]);
+
+    const ratingBreakdown = useMemo(() => {
+        const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        reviews.forEach(r => {
+            const rating = Math.floor(r.rating) as 5 | 4 | 3 | 2 | 1;
+            if (counts[rating] !== undefined) {
+                counts[rating]++;
+            }
+        });
+        const total = reviews.length || 1;
+        return [5, 4, 3, 2, 1].map(star => ({
+            label: String(star),
+            count: counts[star as keyof typeof counts],
+            pct: (counts[star as keyof typeof counts] / total) * 100
+        }));
+    }, [reviews]);
 
     // ── Derived values ─────────────────────────────────────────────────────────
     const name = product?.title ?? product?.name ?? "Unnamed";
@@ -183,6 +224,16 @@ export default function ProductDetailsPage() {
             })
             .finally(() => setIsLoading(false));
     }, [slug]);
+
+    // ── Fetch Reviews ──────────────────────────────────────────────────────────
+    useEffect(() => {
+        if (!product?.id) return;
+        productService.getProductReviews(product.id)
+            .then(res => {
+                if (res.data) setReviews(res.data);
+            })
+            .catch(err => console.error("Failed to fetch reviews", err));
+    }, [product?.id]);
 
     // ── Fetch related products ───────────────────────────────
     useEffect(() => {
@@ -794,18 +845,18 @@ export default function ProductDetailsPage() {
                 <div className="mb-20">
                     <div className="flex items-baseline justify-between mb-8 border-b border-stone-200 pb-4">
                         <h2 className="text-2xl font-serif text-stone-900">Patron Impressions</h2>
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold">145 Total Impressions</span>
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold">{reviews.length} Total Impressions</span>
                     </div>
 
                     <div className="grid lg:grid-cols-12 gap-10">
                         {/* Summary */}
                         <div className="lg:col-span-4 bg-white border border-stone-200 p-6 shadow-sm h-fit">
                             <div className="text-center mb-6 pb-6 border-b border-stone-100">
-                                <p className="text-5xl font-serif text-stone-900 mb-3">4.9</p>
+                                <p className="text-5xl font-serif text-stone-900 mb-3">{averageRating}</p>
                                 <div className="flex justify-center mb-2">
-                                    <Stars rating={4.9} />
+                                    <Stars rating={Number(averageRating)} />
                                 </div>
-                                <p className="text-[8px] uppercase tracking-[0.2em] font-bold text-stone-400">Calculated from 145 verified entries</p>
+                                <p className="text-[8px] uppercase tracking-[0.2em] font-bold text-stone-400">Calculated from {reviews.length} verified entries</p>
                             </div>
                             <div className="space-y-2.5">
                                 {ratingBreakdown.map(({ label, count, pct }) => (
@@ -822,23 +873,25 @@ export default function ProductDetailsPage() {
 
                         {/* Review list + form */}
                         <div className="lg:col-span-8 space-y-6">
-                            {staticReviews.map((r) => (
+                            {reviews.length > 0 ? reviews.map((r) => (
                                 <div key={r.id} className="bg-white border border-stone-200 p-8 shadow-sm">
                                     <div className="flex items-start gap-5">
                                         <div className="w-10 h-10 bg-stone-900 text-white flex items-center justify-center text-[10px] font-bold tracking-widest shrink-0 uppercase">
-                                            {r.avatar}
+                                            {r.user?.username?.substring(0, 2) || "U"}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                                                <p className="text-xs font-bold uppercase tracking-[0.1em] text-stone-900">{r.user}</p>
-                                                <span className="text-[10px] text-stone-400 uppercase tracking-widest font-mono">{r.date}</span>
+                                                <p className="text-xs font-bold uppercase tracking-[0.1em] text-stone-900">{r.user?.username || "Unknown Patron"}</p>
+                                                <span className="text-[10px] text-stone-400 uppercase tracking-widest font-mono">{new Date(r.createdAt).toLocaleDateString()}</span>
                                             </div>
                                             <Stars rating={r.rating} size="xs" />
-                                            <p className="text-[13px] text-stone-500 leading-relaxed mt-4 font-light italic">&quot;{r.content}&quot;</p>
+                                            <p className="text-[13px] text-stone-500 leading-relaxed mt-4 font-light italic">&quot;{r.comment}&quot;</p>
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                            )) : (
+                                <p className="text-sm text-stone-500 italic">No impressions yet. Be the first to share yours.</p>
+                            )}
 
                             {/* Write review */}
                             <div className="bg-white border border-stone-200 p-8 shadow-sm mt-10">
@@ -861,23 +914,23 @@ export default function ProductDetailsPage() {
                                         </div>
                                     </div>
 
-                                    <div className="grid sm:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="text-[9px] uppercase tracking-[0.25em] font-bold text-stone-400 block mb-2">Identity *</label>
-                                            <input type="text" placeholder="Your name" className="w-full bg-stone-50 border border-stone-200 px-4 py-3 text-xs focus:border-stone-900 focus:bg-white focus:outline-none transition-colors shadow-sm" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[9px] uppercase tracking-[0.25em] font-bold text-stone-400 block mb-2">Correspondence *</label>
-                                            <input type="email" placeholder="email@address.com" className="w-full bg-stone-50 border border-stone-200 px-4 py-3 text-xs focus:border-stone-900 focus:bg-white focus:outline-none transition-colors shadow-sm" />
-                                        </div>
-                                    </div>
-
                                     <div>
                                         <label className="text-[9px] uppercase tracking-[0.25em] font-bold text-stone-400 block mb-2">Manuscript *</label>
-                                        <textarea rows={4} placeholder="Detail your experience with the craftsmanship..." className="w-full bg-stone-50 border border-stone-200 px-4 py-3 text-xs focus:border-stone-900 focus:bg-white focus:outline-none transition-colors resize-none shadow-sm" />
+                                        <textarea 
+                                            rows={4} 
+                                            placeholder="Detail your experience with the craftsmanship..." 
+                                            className="w-full bg-stone-50 border border-stone-200 px-4 py-3 text-xs focus:border-stone-900 focus:bg-white focus:outline-none transition-colors resize-none shadow-sm" 
+                                            value={reviewComment}
+                                            onChange={(e) => setReviewComment(e.target.value)}
+                                        />
                                     </div>
 
-                                    <button className="bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.25em] font-bold px-10 py-4 transition-all duration-300 shadow-sm hover:shadow-md">
+                                    <button 
+                                        onClick={handleReviewSubmit}
+                                        disabled={isSubmittingReview}
+                                        className="bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.25em] font-bold px-10 py-4 transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {isSubmittingReview ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
                                         Submit Assessment
                                     </button>
                                 </div>

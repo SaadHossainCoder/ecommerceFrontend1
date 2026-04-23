@@ -1,13 +1,17 @@
 import { create } from "zustand";
 import { authService } from "@/services/auth.service";
-import type { LoginFormValues, SignupFormValues } from "@/validations/auth.validation";
-import { userLocalStorageData } from "@/localStorage/userData";
+import type { LoginFormValues, SignupFormValues, UpdateProfileFormValues } from "@/validations/auth.validation";
+
 
 // Mirrors all safe (non-sensitive) fields from the Prisma User model
 export interface User {
     id: string;
     username: string;
     email: string;
+    phoneNumber: string | null;
+    countryCode: string | null;
+    gender: string | null;
+    dateOfBirth: string | null;
     role: string;                  // "USER" | "ADMIN" | "VENDOR" etc.
     isEmailVerified: boolean;
     isBlocked: boolean;
@@ -33,32 +37,18 @@ interface AuthState {
     login: (data: LoginFormValues) => Promise<void>;
     signup: (data: SignupFormValues) => Promise<void>;
     logout: () => Promise<void>;
+    updateProfile: (data: UpdateProfileFormValues) => Promise<void>;
+    fetchMe: () => Promise<void>;
     setError: (error: string | null) => void;
     clearError: () => void;
     reset: () => void;
 }
 
-// Hydrate minimal session from localStorage on store creation.
-// Full user data (username, email, flags, etc.) is populated after login/signup.
-const _stored = userLocalStorageData.getUser(); // returns { id, role } | null
+
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-    // If localStorage has a session, mark as authenticated with partial data.
-    // Components that need full user data should call authService.getMe() separately.
-    user: _stored
-        ? {
-              id: _stored.id,
-              username: _stored.username,
-              email: _stored.email,
-              role: _stored.role,
-              isEmailVerified: _stored.isEmailVerified,
-              isBlocked: _stored.isBlocked,
-              lockedUntil: _stored.lockedUntil,
-              createdAt: _stored.createdAt,
-              updatedAt: _stored.updatedAt,
-          }
-        : null,
-    isAuthenticated: !!_stored,
+    user: null,
+    isAuthenticated: false,
     isLoading: false,
     error: null,
 
@@ -75,6 +65,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             error: null,
         }),
 
+    // ─── Fetch current user from backend (called on page load) ────────────────
+    fetchMe: async () => {
+        try {
+            const res: AuthResponse = await authService.getMe();
+            if (res.ok && res.user) {
+                set({ user: res.user, isAuthenticated: true });
+            }
+        } catch {
+            // Silent fail — user simply stays unauthenticated
+        }
+    },
+
     // ─── Login ───────────────────────────────────────────────────────────────
     login: async (data: LoginFormValues) => {
         set({ isLoading: true, error: null });
@@ -88,8 +90,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     isAuthenticated: true,
                     isLoading: false,
                 });
-                // Persist minimal session data (id + role only)
-                userLocalStorageData.setUser(res.user);
+
             } else {
                 throw new Error(res.message || "Login failed");
             }
@@ -117,7 +118,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     isAuthenticated: true,
                     isLoading: false,
                 });
-                userLocalStorageData.setUser(res.user);
+
             } else {
                 throw new Error(res.message || "Signup failed");
             }
@@ -126,6 +127,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 err instanceof Error
                     ? err.message
                     : "An unexpected error occurred during signup";
+
+            set({ error: message, isLoading: false });
+            throw err;
+        }
+    },
+
+
+    updateProfile: async (data: UpdateProfileFormValues) => {
+        set({ isLoading: true, error: null });
+
+        try {
+            const res: AuthResponse = await authService.profileUpdate(data);
+
+            if (res.ok && res.user) {
+                set({
+                    user: res.user,
+                    isAuthenticated: true,
+                    isLoading: false,
+                });
+            } else {
+                throw new Error(res.message || "Update profile failed");
+            }
+        } catch (err: unknown) {
+            const message =
+                err instanceof Error
+                    ? err.message
+                    : "An unexpected error occurred during update profile";
 
             set({ error: message, isLoading: false });
             throw err;
@@ -141,7 +169,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } catch (err) {
             console.warn("Backend logout failed (proceeding with local cleanup):", err);
         } finally {
-            userLocalStorageData.removeUser();
+
             get().reset();
         }
     },

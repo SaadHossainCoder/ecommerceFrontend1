@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// import { motion, AnimatePresence } from "framer-motion";
 import {
     User,
     Package,
@@ -10,7 +9,6 @@ import {
     LogOut,
     Edit2,
     Plus,
-    // ChevronRight,
     CheckCircle2,
     Clock,
 } from "lucide-react";
@@ -20,14 +18,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-// import { Badge } from "@/components/ui/badge";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/toaster";
-// import { PageTransition } from "@/components/layout/PageTransition";
-// import { staggerContainerVariants, staggerItemVariants } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store";
 
-// Mock Data (Unchanged for structure, but presentation will change)
+// Mock Data
 const orders = [
     {
         id: "#SDGT1254FD",
@@ -53,20 +49,8 @@ const orders = [
 ];
 
 const addresses = [
-    {
-        id: 1,
-        name: "Bessie Cooper",
-        street: "2464 Royal Ln. Mesa",
-        location: "New Jersey 45463",
-        isDefault: true
-    },
-    {
-        id: 2,
-        name: "Bessie Cooper",
-        street: "6391 Elgin St. Celina",
-        location: "Delaware 10299",
-        isDefault: false
-    }
+    { id: 1, name: "Bessie Cooper", street: "2464 Royal Ln. Mesa", location: "New Jersey 45463", isDefault: true },
+    { id: 2, name: "Bessie Cooper", street: "6391 Elgin St. Celina", location: "Delaware 10299", isDefault: false }
 ];
 
 const cards = [
@@ -77,13 +61,45 @@ const cards = [
 
 export default function MyAccountPage() {
     const [activeTab, setActiveTab] = useState("personal");
-    const [scrolled, setScrolled] = useState(false);
+    const { user, isLoading, updateProfile, fetchMe } = useAuthStore();
 
+    // Local form state seeded from the store user
+    const [formData, setFormData] = useState({
+        username: "",
+        email: "",
+        phoneNumber: "",
+        countryCode: "",
+        gender: "",
+        dateOfBirth: "",
+    });
+
+    // Fetch fresh user data from the backend on mount
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 50);
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
+        fetchMe();
     }, []);
+
+    // Sync form when user data arrives
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                username: user.username ?? "",
+                email: user.email ?? "",
+                phoneNumber: user.phoneNumber ?? "",
+                countryCode: user.countryCode ?? "",
+                gender: user.gender ?? "",
+                dateOfBirth: user.dateOfBirth ?? "",
+            });
+        }
+    }, [user]);
+
+    const handleSave = async () => {
+        try {
+            await updateProfile(formData);
+            toast({ title: "Profile Updated", description: "Your changes have been saved." });
+        } catch {
+            toast({ title: "Update Failed", description: "Something went wrong. Please try again." });
+        }
+    };
 
     const menuItems = [
         { id: "personal", label: "Personal Info", icon: User, desc: "Manage your profile" },
@@ -97,9 +113,7 @@ export default function MyAccountPage() {
         switch (activeTab) {
             case "personal":
                 return (
-                    <div
-                        className="max-w-3xl"
-                    >
+                    <div className="max-w-3xl">
                         <header className="mb-8 md:mb-12 border-b border-stone-200 pb-6">
                             <h2 className="text-3xl font-serif text-stone-900 mb-2">Personal Information</h2>
                             <p className="text-stone-500 font-light">Update your personal details and contact preferences.</p>
@@ -110,7 +124,9 @@ export default function MyAccountPage() {
                                 <div className="relative group cursor-pointer">
                                     <Avatar className="w-32 h-32 border border-stone-200">
                                         <AvatarImage src="/avatar.jpg" className="object-cover" />
-                                        <AvatarFallback className="text-3xl font-serif bg-stone-100 text-stone-900">BC</AvatarFallback>
+                                        <AvatarFallback className="text-3xl font-serif bg-stone-100 text-stone-900">
+                                            {user?.username?.charAt(0).toUpperCase() ?? "U"}
+                                        </AvatarFallback>
                                     </Avatar>
                                     <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <Button size="icon" variant="secondary" className="rounded-full h-8 w-8 bg-white/90 hover:bg-white text-stone-900 shadow-sm">
@@ -122,30 +138,74 @@ export default function MyAccountPage() {
 
                             <div className="flex-1 space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <Label className="text-stone-600 font-normal">First Name</Label>
-                                        <Input defaultValue="Bessie" className="bg-stone-50/50 border-stone-200 focus-visible:ring-stone-400" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-stone-600 font-normal">Last Name</Label>
-                                        <Input defaultValue="Cooper" className="bg-stone-50/50 border-stone-200 focus-visible:ring-stone-400" />
+                                    <div className="space-y-2 sm:col-span-2">
+                                        <Label className="text-stone-600 font-normal">Username</Label>
+                                        <Input
+                                            value={formData.username}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                                            className="bg-stone-50/50 border-stone-200 focus-visible:ring-stone-400"
+                                        />
                                     </div>
                                     <div className="space-y-2 sm:col-span-2">
                                         <Label className="text-stone-600 font-normal">Email Address</Label>
-                                        <Input defaultValue="example@gmail.com" className="bg-stone-50/50 border-stone-200 focus-visible:ring-stone-400" />
+                                        <Input
+                                            value={formData.email}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                                            className="bg-stone-50/50 border-stone-200 focus-visible:ring-stone-400"
+                                        />
                                     </div>
-                                    <div className="space-y-2 sm:col-span-2">
+                                    <div className="space-y-2">
+                                        <Label className="text-stone-600 font-normal">Country Code</Label>
+                                        <Input
+                                            value={formData.countryCode}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, countryCode: e.target.value }))}
+                                            placeholder="+1"
+                                            className="bg-stone-50/50 border-stone-200 focus-visible:ring-stone-400"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
                                         <Label className="text-stone-600 font-normal">Phone Number</Label>
-                                        <Input defaultValue="+0123-456-789" className="bg-stone-50/50 border-stone-200 focus-visible:ring-stone-400" />
+                                        <Input
+                                            value={formData.phoneNumber}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                                            placeholder="0123-456-789"
+                                            className="bg-stone-50/50 border-stone-200 focus-visible:ring-stone-400"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-stone-600 font-normal">Gender</Label>
+                                        <Select
+                                            value={formData.gender}
+                                            onValueChange={(val) => setFormData(prev => ({ ...prev, gender: val }))}
+                                        >
+                                            <SelectTrigger className="bg-stone-50/50 border-stone-200 focus:ring-stone-400">
+                                                <SelectValue placeholder="Select Gender" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="male">Male</SelectItem>
+                                                <SelectItem value="female">Female</SelectItem>
+                                                <SelectItem value="other">Other</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-stone-600 font-normal">Date of Birth</Label>
+                                        <Input
+                                            type="date"
+                                            value={formData.dateOfBirth}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                                            className="bg-stone-50/50 border-stone-200 focus-visible:ring-stone-400"
+                                        />
                                     </div>
                                 </div>
 
                                 <div className="pt-6 flex justify-end">
                                     <Button
+                                        disabled={isLoading}
                                         className="bg-stone-900 text-stone-50 hover:bg-stone-800 px-8 rounded-none transition-all duration-300"
-                                        onClick={() => toast({ title: "Profile Updated", description: "Your changes have been saved." })}
+                                        onClick={handleSave}
                                     >
-                                        Save Changes
+                                        {isLoading ? "Saving..." : "Save Changes"}
                                     </Button>
                                 </div>
                             </div>
@@ -316,13 +376,36 @@ export default function MyAccountPage() {
                     <div className="mb-12 md:mb-16">
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-stone-900 mb-4 tracking-tight">My Account</h1>
                         <div className="h-px w-24 bg-stone-900 mb-6"></div>
-                        <p className="text-stone-500 max-w-md font-light">Welcome back, Bessie. Manage your personal details, orders, and preferences from your dashboard.</p>
+                        <p className="text-stone-500 max-w-md font-light">
+                            Welcome back, <span className="text-stone-800 font-medium">{user?.username ?? "Guest"}</span>. Manage your personal details, orders, and preferences from your dashboard.
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
                         {/* Sidebar Navigation */}
                         <aside className="hidden lg:block lg:col-span-3 sticky top-24">
+                            {/* User Profile Card */}
+                            <div className="mb-6 p-4 border border-stone-200 bg-white">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="w-10 h-10 border border-stone-200">
+                                        <AvatarImage src="/avatar.jpg" className="object-cover" />
+                                        <AvatarFallback className="text-sm font-serif bg-stone-100 text-stone-900">
+                                            {user?.username?.charAt(0).toUpperCase() ?? "U"}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="min-w-0">
+                                        <p className="font-medium text-stone-900 text-sm truncate">{user?.username ?? "—"}</p>
+                                        <p className="text-xs text-stone-400 truncate">{user?.email ?? "—"}</p>
+                                    </div>
+                                </div>
+                                {user?.role && (
+                                    <div className="mt-3 pt-3 border-t border-stone-100">
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-stone-500">{user.role}</span>
+                                    </div>
+                                )}
+                            </div>
+
                             <nav className="space-y-1">
                                 {menuItems.map((item) => (
                                     <button

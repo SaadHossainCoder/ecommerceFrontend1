@@ -70,6 +70,11 @@ export const productService = {
         return response.data;
     },
 
+    getFeaturedProductsBySlug: async (slug: string): Promise<{ ok: boolean; message: string; data: Product[] }> => {
+        const response = await api.get(`products/featured/${slug}`);
+        return response.data;
+    },
+
     // GET /products/slug/:slug — Public
     getProductBySlug: async (slug: string): Promise<{ ok: boolean; message: string; data: Product }> => {
         const response = await api.get(`products/slug/${slug}`);

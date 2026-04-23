@@ -86,7 +86,7 @@ export default async function HomePage() {
                     <hr className="pb-10 h-3" />
                     <Suspense fallback={<LoaderCircle className="text-black"/>}>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 container-custom">
-                            <FeaturedProductsList limit={4} />
+                            <FeaturedProductsList limit={6}/>
                         </div>
                     </Suspense>
                 </section>
@@ -127,8 +127,8 @@ export default async function HomePage() {
                     <hr className="pb-10 h-3" />
                     <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 container-custom">
-                            {/* If there's a specific category ID for Dresses, it can be passed here like: categoryId="dresses_id" */}
-                            <FeaturedProductsList limit={4} />
+                            {/* Passing the specific category Slug for Ladies/Dresses */}
+                            <FeaturedProductsList limit={6} categorySlug="ladies-dresses" />
                         </div>
                     </Suspense>
                 </section>

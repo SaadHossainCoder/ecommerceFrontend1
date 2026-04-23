@@ -61,3 +61,14 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 export type OtpFormValues = z.infer<typeof otpSchema>;
+
+export const updateProfileSchema = z.object({
+  username: z.string().min(2, "Username must be at least 2 characters").trim().optional(),
+  email: z.string().email("Invalid email address").trim().optional(),
+  phoneNumber: z.string().optional(),
+  countryCode: z.string().optional(),
+  gender: z.string().optional(),
+  dateOfBirth: z.string().optional(),
+});
+
+export type UpdateProfileFormValues = z.infer<typeof updateProfileSchema>;

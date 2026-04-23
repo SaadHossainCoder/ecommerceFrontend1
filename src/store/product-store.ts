@@ -182,26 +182,77 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
 }));
 
 interface FeaturedProductStoreState {
-    featuredProducts: any[];
-    isLoading: boolean;
-    error: string | null;
+    featuredProductsByCategory: Record<string, any[]>;
+    loadingStates: Record<string, boolean>;
+    errors: Record<string, string | null>;
     fetchFeaturedProducts: (categoryId?: string) => Promise<void>;
+    fetchFeaturedProductsBySlug: (slug: string) => Promise<void>;
     clearFeaturedProducts: () => void;
 }
 
-export const useFeaturedProducts = create<FeaturedProductStoreState>((set) => ({
-    featuredProducts: [],
-    isLoading: false,
-    error: null,
-    fetchFeaturedProducts: async (categoryId?: string) => {
-        set({ isLoading: true, error: null });
+// Singleton to track in-flight requests across all store instances/renders
+const pendingRequests = new Set<string>();
+
+export const useFeaturedProducts = create<FeaturedProductStoreState>((set, get) => ({
+    featuredProductsByCategory: {},
+    loadingStates: {},
+    errors: {},
+
+    fetchFeaturedProducts: async (categoryId: string = "all") => {
+        const state = get();
+        if (state.featuredProductsByCategory[categoryId] !== undefined || pendingRequests.has(categoryId)) return;
+
+        pendingRequests.add(categoryId);
+        set((s) => ({ 
+            loadingStates: { ...s.loadingStates, [categoryId]: true },
+            errors: { ...s.errors, [categoryId]: null }
+        }));
+
         try {
-            const res = await productService.getFeaturedProducts(categoryId);
-            set({ featuredProducts: res.data, isLoading: false });
+            const res = await productService.getFeaturedProducts(categoryId === "all" ? undefined : categoryId);
+            set((s) => ({
+                featuredProductsByCategory: { ...s.featuredProductsByCategory, [categoryId]: res.data || [] },
+                loadingStates: { ...s.loadingStates, [categoryId]: false }
+            }));
         } catch (error: any) {
-            const msg = error.response?.data?.error || error.response?.data?.message || error.message || "Failed to fetch featured products";
-            set({ error: msg, isLoading: false });
+            set((s) => ({
+                errors: { ...s.errors, [categoryId]: error.message },
+                loadingStates: { ...s.loadingStates, [categoryId]: false }
+            }));
+        } finally {
+            pendingRequests.delete(categoryId);
         }
     },
-    clearFeaturedProducts: () => set({ featuredProducts: [], isLoading: false, error: null })
+
+    fetchFeaturedProductsBySlug: async (slug: string) => {
+        const state = get();
+        if (state.featuredProductsByCategory[slug] !== undefined || pendingRequests.has(slug)) return;
+
+        pendingRequests.add(slug);
+        set((s) => ({ 
+            loadingStates: { ...s.loadingStates, [slug]: true },
+            errors: { ...s.errors, [slug]: null }
+        }));
+
+        try {
+            console.log(`[Store] Fetching featured products for slug: ${slug}`);
+            const res = await productService.getFeaturedProductsBySlug(slug);
+            set((s) => ({
+                featuredProductsByCategory: { ...s.featuredProductsByCategory, [slug]: res.data || [] },
+                loadingStates: { ...s.loadingStates, [slug]: false }
+            }));
+        } catch (error: any) {
+            set((s) => ({
+                errors: { ...s.errors, [slug]: error.message },
+                loadingStates: { ...s.loadingStates, [slug]: false }
+            }));
+        } finally {
+            pendingRequests.delete(slug);
+        }
+    },
+
+    clearFeaturedProducts: () => {
+        pendingRequests.clear();
+        set({ featuredProductsByCategory: {}, loadingStates: {}, errors: {} });
+    }
 }));

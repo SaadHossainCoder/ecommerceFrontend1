@@ -4,6 +4,7 @@ import {
     SignupFormValues,
     ForgotPasswordFormValues,
     ResetPasswordFormValues,
+    UpdateProfileFormValues,
     // OtpFormValues
 } from "@/validations/auth.validation";
 
@@ -74,6 +75,11 @@ export const authService = {
 
     authguard: async () => {
         const response = await api.get("auth/auth-guard");
+        return response.data;
+    },
+
+    profileUpdate: async (data: UpdateProfileFormValues) => {
+        const response = await api.put("auth/me", data);
         return response.data;
     },
 };

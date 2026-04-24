@@ -31,6 +31,7 @@ export default function CheckoutPage() {
     const [step, setStep] = useState(1); // 1: Delivery, 2: Payment, 3: Success
     const [paymentMethod, setPaymentMethod] = useState("card");
     const [isProcessing, setIsProcessing] = useState(false);
+    const [addressType, setAddressType] = useState("MY_ADDRESS");
     
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -152,16 +153,16 @@ export default function CheckoutPage() {
                                             <h2 className="text-2xl font-serif text-stone-900 italic lowercase border-b border-stone-100 pb-4">Shipping Destination</h2>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                                                 <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">First Name</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="e.g. Nils" />
+                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Full Name</Label>
+                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="e.g. Nils Sveje" />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Last Name</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="e.g. Sveje" />
+                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Phone Number</Label>
+                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="+91 98765 43210" />
                                                 </div>
                                                 <div className="space-y-2 md:col-span-2">
                                                     <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Email Address</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="nils@inodasveje.com" />
+                                                    <input type="email" className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="nils@inodasveje.com" />
                                                 </div>
                                                 <div className="space-y-2 md:col-span-2">
                                                     <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Street Address</Label>
@@ -172,9 +173,56 @@ export default function CheckoutPage() {
                                                     <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Milan" />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Zip Code</Label>
+                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">State</Label>
+                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Lombardy" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Postal Code</Label>
                                                     <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="20121" />
                                                 </div>
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Country</Label>
+                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Italy" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Address Label</Label>
+                                                    <select className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors">
+                                                        <option value="Home">Home</option>
+                                                        <option value="Office">Office</option>
+                                                        <option value="Other">Other</option>
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Address Type</Label>
+                                                    <select 
+                                                        className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" 
+                                                        value={addressType} 
+                                                        onChange={(e) => setAddressType(e.target.value)}
+                                                    >
+                                                        <option value="MY_ADDRESS">My Address</option>
+                                                        <option value="GIFT_ADDRESS">Gift Address</option>
+                                                    </select>
+                                                </div>
+
+                                                {addressType === 'GIFT_ADDRESS' && (
+                                                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 mt-4 pt-8 border-t border-stone-100">
+                                                        <div className="space-y-2 md:col-span-2">
+                                                            <h3 className="text-lg font-serif text-stone-900 italic lowercase">Gift Details</h3>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Recipient Name</Label>
+                                                            <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Friend's Name" />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Recipient Phone</Label>
+                                                            <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="+91 98765 43210" />
+                                                        </div>
+                                                        <div className="space-y-2 md:col-span-2">
+                                                            <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Gift Message (Optional)</Label>
+                                                            <textarea className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors resize-none" rows={3} placeholder="Add a personalized message..." />
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </section>
 

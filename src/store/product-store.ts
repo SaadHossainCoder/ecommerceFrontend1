@@ -17,7 +17,7 @@ interface ProductStoreState {
         total: number;
         page: number;
         limit: number;
-        totalPages: number;
+        pages: number;
     } | null;
     isLoading: boolean;
     error: string | null;

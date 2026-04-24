@@ -9,6 +9,8 @@ interface VendorStoreState {
     addVendor: (data: any) => Promise<boolean>;
     editVendor: (id: string, data: any) => Promise<boolean>;
     removeVendor: (id: string) => Promise<boolean>;
+    VendorsByShortData: (force?: boolean) => Promise<void>;
+    
 }
 
 export const useVendorStore = create<VendorStoreState>((set, get) => ({
@@ -22,6 +24,18 @@ export const useVendorStore = create<VendorStoreState>((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             const res = await vendorService.getAllVendors();
+            set({ vendors: res.data || [], isLoading: false });
+        } catch (error: any) {
+            set({ error: error.response?.data?.message || error.message || "Failed to fetch vendors", isLoading: false });
+        }
+    },
+
+    VendorsByShortData: async (force = false) => {
+        if (!force && get().vendors.length > 0) return;
+
+        set({ isLoading: true, error: null });
+        try {
+            const res = await vendorService.getVendorByShotData();
             set({ vendors: res.data || [], isLoading: false });
         } catch (error: any) {
             set({ error: error.response?.data?.message || error.message || "Failed to fetch vendors", isLoading: false });

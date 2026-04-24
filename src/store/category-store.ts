@@ -14,6 +14,7 @@ interface CategoryStore {
 
     fetchCategories: (refresh?: boolean) => Promise<void>;
     fetchTree: (refresh?: boolean) => Promise<void>;
+    fetchTreeShortData: (refresh?: boolean) => Promise<void>;
     fetchStats: (refresh?: boolean) => Promise<void>;
     addMainCategory: (data: { name: string; slug: string; icon?: string; featured?: boolean }) => Promise<boolean>;
     addSubCategory: (data: { name: string; slug: string; parentCategoryId: string; icon?: string; featured?: boolean }) => Promise<boolean>;
@@ -61,6 +62,23 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
             set({ error: error.response?.data?.message || "Failed to fetch category tree" });
         } finally {
             pendingRequests.delete("tree");
+            set({ isLoading: false });
+        }
+    },
+
+    fetchTreeShortData: async (refresh = false) => {
+        if (!refresh && get().categoryTree.length > 0) return;
+        if (pendingRequests.has("tree-short")) return;
+
+        pendingRequests.add("tree-short");
+        set({ isLoading: true, error: null });
+        try {
+            const result = await categoryService.getCategoryTreeShortData();
+            if (result.ok) set({ categoryTree: result.data });
+        } catch (error: any) {
+            set({ error: error.response?.data?.message || "Failed to fetch category tree" });
+        } finally {
+            pendingRequests.delete("tree-short");
             set({ isLoading: false });
         }
     },

@@ -45,6 +45,12 @@ export const vendorService = {
         return response.data;
     },
 
+    //GET/vendor/short
+    getVendorByShotData: async (): Promise<{ ok: boolean; message: string; data: Vendor[] }> => {
+        const response = await api.get("vendor/short-data");
+        return response.data;
+    },
+
     // GET /vendor/:id — Public
     getVendorById: async (id: string): Promise<{ ok: boolean; message: string; data: Vendor }> => {
         const response = await api.get(`vendor/${id}`);

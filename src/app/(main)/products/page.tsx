@@ -297,11 +297,11 @@ function ProductCard({ product }: { product: any }) {
 
 export default function ProductsPage() {
     const { products, pagination, isLoading, error, fetchProducts, clearProducts, lastParams } = useProductStore();
-    const { categoryTree, fetchTree } = useCategoryStore();
+    const { categoryTree, fetchTreeShortData } = useCategoryStore();
 
     useEffect(() => {
-        fetchTree();
-    }, [fetchTree]);
+        fetchTreeShortData();
+    }, [fetchTreeShortData]);
 
     const [sliderMax, setSliderMax] = useState(10000);
 
@@ -376,7 +376,8 @@ export default function ProductsPage() {
 
     const loadProducts = useCallback(() => {
         const params: Record<string, any> = {
-            limit: 100, // Fetch up to 100 items to allow accurate local filtering/sorting
+            page,
+            limit: 12, // Backend pagination
         };
         if (selectedCat) {
             if (categoryTree.length === 0) return; // wait for tree to load
@@ -391,41 +392,28 @@ export default function ProductsPage() {
             if (catId) params.categoryId = catId;
         }
         if (searchTerm.trim()) params.search = searchTerm.trim();
+        
+        // Pass server-side filters
+        if (priceRange[0] > 0) params.minPrice = priceRange[0];
+        if (priceRange[1] < sliderMax) params.maxPrice = priceRange[1];
+
+        // Pass server-side sorting
+        if (sortBy === "price-low") params.sortBy = "price_asc";
+        else if (sortBy === "price-high") params.sortBy = "price_desc";
+        else params.sortBy = "newest";
+
         fetchProducts(params);
-    }, [selectedCat, searchTerm, fetchProducts, categoryTree]);
+    }, [page, selectedCat, searchTerm, priceRange, sliderMax, sortBy, fetchProducts, categoryTree]);
 
     useEffect(() => {
-        loadProducts();
+        const timer = setTimeout(() => {
+            loadProducts();
+        }, 300); // Debounce to prevent API spam from slider
+        return () => clearTimeout(timer);
     }, [loadProducts]);
 
-    const displayedProducts = products
-        .filter(p => {
-            const price = (p.subProducts || p.sizes)?.[0]?.price ?? p.price ?? 0;
-            return price >= priceRange[0] && price <= priceRange[1];
-        })
-        .sort((a, b) => {
-            if (sortBy === "price-low") {
-                const priceA = (a.subProducts || a.sizes)?.[0]?.price ?? a.price ?? 0;
-                const priceB = (b.subProducts || b.sizes)?.[0]?.price ?? b.price ?? 0;
-                return priceA - priceB;
-            }
-            if (sortBy === "price-high") {
-                const priceA = (a.subProducts || a.sizes)?.[0]?.price ?? a.price ?? 0;
-                const priceB = (b.subProducts || b.sizes)?.[0]?.price ?? b.price ?? 0;
-                return priceB - priceA;
-            }
-            if (sortBy === "newest") {
-                return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
-            }
-            // "featured"
-            if (a.featured && !b.featured) return -1;
-            if (!a.featured && b.featured) return 1;
-            return 0;
-        });
-
-    const PRODUCTS_PER_PAGE = 12;
-    const totalPages = Math.ceil(displayedProducts.length / PRODUCTS_PER_PAGE);
-    const paginatedProducts = displayedProducts.slice((page - 1) * PRODUCTS_PER_PAGE, page * PRODUCTS_PER_PAGE);
+    const totalPages = pagination?.pages || 1;
+    const paginatedProducts = products;
 
     return (
         <div className="min-h-screen bg-stone-50">
@@ -494,7 +482,7 @@ export default function ProductsPage() {
                                 </button>
 
                                 <p className="text-xs text-stone-400 font-medium">
-                                    {isLoading ? "Loading…" : `${displayedProducts.length} ${displayedProducts.length === 1 ? "piece" : "pieces"}${selectedCat ? ` · ${selectedCat}` : ""}`}
+                                    {isLoading ? "Loading…" : `${pagination?.total || products.length} ${((pagination?.total || products.length) === 1) ? "piece" : "pieces"}${selectedCat ? ` · ${selectedCat}` : ""}`}
                                 </p>
                             </div>
 

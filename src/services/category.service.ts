@@ -44,6 +44,11 @@ export const categoryService = {
         return response.data;
     },
 
+    getCategoryTreeShortData: async () => {
+        const response = await api.get<{ ok: boolean; data: Category[] }>("categories/tree-short-data");
+        return response.data;
+    },
+
     getCategoryById: async (id: string) => {
         const response = await api.get<{ ok: boolean; data: Category }>(`categories/${id}`);
         return response.data;

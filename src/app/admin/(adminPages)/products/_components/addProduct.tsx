@@ -17,7 +17,7 @@ import {
     Link as LinkIcon,
     PlusCircle,
     FileImage,
-    ExternalLink,
+    // ExternalLink,
     Box,
     Filter,
     List,
@@ -191,13 +191,13 @@ export default function EditProductForm({
     onSave,
     initialData,
 }: EditProductFormProps) {
-    const { categoryTree, fetchTree } = useCategoryStore();
-    const { vendors, fetchVendors } = useVendorStore();
+    const { categoryTree, fetchTreeShortData } = useCategoryStore();
+    const { vendors, VendorsByShortData } = useVendorStore();
 
     useEffect(() => {
-        fetchTree();
-        fetchVendors();
-    }, [fetchTree, fetchVendors]);
+        fetchTreeShortData();
+        VendorsByShortData();
+    }, [fetchTreeShortData, VendorsByShortData]);
 
     // Map initial images from objects to strings
     const initialImages = useMemo(() => {

@@ -9,11 +9,9 @@ import { Button } from "@/components/ui/button";
 import { useSearchStore } from "@/store/search-store";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/store/auth-store";
-import { LogOut } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { cartLocalStorageData } from "@/localStorage/cartData";
+// import { userLocalStorageData } from "@/localStorage/userData";
 
 const navLinks = [
     { href: "/home", label: "Home" },
@@ -24,9 +22,6 @@ const navLinks = [
 ];
 
 export function Navbar() {
-    const { user, isAuthenticated } = useAuthStore();
-    console.log(user);
-
     const [hasMounted, setHasMounted] = useState(false);
     const [cartItemCount, setCartItemCount] = useState(0);
 
@@ -44,6 +39,7 @@ export function Navbar() {
 
     const pathname = usePathname();
     const { openSearch } = useSearchStore();
+    // const user = userLocalStorageData.getUser();
 
     return (
         <header className="sticky top-0 z-50 w-base h-20 w-full border-b bg-background/80 backdrop-blur-lg flex items-center">

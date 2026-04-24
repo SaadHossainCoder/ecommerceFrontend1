@@ -202,38 +202,46 @@ export default function EditProductForm({
     // Map initial images from objects to strings
     const initialImages = useMemo(() => {
         const imgs = initialData?.generalImages || initialData?.images;
-        const mapped = Array.isArray(imgs) 
-            ? imgs.map((img: any) => typeof img === 'string' ? img : img.url) 
+        const mapped = Array.isArray(imgs)
+            ? imgs.map((img: any) => typeof img === 'string' ? img : img.url)
             : [];
         return mapped.length > 0 ? mapped : [""];
     }, [initialData]);
 
-    const defaultFormState = useMemo(() => ({
-        title: initialData?.title || "",
-        description: initialData?.description || "",
-        longDescription: initialData?.longDescription || "",
-        brand: initialData?.brand || initialData?.ingredients?.brand || "",
-        vendor: typeof initialData?.vendor === 'object' ? initialData.vendor.id : initialData?.vendor || "",
-        sku: initialData?.sku || "",
-        slug: initialData?.slug || "",
-        discount: initialData?.discount || 0,
-        category: typeof initialData?.category === 'object' ? initialData.category.id : initialData?.category || "",
-        subcategory: initialData?.subcategory || initialData?.ingredients?.subcategory || "",
-        featured: initialData?.featured || false,
-        disableProduct: initialData?.disableProduct || false,
-        disableProductDate: initialData?.disableProductDate || null,
-        subProducts: (initialData?.subProducts || initialData?.sizes)?.map((s: any) => ({
-            sku: s.sku || "",
-            type: s.type || s.size || "",
-            qty: Number(s.qty || 0),
-            price: Number(s.price || 0),
-            images: Array.isArray(s.images) && s.images.length ? s.images : (s.image ? [s.image] : [""]),
-            size: Array.isArray(s.size) ? s.size : (typeof s.size === 'string' ? [s.size] : [""])
-        })) || [{ sku: "", type: "", qty: 0, price: 0, images: [""], size: [""] }],
-        benefits: (Array.isArray(initialData?.benefits) ? initialData.benefits : (Array.isArray(initialData?.ingredients?.benefits) ? initialData.ingredients.benefits : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
-        ingredients: (Array.isArray(initialData?.ingredients) ? initialData.ingredients : (Array.isArray(initialData?.ingredients?.details) ? initialData.ingredients.details : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
-        generalImages: initialImages,
-    }), [initialData, initialImages]);
+    const defaultFormState = useMemo(() => {
+        // When editing, category.id may point to subcategory (since backend stores subcategory as categoryId)
+        // Detect via parentCategory: if present, category IS the subcategory
+        const categoryObj = typeof initialData?.category === 'object' ? initialData.category : null;
+        const hasParent = categoryObj?.parentCategory;
+
+        return {
+            title: initialData?.title || "",
+            description: initialData?.description || "",
+            longDescription: initialData?.longDescription || "",
+            brand: initialData?.brand || initialData?.ingredients?.brand || "",
+            vendor: typeof initialData?.vendor === 'object' ? initialData.vendor.id : initialData?.vendor || "",
+            sku: initialData?.sku || "",
+            slug: initialData?.slug || "",
+            discount: initialData?.discount || 0,
+            // If category has a parentCategory → it IS the subcategory, use parent as category
+            category: hasParent ? categoryObj.parentCategory.id : (categoryObj?.id || initialData?.category || ""),
+            subcategory: hasParent ? categoryObj.id : (initialData?.ingredients?.subcategory || ""),
+            featured: initialData?.featured || false,
+            disableProduct: initialData?.disableProduct || false,
+            disableProductDate: initialData?.disableProductDate || null,
+            subProducts: (initialData?.subProducts || initialData?.sizes)?.map((s: any) => ({
+                sku: s.sku || "",
+                type: s.type || s.size || "",
+                qty: Number(s.qty || 0),
+                price: Number(s.price || 0),
+                images: Array.isArray(s.images) && s.images.length ? s.images : (s.image ? [s.image] : [""]),
+                size: Array.isArray(s.size) ? s.size : (typeof s.size === 'string' ? [s.size] : [""])
+            })) || [{ sku: "", type: "", qty: 0, price: 0, images: [""], size: [""] }],
+            benefits: (Array.isArray(initialData?.benefits) ? initialData.benefits : (Array.isArray(initialData?.ingredients?.benefits) ? initialData.ingredients.benefits : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
+            ingredients: (Array.isArray(initialData?.ingredients) ? initialData.ingredients : (Array.isArray(initialData?.ingredients?.details) ? initialData.ingredients.details : [])).map((v: string) => ({ value: v })) || [{ value: "" }],
+            generalImages: initialImages,
+        };
+    }, [initialData, initialImages]);
 
     const {
         register,
@@ -277,7 +285,7 @@ export default function EditProductForm({
     const onSubmit: SubmitHandler<ProductFormValues> = async (data: ProductFormValues) => {
         // Filter empty strings from all array fields
         data.generalImages = (data.generalImages || []).filter(v => typeof v === "string" && v.trim() !== "");
-        
+
         data.subProducts = (data.subProducts || []).map(s => ({
             ...s,
             images: (s.images || []).filter(v => typeof v === "string" && v.trim() !== ""),
@@ -402,6 +410,7 @@ export default function EditProductForm({
                                         </Select>
                                     )}
                                 />
+                                {errors.subcategory && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.subcategory.message as string}</p>}
                             </div>
                             <div>
                                 <Label htmlFor="sku" className="text-xs font-semibold">UNIQUE SKU *</Label>
@@ -489,7 +498,7 @@ export default function EditProductForm({
 
                     <section className="space-y-4">
                         <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-primary">
+                            <div className="flex items-center gap-2 text-primary">
                                 <List className="h-5 w-5" />
                                 <h3 className="font-bold uppercase tracking-wider">Variants & Inventory</h3>
                             </div>
@@ -543,7 +552,7 @@ export default function EditProductForm({
                                                     name={`subProducts.${index}.size`}
                                                     control={control}
                                                     render={({ field }) => (
-                                                        <TagInput 
+                                                        <TagInput
                                                             label="Available sizes / options"
                                                             values={field.value || [""]}
                                                             onChange={(vals) => field.onChange(vals)}

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import Link from "next/link";
 import { useFeaturedProducts } from "@/store/product-store";
 import ProductCard from "./ProductCard";
-import { motion, AnimatePresence } from "motion/react";
 
 interface FeaturedProductsListProps {
     categoryId?: string;
@@ -11,12 +11,19 @@ interface FeaturedProductsListProps {
     limit?: number;
 }
 
-const ProductCardSkeleton = () => (
-    <div className="space-y-4 animate-pulse">
-        <div className="aspect-square bg-zinc-100 rounded-none w-full" />
-        <div className="space-y-2">
-            <div className="h-4 bg-zinc-100 w-3/4" />
-            <div className="h-4 bg-zinc-100 w-1/4" />
+const ProductCardSkeleton = ({ index = 0 }: { index?: number }) => (
+    <div
+        className="space-y-3 animate-pulse"
+        style={{ animationDelay: `${index * 120}ms` }}
+    >
+        {/* Image skeleton with shimmer */}
+        <div className="relative aspect-square bg-muted/40 overflow-hidden">
+            <div className="absolute inset-0 animate-shimmer" />
+        </div>
+        {/* Text skeletons */}
+        <div className="space-y-1.5 px-0.5">
+            <div className="h-2.5 bg-muted/50 rounded-full w-4/5" />
+            <div className="h-2.5 bg-muted/50 rounded-full w-2/5" />
         </div>
     </div>
 );
@@ -27,29 +34,55 @@ export function FeaturedProductsList({ categoryId, categorySlug, limit = 4 }: Fe
         loadingStates, 
         errors, 
         fetchFeaturedProducts,
-        fetchFeaturedProductsBySlug 
     } = useFeaturedProducts();
-    
-    // Determine the key for state lookup (Slug takes precedence)
-    const activeKey = categorySlug || categoryId || "all";
-    
-    const featuredProducts = featuredProductsByCategory[activeKey] || [];
-    const isLoading = loadingStates[activeKey];
-    const error = errors[activeKey];
+
+    // Always fetch ALL featured products once — single API call
+    const allProducts = featuredProductsByCategory["all"] || [];
+    const isLoading = loadingStates["all"];
+    const error = errors["all"];
 
     useEffect(() => {
-        if (categorySlug) {
-            fetchFeaturedProductsBySlug(categorySlug);
-        } else {
-            fetchFeaturedProducts(categoryId || "all");
-        }
-    }, [categoryId, categorySlug, fetchFeaturedProducts, fetchFeaturedProductsBySlug]);
+        fetchFeaturedProducts("all");
+    }, [fetchFeaturedProducts]);
+
+    // Client-side filter: when categoryId or categorySlug is provided,
+    // filter from the "all" dataset instead of making extra API calls
+    const filteredProducts = useMemo(() => {
+        if (!categoryId && !categorySlug) return allProducts;
+
+        return allProducts.filter((p: any) => {
+            // Match by categoryId
+            if (categoryId) {
+                if (
+                    p.categoryId === categoryId ||
+                    p.category?.id === categoryId ||
+                    p.category?._id === categoryId
+                ) {
+                    return true;
+                }
+            }
+
+            // Match by categorySlug (check slug, name lowercase)
+            if (categorySlug) {
+                const slug = categorySlug.toLowerCase();
+                if (
+                    p.category?.slug?.toLowerCase() === slug ||
+                    p.category?.name?.toLowerCase() === slug ||
+                    p.categorySlug?.toLowerCase() === slug
+                ) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+    }, [allProducts, categoryId, categorySlug]);
 
     if (isLoading) {
         return (
             <>
                 {Array.from({ length: limit }).map((_, i) => (
-                    <ProductCardSkeleton key={i} />
+                    <ProductCardSkeleton key={i} index={i} />
                 ))}
             </>
         );
@@ -57,52 +90,52 @@ export function FeaturedProductsList({ categoryId, categorySlug, limit = 4 }: Fe
 
     if (error) {
         return (
-            <div className="col-span-full py-16 text-center space-y-4">
-                <p className="text-red-900/60 font-medium text-sm tracking-widest uppercase">{error}</p>
+            <div className="col-span-full py-20 text-center space-y-5">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-50 mb-2">
+                    <span className="text-red-400 text-xl">!</span>
+                </div>
+                <p className="text-red-800/50 font-medium text-xs tracking-[0.25em] uppercase">{error}</p>
                 <button 
-                    onClick={() => fetchFeaturedProducts(categoryId)}
-                    className="text-xs border-b border-black pb-0.5 hover:opacity-60 transition-opacity uppercase tracking-tighter"
+                    onClick={() => fetchFeaturedProducts("all")}
+                    className="text-xs border-b border-foreground/30 pb-0.5 hover:border-foreground hover:text-foreground transition-all duration-300 uppercase tracking-[0.15em] text-foreground/60"
                 >
-                    Retry Fetch
+                    Try Again
                 </button>
             </div>
         );
     }
 
-    if (!featuredProducts || featuredProducts.length === 0) {
+    if (!filteredProducts || filteredProducts.length === 0) {
         return (
-            <div className="col-span-full py-20 text-center">
-                <p className="text-zinc-400 italic font-body text-lg">No masterpieces found in this collection yet.</p>
+            <div className="col-span-full py-24 text-center space-y-3">
+                <p className="text-foreground/30 text-xs tracking-[0.25em] uppercase font-medium">Collection</p>
+                <p className="text-foreground/50 italic font-body text-lg">No masterpieces found in this collection yet.</p>
             </div>
         );
     }
 
-    const displayProducts = featuredProducts.slice(0, limit);
+    const displayProducts = filteredProducts.slice(0, limit);
 
     return (
-        <AnimatePresence mode="popLayout">
+        <>
             {displayProducts.map((p: any, index: number) => {
                 const displayPrice = p.subProducts?.[0]?.price || p.price || 0;
                 return (
-                    <motion.div
-                        key={p.id || index}
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ 
-                            duration: 0.8, 
-                            delay: index * 0.1,
-                            ease: [0.21, 0.47, 0.32, 0.98]
-                        }}
+                    <Link
+                        key={p.id || p._id || index}
+                        href={`/products/${p.slug}`}
+                        className="block animate-fade-in-up"
+                        style={{ animationDelay: `${index * 80}ms`, animationFillMode: "both" }}
                     >
                         <ProductCard 
                             name={p.title || "Unknown Product"} 
                             price={displayPrice} 
-                            image={p.generalImages?.[0] || "/placeholder.png"} 
+                            image={p.subProducts?.[0]?.images?.[0] || "/placeholder.png"}
+                            index={index}
                         />
-                    </motion.div>
+                    </Link>
                 );
             })}
-        </AnimatePresence>
+        </>
     );
 }

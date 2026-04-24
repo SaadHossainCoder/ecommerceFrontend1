@@ -85,7 +85,7 @@ export default async function HomePage() {
                     </div>
                     <hr className="pb-10 h-3" />
                     <Suspense fallback={<LoaderCircle className="text-black"/>}>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 container-custom">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-x-4 gap-y-8 container-custom">
                             <FeaturedProductsList limit={6}/>
                         </div>
                     </Suspense>
@@ -126,9 +126,9 @@ export default async function HomePage() {
                     </div>
                     <hr className="pb-10 h-3" />
                     <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 container-custom">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-x-4 gap-y-8 container-custom">
                             {/* Passing the specific category Slug for Ladies/Dresses */}
-                            <FeaturedProductsList limit={6} categorySlug="ladies-dresses" />
+                            <FeaturedProductsList limit={6} categorySlug="bags" />
                         </div>
                     </Suspense>
                 </section>

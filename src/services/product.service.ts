@@ -125,4 +125,13 @@ export const productService = {
         const response = await api.delete(`products/review/${reviewId}`);
         return response.data;
     },
+
+    getAllProductsByAdmin: async (params?: Record<string, any>): Promise<{ 
+        ok: boolean; 
+        message: string; 
+        data: { data: Product[]; pagination: any } 
+    }> => {
+        const response = await api.get("products/admin", { params });
+        return response.data;
+    },
 };

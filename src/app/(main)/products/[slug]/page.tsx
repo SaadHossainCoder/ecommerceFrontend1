@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/components/ui/toaster";
 import { productService } from "@/services/product.service";
-import { categoryService } from "@/services/category.service";
+import { useProductDetail } from "@/store/product-store";
 import { cartLocalStorageData } from "@/localStorage/cartData";
 
 // ─── Zoom Component ───────────────────────────────────────────────────────────
@@ -100,14 +100,13 @@ export default function ProductDetailsPage() {
     const params = useParams();
     const slug = params?.slug as string;
 
-    const [product, setProduct] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [fetchError, setFetchError] = useState<string | null>(null);
+    // ── Store: single source of truth (1 API call) ─────────────────────────────
+    const { product, reviews, relatedProducts, isLoading, error: fetchError, fetchBySlug, refreshBySlug } = useProductDetail();
 
-    const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+    // ── Local UI state ─────────────────────────────────────────────────────────
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
-    const [selectedColor, setSelectedColor] = useState(0);
+    // const [selectedColor, setSelectedColor] = useState(0);
     const [selectedSize, setSelectedSize] = useState<string>("");
     const [selectedSubSize, setSelectedSubSize] = useState<string>("");
     const [wishlisted, setWishlisted] = useState(false);
@@ -117,8 +116,6 @@ export default function ProductDetailsPage() {
     const [showSticky, setShowSticky] = useState(false);
     const [autoPlay, setAutoPlay] = useState(true);
     const [lightbox, setLightbox] = useState(false);
-
-    const [reviews, setReviews] = useState<any[]>([]);
     const [reviewComment, setReviewComment] = useState("");
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
@@ -130,16 +127,15 @@ export default function ProductDetailsPage() {
 
         try {
             setIsSubmittingReview(true);
-            const res = await productService.addReview(product.id, {
+            await productService.addReview(product.id, {
                 rating: reviewRating,
                 comment: reviewComment
             });
             toast({ title: "Success", description: "Your assessment has been submitted." });
             setReviewRating(0);
             setReviewComment("");
-            // Refresh reviews
-            const newReviews = await productService.getProductReviews(product.id);
-            if (newReviews.data) setReviews(newReviews.data);
+            // Refresh all data via the store (single API)
+            await refreshBySlug(slug);
         } catch (err: any) {
             const msg = err.response?.data?.message || err.message || "Failed to submit review";
             toast({ title: "Error", description: msg, variant: "destructive" });
@@ -171,13 +167,14 @@ export default function ProductDetailsPage() {
         }));
     }, [reviews]);
 
-    // ── Derived values ─────────────────────────────────────────────────────────
+    // ── Derived values (mapped to actual JSON structure) ────────────────────────
     const name = product?.title ?? product?.name ?? "Unnamed";
     const categoryName = typeof product?.category === "object" ? product?.category?.name : product?.category;
     const parentCategory = typeof product?.category === "object" ? product?.category?.parentCategory : null;
     const sku = product?.sku ?? "—";
     const description = product?.description ?? "";
-    const details = product?.benefits ?? [];
+    const details = product?.ingredients?.benefits ?? [];
+    const brand = product?.ingredients?.brand ?? "Gemini";
     const discount = product?.discount ?? 0;
     const currentVariant = product?.subProducts?.find((s: any) => s.type === selectedSize) ?? product?.subProducts?.[0];
     const price = currentVariant?.price ?? 0;
@@ -200,117 +197,21 @@ export default function ProductDetailsPage() {
         setSelectedImage(0);
     }, [selectedSize]);
 
-    // ── Fetch product ──────────────────────────────────────────────────────────
+    // ── Fetch product via store (single API call) ──────────────────────────────
     useEffect(() => {
         if (!slug) return;
-        setIsLoading(true);
-        setFetchError(null);
-        productService.getProductBySlug(slug)
-            .then((res) => {
-                const data = res.data;
-                setProduct(data);
-                // Set first sub-product as default selection
-                if (data?.subProducts?.length > 0) {
-                    const first = data.subProducts[0];
-                    setSelectedSize(first.type);
-                    if (first.size?.length > 0) {
-                        setSelectedSubSize(first.size[0]);
-                    }
-                }
-            })
-            .catch((err) => {
-                const msg = err.response?.data?.message || err.message || "Failed to load product";
-                setFetchError(msg);
-            })
-            .finally(() => setIsLoading(false));
-    }, [slug]);
+        fetchBySlug(slug);
+    }, [slug, fetchBySlug]);
 
-    // ── Fetch Reviews ──────────────────────────────────────────────────────────
+    // Set default variant selection when product loads
     useEffect(() => {
-        if (!product?.id) return;
-        productService.getProductReviews(product.id)
-            .then(res => {
-                if (res.data) setReviews(res.data);
-            })
-            .catch(err => console.error("Failed to fetch reviews", err));
+        if (!product?.subProducts?.length) return;
+        const first = product.subProducts[0];
+        setSelectedSize(first.type);
+        if (first.size?.length > 0) {
+            setSelectedSubSize(first.size[0]);
+        }
     }, [product?.id]);
-
-    // ── Fetch related products ───────────────────────────────
-    useEffect(() => {
-        if (!product?.category) return;
-
-        const categoryIdQuery = typeof product.category === 'object' ? product.category.id : product.category;
-
-        if (!categoryIdQuery) return;
-
-        const fetchRelated = async () => {
-            try {
-                // Fetch a bit more to ensure we can find items in the same subcategory
-                const res = await productService.getAllProducts({ categoryId: categoryIdQuery, limit: 12 });
-                let others = res.data.data.filter((p: any) => p.slug !== slug);
-
-                // Fetch the category to get its SubCategories
-                let fetchedSubCategories: any[] = [];
-                try {
-                    const catRes = await categoryService.getSubCategories(categoryIdQuery);
-                    if (catRes.data?.subCategories) {
-                        fetchedSubCategories = catRes.data.subCategories;
-                    }
-                } catch (err) {
-                    console.error("Failed to fetch subcategories", err);
-                }
-
-                // Prioritize items in the same subcategory
-                let subCatId = product?.ingredients?.subcategory;
-                
-                // If subCatId is a name, find its actual ID from the fetched SubCategories
-                if (subCatId && fetchedSubCategories.length > 0) {
-                    const match = fetchedSubCategories.find(s => s.id === subCatId || s.name === subCatId || s.slug === subCatId);
-                    if (match) subCatId = match.id;
-                }
-
-                if (!subCatId && typeof product.category === 'object') {
-                    if (Array.isArray(product.category.subCategories) && product.category.subCategories.length > 0) {
-                        subCatId = product.category.subCategories[0].id;
-                    } else if (fetchedSubCategories.length > 0) {
-                        subCatId = fetchedSubCategories[0].id;
-                    }
-                }
-
-                if (subCatId) {
-                    const sameSubCat = others.filter((p: any) => {
-                        let pSubCat = p?.ingredients?.subcategory;
-                        if (pSubCat && fetchedSubCategories.length > 0) {
-                             const match = fetchedSubCategories.find(s => s.id === pSubCat || s.name === pSubCat || s.slug === pSubCat);
-                             if (match) pSubCat = match.id;
-                        }
-                        if (!pSubCat && typeof p?.category === 'object' && Array.isArray(p?.category?.subCategories)) {
-                             pSubCat = p.category.subCategories[0]?.id;
-                        }
-                        return pSubCat === subCatId;
-                    });
-                    const diffSubCat = others.filter((p: any) => {
-                        let pSubCat = p?.ingredients?.subcategory;
-                        if (pSubCat && fetchedSubCategories.length > 0) {
-                             const match = fetchedSubCategories.find(s => s.id === pSubCat || s.name === pSubCat || s.slug === pSubCat);
-                             if (match) pSubCat = match.id;
-                        }
-                        if (!pSubCat && typeof p?.category === 'object' && Array.isArray(p?.category?.subCategories)) {
-                             pSubCat = p.category.subCategories[0]?.id;
-                        }
-                        return pSubCat !== subCatId;
-                    });
-                    others = [...sameSubCat, ...diffSubCat];
-                }
-
-                setRelatedProducts(others.slice(0, 4));
-            } catch (err) {
-                console.error("Failed to fetch curated alternatives", err);
-            }
-        };
-
-        fetchRelated();
-    }, [product?.category, product?.ingredients, slug]);
 
     // Update sub-size if variant changes
     useEffect(() => {
@@ -491,9 +392,9 @@ export default function ProductDetailsPage() {
                             </h1>
 
                             <div className="flex items-center gap-3">
-                                <Stars rating={4.9} />
-                                <span className="text-xs font-bold text-stone-700">4.9</span>
-                                <span className="text-[10px] uppercase tracking-widest font-bold text-stone-400">(145 reviews)</span>
+                                <Stars rating={product?.rating ?? 0} />
+                                <span className="text-xs font-bold text-stone-700">{product?.rating ?? 0}</span>
+                                <span className="text-[10px] uppercase tracking-widest font-bold text-stone-400">({product?.numReviews ?? 0} reviews)</span>
                             </div>
                         </div>
 
@@ -727,7 +628,7 @@ export default function ProductDetailsPage() {
                                 </div>
                                 <div className="bg-stone-900 p-6 sm:p-10 text-white flex flex-col justify-center border border-stone-800 shadow-xl shadow-stone-200/50 mt-6 md:mt-0">
                                     <p className="text-[9px] uppercase tracking-[0.4em] font-bold text-amber-500 mb-4">Heritage Lineage</p>
-                                    <h3 className="text-3xl font-serif leading-tight mb-8">{product.brand ?? "Gemini"}<br /><span className="text-stone-400 italic font-light">Heritage</span></h3>
+                                    <h3 className="text-3xl font-serif leading-tight mb-8">{brand}<br /><span className="text-stone-400 italic font-light">Heritage</span></h3>
                                     <div className="space-y-5 text-xs text-stone-300 font-mono tracking-widest uppercase">
                                         <div className="flex justify-between border-b border-stone-700/50 pb-3">
                                             <span className="text-stone-500">Classification</span>
@@ -959,7 +860,7 @@ export default function ProductDetailsPage() {
                                     <Link key={p.id} href={`/products/${p.slug}`} className="group space-y-4 block">
                                         <div className="relative aspect-[4/5] overflow-hidden bg-stone-100 border border-stone-200/60 shadow-sm transition-all duration-500 hover:shadow-xl">
                                             <Image
-                                                src={p.generalImages?.[0] || "https://placehold.co/800x1000"}
+                                                src={p.subProducts?.[0]?.images[0] || "https://placehold.co/800x1000"}
                                                 alt={p.title}
                                                 fill
                                                 className="object-cover transition-transform duration-1000 group-hover:scale-105"

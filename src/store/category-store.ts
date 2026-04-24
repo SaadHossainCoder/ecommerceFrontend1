@@ -21,6 +21,9 @@ interface CategoryStore {
     removeCategory: (id: string, hard?: boolean) => Promise<boolean>;
 }
 
+// Singleton to track in-flight requests across all store instances/renders
+const pendingRequests = new Set<string>();
+
 export const useCategoryStore = create<CategoryStore>((set, get) => ({
     categories: [],
     categoryTree: [],
@@ -30,20 +33,26 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
 
     fetchCategories: async (refresh = false) => {
         if (!refresh && get().categories.length > 0) return;
+        if (pendingRequests.has("categories")) return;
+
+        pendingRequests.add("categories");
         set({ isLoading: true, error: null });
         try {
             const result = await categoryService.getAllCategories();
-            // result.data contains { ok, data: Category[], total, ... }
             if (result.ok) set({ categories: result.data.data || [] });
         } catch (error: any) {
             set({ error: error.response?.data?.message || "Failed to fetch categories" });
         } finally {
+            pendingRequests.delete("categories");
             set({ isLoading: false });
         }
     },
 
     fetchTree: async (refresh = false) => {
         if (!refresh && get().categoryTree.length > 0) return;
+        if (pendingRequests.has("tree")) return;
+
+        pendingRequests.add("tree");
         set({ isLoading: true, error: null });
         try {
             const result = await categoryService.getCategoryTree();
@@ -51,12 +60,16 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
         } catch (error: any) {
             set({ error: error.response?.data?.message || "Failed to fetch category tree" });
         } finally {
+            pendingRequests.delete("tree");
             set({ isLoading: false });
         }
     },
 
     fetchStats: async (refresh = false) => {
         if (!refresh && get().stats) return;
+        if (pendingRequests.has("stats")) return;
+
+        pendingRequests.add("stats");
         set({ isLoading: true, error: null });
         try {
             const result = await categoryService.getCategoryStatistics();
@@ -64,6 +77,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
         } catch (error: any) {
             set({ error: error.response?.data?.message || "Failed to fetch stats" });
         } finally {
+            pendingRequests.delete("stats");
             set({ isLoading: false });
         }
     },

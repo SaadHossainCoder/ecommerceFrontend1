@@ -15,91 +15,192 @@ import {
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useProductStore } from "@/store/product-store";
+import { useCategoryStore } from "@/store/category-store";
 
-// ─── Categories ───────────────────────────────────────────────────────────────
 
-const categories = [
-    { label: "All",       value: null         },
-    { label: "Furniture", value: "Furniture"  },
-    { label: "Clocks",    value: "Clocks"     },
-    { label: "Fine Art",  value: "Art"        },
-    { label: "Ceramics",  value: "Ceramics"   },
-    { label: "Artifacts", value: "Artifacts"  },
-    { label: "Textiles",  value: "Textiles"   },
-];
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 function Sidebar({
+    categoryTree,
     selectedCat,
     setSelectedCat,
     priceRange,
     setPriceRange,
     onReset,
     onClose,
+    sliderMax,
 }: {
+    categoryTree: any[];
     selectedCat: string | null;
     setSelectedCat: (v: string | null) => void;
     priceRange: number[];
     setPriceRange: (v: number[]) => void;
     onReset: () => void;
     onClose?: () => void;
+    sliderMax: number;
 }) {
+    const [expandedCats, setExpandedCats] = useState<string[]>([]);
+    const [catSearch, setCatSearch] = useState("");
+
+    // Auto-expand parents of active subcategories
+    useEffect(() => {
+        if (selectedCat) {
+            const parent = categoryTree.find(cat => 
+                cat.subCategories?.some((s: any) => s.slug === selectedCat)
+            );
+            if (parent && !expandedCats.includes(parent.id)) {
+                setExpandedCats(prev => [...prev, parent.id]);
+            }
+        }
+    }, [selectedCat, categoryTree]);
+
+    const toggleExpand = (id: string, e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setExpandedCats(prev => 
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
+
+    const filteredTree = categoryTree.map(cat => {
+        if (!catSearch.trim()) return cat;
+        const q = catSearch.toLowerCase();
+        const matchesMain = cat.name.toLowerCase().includes(q);
+        const matchingSubs = (cat.subCategories || []).filter((s: any) => s.name.toLowerCase().includes(q));
+        
+        if (matchesMain || matchingSubs.length > 0) {
+            return {
+                ...cat,
+                // If main matches, show all subs. If sub matches, only show matched subs.
+                subCategories: matchesMain ? cat.subCategories : matchingSubs
+            };
+        }
+        return null;
+    }).filter(Boolean);
+
     return (
-        <div className="space-y-10">
+        <div className="space-y-12">
             {/* Categories */}
-            <div>
-                <p className="text-[9px] uppercase tracking-[0.2em] font-semibold text-stone-400 mb-4">
-                    Category
-                </p>
-                <ul className="space-y-0.5">
-                    {categories.map((cat) => {
-                        const active = selectedCat === cat.value;
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-stone-300">
+                        Collections
+                    </p>
+                </div>
+                
+                {/* Category Search */}
+                <div className="relative">
+                    <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+                    <input
+                        type="text"
+                        placeholder="Search collections..."
+                        value={catSearch}
+                        onChange={(e) => setCatSearch(e.target.value)}
+                        className="w-full pl-8 pr-3 py-2 text-xs bg-white border border-stone-200 focus:border-stone-900 focus:outline-none transition-colors rounded-sm"
+                    />
+                </div>
+
+                <div className="space-y-1 max-h-[40vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-stone-200">
+                    <button
+                        onClick={() => { setSelectedCat(null); onClose?.(); }}
+                        className={`w-full text-left py-2 px-3 text-sm transition-all duration-300 border-l-2 ${
+                            !selectedCat 
+                            ? "border-primary text-primary font-semibold bg-primary/5" 
+                            : "border-transparent text-stone-500 hover:text-stone-900 hover:bg-stone-50"
+                        }`}
+                    >
+                        All Masterpieces
+                    </button>
+                    {filteredTree.length === 0 && (
+                        <div className="py-4 text-center text-xs text-stone-400">
+                            No collections found.
+                        </div>
+                    )}
+                    {filteredTree.map((cat: any) => {
+                        const hasActiveSub = cat.subCategories?.some((s: any) => s.slug === selectedCat);
+                        const isSearching = catSearch.trim().length > 0;
+                        const isExpanded = expandedCats.includes(cat.id) || hasActiveSub || isSearching;
+                        const hasSubs = cat.subCategories && cat.subCategories.length > 0;
+                        
                         return (
-                            <li key={cat.label}>
-                                <button
-                                    onClick={() => {
-                                        setSelectedCat(cat.value);
-                                        onClose?.();
-                                    }}
-                                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${
-                                        active
-                                            ? "bg-stone-900 text-white font-semibold"
-                                            : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
-                                    }`}
-                                >
-                                    {cat.label}
-                                </button>
-                            </li>
+                            <div key={cat.id} className="space-y-1">
+                                <div className="flex items-center group/item">
+                                    <button
+                                        onClick={(e) => {
+                                            if (hasSubs) {
+                                                toggleExpand(cat.id, e);
+                                            } else {
+                                                setSelectedCat(cat.slug);
+                                                onClose?.();
+                                            }
+                                        }}
+                                        className={`flex-1 flex items-center justify-between py-2 px-3 text-sm transition-all duration-300 border-l-2 ${
+                                            hasActiveSub
+                                            ? "border-primary/30 text-stone-900 font-medium bg-stone-50/50"
+                                            : "border-transparent text-stone-500 hover:text-stone-900 hover:bg-stone-50"
+                                        }`}
+                                    >
+                                        <span>{cat.name}</span>
+                                        {hasSubs && (
+                                            <ChevronDown className={`w-3.5 h-3.5 text-stone-300 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
+                                        )}
+                                    </button>
+                                </div>
+                                
+                                {hasSubs && isExpanded && (
+                                    <div className="ml-3 border-l border-stone-100 flex flex-col animate-fade-in">
+                                        {cat.subCategories.map((sub: any) => {
+                                            const active = selectedCat === sub.slug;
+                                            return (
+                                                <button
+                                                    key={sub.id}
+                                                    onClick={() => { setSelectedCat(sub.slug); onClose?.(); }}
+                                                    className={`text-left py-1.5 pl-5 pr-3 text-xs transition-colors ${
+                                                        active 
+                                                        ? "text-primary font-semibold" 
+                                                        : "text-stone-400 hover:text-stone-700"
+                                                    }`}
+                                                >
+                                                    {sub.name}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         );
                     })}
-                </ul>
+                </div>
             </div>
 
             {/* Price */}
-            <div>
-                <p className="text-[9px] uppercase tracking-[0.2em] font-semibold text-stone-400 mb-4">
-                    Price Range
+            <div className="space-y-6">
+                <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-stone-300">
+                    Investment
                 </p>
-                <Slider
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    max={10000}
-                    step={100}
-                    className="mb-4"
-                />
-                <div className="flex justify-between text-xs font-mono text-stone-500">
-                    <span>₹{priceRange[0].toLocaleString()}</span>
-                    <span>₹{priceRange[1].toLocaleString()}</span>
+                <div className="px-2">
+                    <Slider
+                        value={priceRange}
+                        onValueChange={setPriceRange}
+                        max={sliderMax}
+                        step={100}
+                        className="mb-5"
+                    />
+                    <div className="flex justify-between items-center text-[11px] font-medium text-stone-500">
+                        <span className="bg-stone-100 px-2 py-1 rounded-sm">₹{priceRange[0].toLocaleString()}</span>
+                        <div className="h-px w-4 bg-stone-200" />
+                        <span className="bg-stone-100 px-2 py-1 rounded-sm">₹{priceRange[1].toLocaleString()}</span>
+                    </div>
                 </div>
             </div>
 
             {/* Reset */}
             <button
                 onClick={onReset}
-                className="w-full border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900 text-xs uppercase tracking-[0.2em] font-semibold py-2.5 transition-colors"
+                className="w-full bg-stone-50 border border-stone-200 text-stone-400 hover:border-stone-900 hover:text-stone-900 text-[10px] uppercase tracking-[0.25em] font-bold py-3.5 transition-all duration-300 rounded-sm"
             >
-                Reset Filters
+                Clear Selection
             </button>
         </div>
     );
@@ -111,12 +212,12 @@ function ProductCard({ product }: { product: any }) {
     const price = (product.subProducts || product.sizes)?.[0]?.price ?? product.price ?? 0;
     const discountPct = product.discount ?? 0;
     const originalPrice = discountPct > 0 ? Math.round(price / (1 - discountPct / 100)) : null;
-    
+
     // Prioritize first sub-product's image as cover, then generalImages, then fallback
     const variantImg = product.subProducts?.[0]?.images?.[0];
     const generalImg = (product.generalImages || product.images)?.[0];
     const imgData = variantImg || generalImg;
-    
+
     const image = (typeof imgData === 'string' ? imgData : imgData?.url) ?? "https://placehold.co/600x800/png?text=Product";
     const id = product._id ?? product.id;
     const slug = product.slug ?? id;
@@ -196,8 +297,45 @@ function ProductCard({ product }: { product: any }) {
 
 export default function ProductsPage() {
     const { products, pagination, isLoading, error, fetchProducts, clearProducts, lastParams } = useProductStore();
+    const { categoryTree, fetchTree } = useCategoryStore();
 
-    const [priceRange, setPriceRange]   = useState<number[]>(() => {
+    useEffect(() => {
+        fetchTree();
+    }, [fetchTree]);
+
+    const [sliderMax, setSliderMax] = useState(10000);
+
+    // Dynamically update the maximum price of the slider based on the products fetched
+    useEffect(() => {
+        if (products && products.length > 0) {
+            let max = 0;
+            products.forEach(p => {
+                const price = (p.subProducts || p.sizes)?.[0]?.price ?? p.price ?? 0;
+                if (price > max) max = price;
+            });
+            const calculatedMax = Math.max(10000, Math.ceil(max / 1000) * 1000);
+            
+            if (calculatedMax > sliderMax) {
+                setSliderMax(calculatedMax);
+                setPriceRange(prev => [prev[0], prev[1] === sliderMax ? calculatedMax : prev[1]]);
+            }
+        }
+    }, [products, sliderMax]);
+
+    const categories: { label: string; value: string | null; isSub?: boolean }[] = [
+        { label: "All", value: null }
+    ];
+
+    categoryTree.forEach((cat: any) => {
+        categories.push({ label: cat.name, value: cat.slug });
+        if (cat.subCategories && cat.subCategories.length > 0) {
+            cat.subCategories.forEach((sub: any) => {
+                categories.push({ label: sub.name, value: sub.slug, isSub: true });
+            });
+        }
+    });
+
+    const [priceRange, setPriceRange] = useState<number[]>(() => {
         if (!lastParams) return [0, 10000];
         try { const p = JSON.parse(lastParams); return [p.minPrice || 0, p.maxPrice || 10000]; } catch { return [0, 10000]; }
     });
@@ -205,11 +343,11 @@ export default function ProductsPage() {
         if (!lastParams) return null;
         try { return JSON.parse(lastParams).category || null; } catch { return null; }
     });
-    const [searchTerm, setSearchTerm]   = useState(() => {
+    const [searchTerm, setSearchTerm] = useState(() => {
         if (!lastParams) return "";
         try { return JSON.parse(lastParams).search || ""; } catch { return ""; }
     });
-    const [sortBy, setSortBy]           = useState(() => {
+    const [sortBy, setSortBy] = useState(() => {
         if (!lastParams) return "featured";
         try {
             const p = JSON.parse(lastParams);
@@ -219,48 +357,75 @@ export default function ProductsPage() {
             return "featured";
         } catch { return "featured"; }
     });
-    const [page, setPage]               = useState(() => {
+    const [page, setPage] = useState(() => {
         if (!lastParams) return 1;
         try { return JSON.parse(lastParams).page || 1; } catch { return 1; }
     });
-    const [drawerOpen, setDrawerOpen]   = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
 
-    const loadProducts = useCallback(() => {
-        const params: Record<string, any> = {
-            page,
-            limit: 12,
-        };
-        if (selectedCat)           params.category  = selectedCat;
-        if (searchTerm.trim())     params.search    = searchTerm.trim();
-        if (priceRange[0] > 0)    params.minPrice  = priceRange[0];
-        if (priceRange[1] < 10000) params.maxPrice  = priceRange[1];
-        if (sortBy !== "featured") {
-            if (sortBy === "price-low")  { params.sort = "price"; params.order = "asc"; }
-            if (sortBy === "price-high") { params.sort = "price"; params.order = "desc"; }
-            if (sortBy === "newest")     { params.sort = "createdAt"; params.order = "desc"; }
-        }
-        fetchProducts(params);
-    }, [page, selectedCat, searchTerm, priceRange, sortBy, fetchProducts]);
-
-    useEffect(() => {
-        loadProducts();
-    }, [loadProducts]);
-
-    // Reset to page 1 when filters change
     const handleCategoryChange = (v: string | null) => { setSelectedCat(v); setPage(1); };
-    const handleSortChange     = (v: string)         => { setSortBy(v);      setPage(1); };
-    const handleSearchChange   = (v: string)         => { setSearchTerm(v);  setPage(1); };
-    const handlePriceChange    = (v: number[])       => { setPriceRange(v);  setPage(1); };
+    const handleSearchChange = (v: string) => { setSearchTerm(v); setPage(1); };
 
     const reset = () => {
         setSelectedCat(null);
-        setPriceRange([0, 10000]);
+        setPriceRange([0, sliderMax]);
         setSearchTerm("");
         setSortBy("featured");
         setPage(1);
     };
 
-    const totalCount = pagination?.total ?? products.length;
+    const loadProducts = useCallback(() => {
+        const params: Record<string, any> = {
+            limit: 100, // Fetch up to 100 items to allow accurate local filtering/sorting
+        };
+        if (selectedCat) {
+            if (categoryTree.length === 0) return; // wait for tree to load
+            let catId = null;
+            for (const cat of categoryTree) {
+                if (cat.slug === selectedCat) { catId = cat.id; break; }
+                if (cat.subCategories) {
+                    const sub = cat.subCategories.find((s: any) => s.slug === selectedCat);
+                    if (sub) { catId = sub.id; break; }
+                }
+            }
+            if (catId) params.categoryId = catId;
+        }
+        if (searchTerm.trim()) params.search = searchTerm.trim();
+        fetchProducts(params);
+    }, [selectedCat, searchTerm, fetchProducts, categoryTree]);
+
+    useEffect(() => {
+        loadProducts();
+    }, [loadProducts]);
+
+    const displayedProducts = products
+        .filter(p => {
+            const price = (p.subProducts || p.sizes)?.[0]?.price ?? p.price ?? 0;
+            return price >= priceRange[0] && price <= priceRange[1];
+        })
+        .sort((a, b) => {
+            if (sortBy === "price-low") {
+                const priceA = (a.subProducts || a.sizes)?.[0]?.price ?? a.price ?? 0;
+                const priceB = (b.subProducts || b.sizes)?.[0]?.price ?? b.price ?? 0;
+                return priceA - priceB;
+            }
+            if (sortBy === "price-high") {
+                const priceA = (a.subProducts || a.sizes)?.[0]?.price ?? a.price ?? 0;
+                const priceB = (b.subProducts || b.sizes)?.[0]?.price ?? b.price ?? 0;
+                return priceB - priceA;
+            }
+            if (sortBy === "newest") {
+                return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+            }
+            // "featured"
+            if (a.featured && !b.featured) return -1;
+            if (!a.featured && b.featured) return 1;
+            return 0;
+        });
+
+    const PRODUCTS_PER_PAGE = 12;
+    const totalPages = Math.ceil(displayedProducts.length / PRODUCTS_PER_PAGE);
+    const paginatedProducts = displayedProducts.slice((page - 1) * PRODUCTS_PER_PAGE, page * PRODUCTS_PER_PAGE);
 
     return (
         <div className="min-h-screen bg-stone-50">
@@ -291,30 +456,6 @@ export default function ProductsPage() {
                 </div>
             </section>
 
-            {/* ── Category Pills ── */}
-            <div className="bg-white border-b border-stone-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                    <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide">
-                        {categories.map((cat) => {
-                            const active = selectedCat === cat.value;
-                            return (
-                                <button
-                                    key={cat.label}
-                                    onClick={() => handleCategoryChange(cat.value)}
-                                    className={`shrink-0 px-5 py-4 text-[10px] uppercase tracking-[0.2em] font-semibold border-b-2 transition-colors ${
-                                        active
-                                            ? "border-stone-900 text-stone-900"
-                                            : "border-transparent text-stone-400 hover:text-stone-700"
-                                    }`}
-                                >
-                                    {cat.label}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
-
             {/* ── Main ── */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
                 <div className="flex gap-10">
@@ -326,11 +467,13 @@ export default function ProductsPage() {
                                 Filter
                             </p>
                             <Sidebar
+                                categoryTree={categoryTree}
                                 selectedCat={selectedCat}
                                 setSelectedCat={handleCategoryChange}
                                 priceRange={priceRange}
-                                setPriceRange={handlePriceChange}
+                                setPriceRange={setPriceRange}
                                 onReset={reset}
+                                sliderMax={sliderMax}
                             />
                         </div>
                     </aside>
@@ -351,7 +494,7 @@ export default function ProductsPage() {
                                 </button>
 
                                 <p className="text-xs text-stone-400 font-medium">
-                                    {isLoading ? "Loading…" : `${totalCount} ${totalCount === 1 ? "piece" : "pieces"}${selectedCat ? ` · ${selectedCat}` : ""}`}
+                                    {isLoading ? "Loading…" : `${displayedProducts.length} ${displayedProducts.length === 1 ? "piece" : "pieces"}${selectedCat ? ` · ${selectedCat}` : ""}`}
                                 </p>
                             </div>
 
@@ -372,13 +515,12 @@ export default function ProductsPage() {
                                 <div className="relative">
                                     <select
                                         value={sortBy}
-                                        onChange={(e) => handleSortChange(e.target.value)}
+                                        onChange={(e) => setSortBy(e.target.value)}
                                         className="appearance-none bg-white border border-stone-200 focus:border-stone-900 focus:outline-none pl-3 pr-8 py-2 text-xs font-medium transition-colors cursor-pointer"
                                     >
                                         <option value="featured">Featured</option>
-                                        <option value="newest">Newest</option>
-                                        <option value="price-low">Price ↑</option>
-                                        <option value="price-high">Price ↓</option>
+                                        <option value="price-low">Lowest price ↑</option>
+                                        <option value="price-high">Highest price ↓</option>
                                     </select>
                                     <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-stone-400 pointer-events-none" />
                                 </div>
@@ -386,7 +528,7 @@ export default function ProductsPage() {
                         </div>
 
                         {/* Active filters */}
-                        {(selectedCat || searchTerm || priceRange[0] > 0 || priceRange[1] < 10000) && (
+                        {(selectedCat || searchTerm || priceRange[0] > 0 || priceRange[1] < sliderMax) && (
                             <div className="flex flex-wrap items-center gap-2 mb-6">
                                 <span className="text-[9px] uppercase tracking-[0.2em] text-stone-400 font-semibold">Active:</span>
                                 {selectedCat && (
@@ -405,9 +547,9 @@ export default function ProductsPage() {
                                         &quot;{searchTerm}&quot; <X className="w-2.5 h-2.5" />
                                     </button>
                                 )}
-                                {(priceRange[0] > 0 || priceRange[1] < 10000) && (
+                                {(priceRange[0] > 0 || priceRange[1] < sliderMax) && (
                                     <button
-                                        onClick={() => handlePriceChange([0, 10000])}
+                                        onClick={() => setPriceRange([0, sliderMax])}
                                         className="inline-flex items-center gap-1 bg-stone-900 text-white text-[9px] uppercase tracking-[0.15em] font-semibold px-2.5 py-1 hover:bg-stone-700 transition-colors"
                                     >
                                         ₹{priceRange[0].toLocaleString()} – ₹{priceRange[1].toLocaleString()} <X className="w-2.5 h-2.5" />
@@ -437,9 +579,9 @@ export default function ProductsPage() {
                                     Retry Connection
                                 </button>
                             </div>
-                        ) : products.length > 0 ? (
+                        ) : paginatedProducts.length > 0 ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-10">
-                                {products.map((p) => (
+                                {paginatedProducts.map((p) => (
                                     <ProductCard key={p._id ?? p.id} product={p} />
                                 ))}
                             </div>
@@ -460,20 +602,20 @@ export default function ProductsPage() {
                         )}
 
                         {/* Pagination */}
-                        {!isLoading && pagination && pagination.totalPages > 1 && (
+                        {!isLoading && totalPages > 1 && (
                             <div className="mt-16 pt-8 border-t border-stone-200 flex items-center justify-center gap-2 flex-wrap">
                                 <button
                                     disabled={page === 1}
-                                    onClick={() => setPage(page - 1)}
+                                    onClick={() => { setPage(page - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                                     className={`w-9 h-9 border border-stone-200 text-stone-500 text-xs font-semibold transition-colors ${page === 1 ? "opacity-30 cursor-not-allowed" : "hover:border-stone-900 hover:text-stone-900"}`}
                                 >
                                     ←
                                 </button>
 
-                                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                                     <button
                                         key={p}
-                                        onClick={() => setPage(p)}
+                                        onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                                         className={`w-9 h-9 text-xs font-bold transition-all ${page === p ? "bg-stone-900 text-white" : "border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900"}`}
                                     >
                                         {p}
@@ -481,9 +623,9 @@ export default function ProductsPage() {
                                 ))}
 
                                 <button
-                                    disabled={page === pagination.totalPages}
-                                    onClick={() => setPage(page + 1)}
-                                    className={`w-9 h-9 border border-stone-200 text-stone-500 text-xs font-semibold transition-colors ${page === pagination.totalPages ? "opacity-30 cursor-not-allowed" : "hover:border-stone-900 hover:text-stone-900"}`}
+                                    disabled={page === totalPages}
+                                    onClick={() => { setPage(page + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    className={`w-9 h-9 border border-stone-200 text-stone-500 text-xs font-semibold transition-colors ${page === totalPages ? "opacity-30 cursor-not-allowed" : "hover:border-stone-900 hover:text-stone-900"}`}
                                 >
                                     →
                                 </button>
@@ -506,12 +648,14 @@ export default function ProductsPage() {
                         </div>
                         <div className="p-6">
                             <Sidebar
+                                categoryTree={categoryTree}
                                 selectedCat={selectedCat}
                                 setSelectedCat={handleCategoryChange}
                                 priceRange={priceRange}
-                                setPriceRange={handlePriceChange}
+                                setPriceRange={setPriceRange}
                                 onReset={reset}
                                 onClose={() => setDrawerOpen(false)}
+                                sliderMax={sliderMax}
                             />
                         </div>
                     </div>

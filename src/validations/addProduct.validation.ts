@@ -15,7 +15,7 @@ export const productSchema = z.object({
     discount: z.number().min(0).max(100),
 
     category: z.string().min(1, "Category is required"),
-    subcategory: z.string().optional(),
+    subcategory: z.string().min(1, "Subcategory is required"),
     featured: z.boolean(),
     disableProduct: z.boolean().optional(),
     disableProductDate: z.string().optional().nullable(),

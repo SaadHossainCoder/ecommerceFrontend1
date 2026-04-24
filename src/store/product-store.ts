@@ -29,6 +29,9 @@ interface ProductStoreState {
     clearProducts: () => void;
 }
 
+// Singleton to track in-flight requests across all store instances/renders
+const pendingRequests = new Set<string>();
+
 export const useProductStore = create<ProductStoreState>((set, get) => ({
     products: [],
     pagination: null,
@@ -41,23 +44,38 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
         
         // Skip fetch if:
         // 1. Not a forced refresh
-        // 2. We already have products
-        // 3. The parameters (filters/page) haven't changed since last fetch
+        // 2. We already have products AND parameters haven't changed
         if (!refresh && get().products.length > 0 && paramsStr === get().lastParams) {
             return;
         }
 
+        // 3. This exact request is already in flight (prevents double-fetching in React StrictMode/Effects)
+        if (pendingRequests.has(`products-${paramsStr}`)) {
+            return;
+        }
+
+        pendingRequests.add(`products-${paramsStr}`);
         set({ isLoading: true, error: null });
+
         try {
             console.log("Fetching products with params:", params);
             const res = await productService.getAllProducts(params);
+            
             // The structure is { ok: true, message: "...", data: { data: [...], pagination: {...} } }
             const products = res.data?.data || [];
             const pagination = res.data?.pagination || null;
-            set({ products, pagination, lastParams: paramsStr, isLoading: false });
+            
+            set({ 
+                products, 
+                pagination, 
+                lastParams: paramsStr, 
+                isLoading: false 
+            });
         } catch (error: any) {
             const msg = error.response?.data?.error || error.response?.data?.message || error.message || "Failed to fetch products";
             set({ error: msg, isLoading: false });
+        } finally {
+            pendingRequests.delete(`products-${paramsStr}`);
         }
     },
 
@@ -190,8 +208,7 @@ interface FeaturedProductStoreState {
     clearFeaturedProducts: () => void;
 }
 
-// Singleton to track in-flight requests across all store instances/renders
-const pendingRequests = new Set<string>();
+
 
 export const useFeaturedProducts = create<FeaturedProductStoreState>((set, get) => ({
     featuredProductsByCategory: {},
@@ -255,4 +272,103 @@ export const useFeaturedProducts = create<FeaturedProductStoreState>((set, get) 
         pendingRequests.clear();
         set({ featuredProductsByCategory: {}, loadingStates: {}, errors: {} });
     }
+}));
+
+// ====================== PRODUCT DETAIL STORE ======================
+// Single API call → stores ALL data for the product detail page
+// Uses getProductBySlug which returns: product, productReviews, relatedProducts
+
+interface ProductDetailState {
+    product: any | null;
+    reviews: any[];
+    relatedProducts: any[];
+    isLoading: boolean;
+    error: string | null;
+    currentSlug: string | null;
+    fetchBySlug: (slug: string) => Promise<void>;
+    refreshBySlug: (slug: string) => Promise<void>;
+    clearDetail: () => void;
+}
+
+export const useProductDetail = create<ProductDetailState>((set, get) => ({
+    product: null,
+    reviews: [],
+    relatedProducts: [],
+    isLoading: false,
+    error: null,
+    currentSlug: null,
+
+    fetchBySlug: async (slug: string) => {
+        // Skip if already loaded for this slug
+        if (get().currentSlug === slug && get().product) return;
+
+        set({ isLoading: true, error: null, currentSlug: slug });
+        try {
+            const res = await productService.getProductBySlug(slug);
+            const data = res.data as any;
+            set({
+                product: data,
+                reviews: data?.productReviews ?? [],
+                relatedProducts: data?.relatedProducts ?? [],
+                isLoading: false
+            });
+        } catch (error: any) {
+            const msg = error.response?.data?.message || error.message || "Failed to load product";
+            set({ error: msg, isLoading: false });
+        }
+    },
+
+    // Force re-fetch (e.g. after submitting a review)
+    refreshBySlug: async (slug: string) => {
+        try {
+            const res = await productService.getProductBySlug(slug);
+            const data = res.data as any;
+            set({
+                product: data,
+                reviews: data?.productReviews ?? [],
+                relatedProducts: data?.relatedProducts ?? [],
+            });
+        } catch (error: any) {
+            console.error("Failed to refresh product", error);
+        }
+    },
+
+    clearDetail: () => set({
+        product: null,
+        reviews: [],
+        relatedProducts: [],
+        error: null,
+        currentSlug: null
+    })
+}));
+
+export interface ProductAdminState {
+    products: any[];
+    pagination: any;
+    error: string | null;
+    isLoading: boolean;
+    fetchProducts: (filters: any) => Promise<void>;
+    clearProducts: () => void;
+}
+
+export const useProductsByAdmin = create<ProductAdminState>((set) => ({
+    products: [],
+    pagination: null,
+    error: null,
+    isLoading: false,
+
+    fetchProducts: async (filters: any) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await productService.getAllProductsByAdmin(filters);
+            set({
+                products: res.data.data,
+                pagination: res.data.pagination,
+                isLoading: false
+            });
+        } catch (error: any) {
+            set({ error: error.message, isLoading: false });
+        }
+    },
+    clearProducts: () => set({ products: [], pagination: null, error: null })
 }));

@@ -64,7 +64,7 @@ import {
 } from "@/components/ui/pagination";
 import { toast } from "@/components/ui/toaster";
 import EditProductForm from "./_components/addProduct";
-import { useProductStore } from "@/store/product-store";
+import { useProductStore, useProductsByAdmin } from "@/store/product-store";
 import { Product } from "@/services/product.service";
 
 const getStatusColor = (status: string) => {
@@ -85,7 +85,8 @@ const getName = (val: any): string => {
 };
 
 export default function ProductsPage() {
-    const { products, isLoading, error, fetchProducts, addProduct, editProduct, removeProduct } = useProductStore();
+    const { addProduct, editProduct, removeProduct } = useProductStore();
+    const { products, isLoading, error, fetchProducts } = useProductsByAdmin();
     const [viewMode, setViewMode] = useState<"grid" | "table">("table");
     const [searchTerm, setSearchTerm] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
@@ -150,7 +151,7 @@ export default function ProductsPage() {
     };
 
     const handleRefresh = async () => {
-        await fetchProducts(undefined, true);
+        await loadData();
     };
 
     const toggleDisableProduct = async (product: Product) => {

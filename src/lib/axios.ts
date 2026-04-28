@@ -46,16 +46,9 @@ api.interceptors.response.use(
                 await api.post("/auth/refresh");
                 return api(request);
             } catch (refreshError) {
-                // if (typeof window !== "undefined") {
-                //     window.location.href = "/auth/login";
-                // }
-                console.log(refreshError);
-                toast({
-                    title: "Session expired",
-                    description: "Please log in again.",
-                    variant: "destructive",
-                });
-                
+                if (typeof window !== "undefined") {
+                    window.location.href = "/auth/login";
+                }
                 return Promise.reject(refreshError);
             }
         }

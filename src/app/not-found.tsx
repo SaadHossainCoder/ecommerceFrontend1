@@ -1,13 +1,13 @@
-"use client";
-
 import Link from "next/link";
-// import { motion } from "framer-motion";
+import { Metadata } from "next";
 import { Search, ArrowRight } from "lucide-react";
-import { useState } from "react";
+
+export const metadata: Metadata = {
+    title: "404 - Page Not Found | ShopHub",
+    description: "Oops! The page you're looking for doesn't exist or has been moved.",
+};
 
 export default function NotFound() {
-    const [query, setQuery] = useState("");
-
     return (
         <div className="relative min-h-screen bg-white text-gray-900 flex flex-col items-center justify-center overflow-hidden px-4">
 
@@ -42,19 +42,6 @@ export default function NotFound() {
                     The page you&apos;re looking for doesn&apos;t exist or has been moved.
                 </p>
 
-                {/* 🔍 SEARCH BAR */}
-                <div
-                    className="mt-8 flex items-center gap-2 bg-gray-100 px-4 py-3 rounded-xl shadow-sm"
-                >
-                    <Search className="text-gray-400 w-5 h-5" />
-                    <input
-                        type="text"
-                        placeholder="Search products..."
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        className="bg-transparent outline-none flex-1 text-sm"
-                    />
-                </div>
 
                 {/* 🎯 ACTION BUTTONS */}
                 <div

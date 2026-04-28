@@ -1,15 +1,7 @@
-"use client";
-
-import { use } from "react";
 import Link from "next/link";
-import {
-    Check, ClipboardList, Package, Truck, Home, MapPin, Phone, Headphones,
-    // CreditCard,
-    ArrowLeft
-} from "lucide-react";
+import { Check, ClipboardList, Package, Truck, Home, MapPin, Phone, Headphones, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-// import { PageTransition } from "@/components/layout/PageTransition";
 import { cn } from "@/lib/utils";
 
 // Mock Data (simulating a fetch based on orderId)
@@ -18,7 +10,7 @@ const getMockOrder = (orderId: string) => {
         id: orderId,
         date: "20 Feb 2024",
         time: "11:00 AM",
-        status: "In Progress", // Current status for demo
+        status: "In Progress",
         expectedDate: "21 Feb 2024",
         timeline: [
             { id: 1, title: "Order Placed", date: "20 Feb 2024", time: "11:00 AM", completed: true, icon: ClipboardList },
@@ -46,9 +38,9 @@ const getMockOrder = (orderId: string) => {
     };
 };
 
-export default function TrackOrderPage({ params }: { params: Promise<{ orderId: string }> }) {
-    // Unwrap params using React.use()
-    const resolvedParams = use(params);
+export default async function TrackOrderPage({ params }: { params: Promise<{ orderId: string }> }) {
+    // Unwrap params using await (Server Component pattern)
+    const resolvedParams = await params;
     const orderId = resolvedParams.orderId;
     const order = getMockOrder(orderId);
 

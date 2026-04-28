@@ -1,8 +1,11 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useVendorStore } from "@/store/vendor-store";
+import Link from "next/link";
 
 export interface Report {
   id: string;
@@ -11,10 +14,11 @@ export interface Report {
   period: string;
   imageSrc: string;
   isNew?: boolean;
+  slug?: string;
 }
 
 interface ShareholderReportsProps {
-  reports: Report[];
+  reports?: Report[];
   title?: string;
   artName?: string;
   subtitle?: string;
@@ -24,11 +28,31 @@ interface ShareholderReportsProps {
 export const ShareholderReports = React.forwardRef<
   HTMLDivElement,
   ShareholderReportsProps
->(({ reports, title = "Our Artist", subtitle = "Masterful craftsmanship", className, ...props }, ref) => {
+>(({ reports: initialReports, title = "Our Artist", subtitle = "Masterful craftsmanship", className, ...props }, ref) => {
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = React.useState(false);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(true);
+
+  const { vendors, VendorsByShortData, isLoading } = useVendorStore();
+
+  React.useEffect(() => {
+    VendorsByShortData();
+  }, [VendorsByShortData]);
+
+  // Use dynamic vendors if initialReports not provided or empty
+  const displayReports: Report[] = React.useMemo(() => {
+    if (initialReports && initialReports.length > 0) return initialReports;
+    
+    return vendors.map(vendor => ({
+      id: vendor.id,
+      name: vendor.name,
+      artName: vendor.vendorProductType || subtitle,
+      period: new Date(vendor.createdAt).getFullYear().toString(),
+      imageSrc: vendor.images && vendor.images.length > 0 ? vendor.images[0] : "https://via.placeholder.com/400x500",
+      slug: vendor.slug
+    }));
+  }, [vendors, initialReports, subtitle]);
 
   const checkScrollability = React.useCallback(() => {
     const container = scrollContainerRef.current;
@@ -51,7 +75,7 @@ export const ShareholderReports = React.forwardRef<
         container.removeEventListener("scroll", checkScrollability);
       }
     };
-  }, [reports, checkScrollability]);
+  }, [displayReports, checkScrollability]);
 
   const scroll = (direction: "left" | "right") => {
     const container = scrollContainerRef.current;
@@ -64,10 +88,14 @@ export const ShareholderReports = React.forwardRef<
     }
   };
 
+  if (isLoading && displayReports.length === 0) {
+    return <div className="py-20 text-center font-serif italic text-stone-500">Loading artisans...</div>;
+  }
+
   return (
     <section
       ref={ref}
-      className={cn("w-full py-12 border-y border-ash-brown/5", className)}
+      className={cn("w-full", className)}
       aria-labelledby="reports-heading"
       {...props}
     >
@@ -107,17 +135,19 @@ export const ShareholderReports = React.forwardRef<
         ref={scrollContainerRef}
         className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide gap-3 sm:gap-5 px-4 sm:px-6 md:px-8 pb-4"
       >
-        {reports.map((report) => (
+        {displayReports.map((report) => (
           <div
             key={report.id}
             className="shrink-0 w-[75vw] sm:w-[280px] md:w-[340px] snap-start"
           >
-            <div className="group cursor-pointer">
+            <Link href={report.slug ? `/artists/${report.slug}` : "#"} className="group cursor-pointer block">
               <div className="relative overflow-hidden rounded-sm bg-card border-none mb-4 transition-all duration-700 ease-in-out group-hover:shadow-royal">
                 <div className="aspect-[4/5] sm:aspect-[3/4] w-full">
-                  <img
+                  <Image
                     src={report.imageSrc}
                     alt={`Information for ${report.name}`}
+                    fill
+                    sizes="(max-width: 640px) 75vw, (max-width: 768px) 280px, 340px"
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   />
                 </div>
@@ -139,7 +169,7 @@ export const ShareholderReports = React.forwardRef<
               <div className="flex items-center justify-between px-1">
                 <h4 className="font-heading font-medium tracking-wide text-foreground text-base sm:text-lg">{report.name}</h4>
               </div>
-            </div>
+            </Link>
           </div>
         ))}
       </div>

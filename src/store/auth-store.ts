@@ -67,12 +67,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // ─── Fetch current user from backend (called on page load) ────────────────
     fetchMe: async () => {
+        set({ isLoading: true });
         try {
             const res: AuthResponse = await authService.getMe();
             if (res.ok && res.user) {
-                set({ user: res.user, isAuthenticated: true });
+                set({ user: res.user, isAuthenticated: true, isLoading: false });
+            } else {
+                set({ isLoading: false });
             }
         } catch {
+            set({ isLoading: false });
             // Silent fail — user simply stays unauthenticated
         }
     },

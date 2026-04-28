@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Heart, ShoppingBag, Eye, Star } from "lucide-react";
+import { Heart, ShoppingBag, Eye } from "lucide-react";
 import { useState } from "react";
 
 interface ProductCardProps {
@@ -8,6 +8,7 @@ interface ProductCardProps {
     price: number;
     originalPrice?: number;
     image: string;
+    category?: string;
     rating?: number;
     reviews?: number;
     badge?: string;
@@ -22,8 +23,7 @@ export default function ProductCard({
     price,
     originalPrice,
     image,
-    rating = 4.5,
-    reviews = 128,
+    category = "Featured",
     badge,
     index = 0,
     onWishlist,
@@ -51,7 +51,7 @@ export default function ProductCard({
                 animationFillMode: "both",
             }}
         >
-            <div className="flex flex-col h-full bg-white overflow-hidden transition-all duration-500 hover:shadow-xl">
+            <div className="flex flex-col h-full bg-white overflow-hidden transition-all duration-500 rounded-sm hover:shadow-lg">
                 {/* Image Container */}
                 <div className="relative aspect-square overflow-hidden bg-zinc-50">
                     <Image
@@ -60,6 +60,10 @@ export default function ProductCard({
                         fill
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         className="object-cover transition-all duration-700 ease-out group-hover:scale-110"
+                        priority={index < 2}
+                        onError={(e) => {
+                            e.currentTarget.src = "/placeholder.png";
+                        }}
                     />
 
                     {/* Badge */}
@@ -88,9 +92,8 @@ export default function ProductCard({
                             className="p-2 bg-white rounded-full shadow-sm hover:bg-zinc-50 transition-colors"
                         >
                             <Heart
-                                className={`w-4 h-4 ${
-                                    isWishlisted ? "fill-red-500 text-red-500" : "text-zinc-600"
-                                }`}
+                                className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : "text-zinc-600"
+                                    }`}
                             />
                         </button>
 
@@ -101,6 +104,7 @@ export default function ProductCard({
                                 e.stopPropagation();
                                 onQuickView?.();
                             }}
+                            aria-label="Quick view"
                             className="p-2 bg-white rounded-full shadow-sm hover:bg-zinc-50 transition-colors"
                         >
                             <Eye className="w-4 h-4 text-zinc-600" />
@@ -115,6 +119,7 @@ export default function ProductCard({
                                 e.stopPropagation();
                                 onAddToBag?.();
                             }}
+                            aria-label={`Add ${name} to bag`}
                             className="w-full py-3 bg-black text-white text-[11px] font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-zinc-900 transition-colors"
                         >
                             <ShoppingBag className="w-3.5 h-3.5" />
@@ -126,31 +131,15 @@ export default function ProductCard({
                 {/* Product Info */}
                 <div className="p-2 flex flex-col gap-1 flex-grow">
                     <div className="flex flex-col gap-0.5">
-                        {/* Category/Brand placeholder if needed */}
-                        <p className="text-[9px] text-zinc-400 uppercase tracking-widest font-medium">Artisanal Craft</p>
+                        <p className="text-[9px] text-zinc-400 uppercase tracking-widest font-medium">
+                            {category}
+                        </p>
                         <h3 className="text-xs font-medium text-zinc-900 line-clamp-2 min-h-[2rem]">
                             {name}
                         </h3>
                     </div>
 
                     <div className="flex flex-col mt-auto gap-1">
-                        {/* Rating */}
-                        <div className="flex items-center gap-1">
-                            <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star
-                                        key={i}
-                                        className={`w-3 h-3 ${
-                                            i < Math.floor(rating)
-                                                ? "fill-zinc-900 text-zinc-900"
-                                                : "text-zinc-200"
-                                        }`}
-                                    />
-                                ))}
-                            </div>
-                            <span className="text-[10px] text-zinc-400 font-medium">({reviews})</span>
-                        </div>
-
                         {/* Pricing */}
                         <div className="flex items-center gap-1">
                             <span className="text-xs font-bold text-zinc-900">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareholderReports } from "@/app/(main)/home/_components/carousel";
@@ -12,6 +13,13 @@ import { Suspense } from "react";
 import {LoaderCircleIcon as LoaderCircle} from "@/components/icon/loader-circle"
 
 import { Hero } from "./_components/Hero";
+import { TrustBadges } from "./_components/TrustBadges";
+
+export const metadata: Metadata = {
+    title: "Home | ShopHub - Premium E-Commerce",
+    description: "Explore our curated collection of premium products, from artisanal jewelry to modern electronics.",
+};
+
 
 const reportsData = [
   {
@@ -177,11 +185,14 @@ export default async function HomePage() {
                 {/* --- SECTION:  --- */}
                 <section className=" py-16">
                     <div className="w-full bg-background">
-                        <ShareholderReports reports={reportsData} />
+                        <ShareholderReports className="" />
                     </div>
                 </section>
-                <hr />
 
+                <section className="hidden md:block">
+                <TrustBadges />
+                </section>
+       
                 {/* --- SECTION: ELEPHANT PROMO --- */}
                 <section className="container-custom py-24 relative ">
                     <div className="grid md:grid-cols-2 gap-12 items-start relative h-full">
@@ -218,6 +229,7 @@ export default async function HomePage() {
                 <hr />
                 {/* Customer Testimonials Section */}
                 <TestimonialsSection />
+               
                 <hr />
                 {/* --- SECTION: EXPLORE COLLECTIONS --- */}
                 <section className=" py-24 bg-muted/30">

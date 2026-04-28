@@ -11,6 +11,7 @@ import {
     Plus,
     CheckCircle2,
     Clock,
+    Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -382,81 +383,89 @@ export default function MyAccountPage() {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                        {isLoading && !user ? (
+                            <div className="col-span-12 flex flex-col items-center justify-center py-32 space-y-4">
+                                <Loader2 className="w-10 h-10 text-stone-300 animate-spin" />
+                                <p className="text-stone-500 font-light italic text-lg tracking-wide">Securing your profile vault...</p>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Sidebar Navigation */}
+                                <aside className="hidden lg:block lg:col-span-3 sticky top-24">
+                                    {/* User Profile Card */}
+                                    <div className="mb-6 p-4 border border-stone-200 bg-white shadow-sm">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="w-10 h-10 border border-stone-200">
+                                                <AvatarImage src="/avatar.jpg" className="object-cover" />
+                                                <AvatarFallback className="text-sm font-serif bg-stone-100 text-stone-900">
+                                                    {user?.username?.charAt(0).toUpperCase() ?? "U"}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="min-w-0">
+                                                <p className="font-medium text-stone-900 text-sm truncate">{user?.username ?? "—"}</p>
+                                                <p className="text-xs text-stone-400 truncate">{user?.email ?? "—"}</p>
+                                            </div>
+                                        </div>
+                                        {user?.role && (
+                                            <div className="mt-3 pt-3 border-t border-stone-100">
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-stone-500">{user.role}</span>
+                                            </div>
+                                        )}
+                                    </div>
 
-                        {/* Sidebar Navigation */}
-                        <aside className="hidden lg:block lg:col-span-3 sticky top-24">
-                            {/* User Profile Card */}
-                            <div className="mb-6 p-4 border border-stone-200 bg-white">
-                                <div className="flex items-center gap-3">
-                                    <Avatar className="w-10 h-10 border border-stone-200">
-                                        <AvatarImage src="/avatar.jpg" className="object-cover" />
-                                        <AvatarFallback className="text-sm font-serif bg-stone-100 text-stone-900">
-                                            {user?.username?.charAt(0).toUpperCase() ?? "U"}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="min-w-0">
-                                        <p className="font-medium text-stone-900 text-sm truncate">{user?.username ?? "—"}</p>
-                                        <p className="text-xs text-stone-400 truncate">{user?.email ?? "—"}</p>
+                                    <nav className="space-y-1">
+                                        {menuItems.map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => setActiveTab(item.id)}
+                                                className={cn(
+                                                    "w-full text-left px-4 py-4 border-l-2 transition-all duration-300 group",
+                                                    activeTab === item.id
+                                                        ? "border-stone-900 bg-white shadow-sm"
+                                                        : "border-transparent hover:border-stone-300 hover:bg-stone-50"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <item.icon className={cn(
+                                                        "w-4 h-4 transition-colors",
+                                                        activeTab === item.id ? "text-stone-900" : "text-stone-400 group-hover:text-stone-600"
+                                                    )} />
+                                                    <span className={cn(
+                                                        "font-medium text-sm tracking-wide uppercase",
+                                                        activeTab === item.id ? "text-stone-900" : "text-stone-500 group-hover:text-stone-900"
+                                                    )}>{item.label}</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </nav>
+                                </aside>
+
+                                {/* Mobile Tab Navigation */}
+                                <div className="lg:hidden col-span-1 mb-8 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+                                    <div className="flex gap-4">
+                                        {menuItems.map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => setActiveTab(item.id)}
+                                                className={cn(
+                                                    "whitespace-nowrap px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider border transition-all",
+                                                    activeTab === item.id
+                                                        ? "bg-stone-900 text-white border-stone-900"
+                                                        : "bg-white text-stone-500 border-stone-200 hover:border-stone-400"
+                                                )}
+                                            >
+                                                {item.label}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
-                                {user?.role && (
-                                    <div className="mt-3 pt-3 border-t border-stone-100">
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-stone-500">{user.role}</span>
-                                    </div>
-                                )}
-                            </div>
 
-                            <nav className="space-y-1">
-                                {menuItems.map((item) => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => setActiveTab(item.id)}
-                                        className={cn(
-                                            "w-full text-left px-4 py-4 border-l-2 transition-all duration-300 group",
-                                            activeTab === item.id
-                                                ? "border-stone-900 bg-white shadow-sm"
-                                                : "border-transparent hover:border-stone-300 hover:bg-stone-50"
-                                        )}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <item.icon className={cn(
-                                                "w-4 h-4 transition-colors",
-                                                activeTab === item.id ? "text-stone-900" : "text-stone-400 group-hover:text-stone-600"
-                                            )} />
-                                            <span className={cn(
-                                                "font-medium text-sm tracking-wide uppercase",
-                                                activeTab === item.id ? "text-stone-900" : "text-stone-500 group-hover:text-stone-900"
-                                            )}>{item.label}</span>
-                                        </div>
-                                    </button>
-                                ))}
-                            </nav>
-                        </aside>
-
-                        {/* Mobile Tab Navigation */}
-                        <div className="lg:hidden col-span-1 mb-8 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
-                            <div className="flex gap-4">
-                                {menuItems.map((item) => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => setActiveTab(item.id)}
-                                        className={cn(
-                                            "whitespace-nowrap px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider border transition-all",
-                                            activeTab === item.id
-                                                ? "bg-stone-900 text-white border-stone-900"
-                                                : "bg-white text-stone-500 border-stone-200 hover:border-stone-400"
-                                        )}
-                                    >
-                                        {item.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Main Content Area */}
-                        <main className="lg:col-span-9 min-h-[600px]">
-                            {renderContent()}
-                        </main>
+                                {/* Main Content Area */}
+                                <main className="lg:col-span-9 min-h-[600px] animate-in fade-in duration-700">
+                                    {renderContent()}
+                                </main>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

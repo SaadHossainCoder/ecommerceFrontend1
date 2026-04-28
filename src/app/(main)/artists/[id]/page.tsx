@@ -1,25 +1,15 @@
 "use client";
 
-import React, { use } from "react";
+import React, { use, useEffect } from "react";
 import { motion } from "framer-motion";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
-    // ArrowLeft,
     ArrowRight,
-    // Instagram,
     MapPin,
-    // Quote,
 } from "lucide-react";
-// import { PageTransition } from "@/components/layout/PageTransition";
-// import { Button } from "@/components/ui/button";
-import { artists } from "@/lib/data";
-// import {
-//     staggerContainerVariants,
-//     staggerItemVariants,
-//     slideUpVariants,
-// } from "@/lib/motion";
+import { useVendorStore } from "@/store/vendor-store";
 
 // Mock products for the artist (in a real app, these would be filtered from a product list)
 const artistProducts = [
@@ -47,11 +37,33 @@ const artistProducts = [
 
 export default function ArtistDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const artist = artists.find((a) => a.id === id);
+    const { vendors, fetchVendorBySlug, isLoading } = useVendorStore();
 
-    if (!artist) {
+    useEffect(() => {
+        if (id) {
+            fetchVendorBySlug(id);
+        }
+    }, [id, fetchVendorBySlug]);
+
+    // Find the current vendor from the store (id in params is the slug)
+    const artist = vendors.find((v) => v.slug === id || v.id === id);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="space-y-4 text-center">
+                    <div className="w-12 h-12 border-4 border-stone-200 border-t-stone-900 rounded-full animate-spin mx-auto"></div>
+                    <p className="text-stone-500 font-serif italic">Loading artisan profile...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!artist && !isLoading) {
         notFound();
     }
+
+    if (!artist) return null;
 
     return (
         <section>
@@ -59,7 +71,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                 {/* Hero Section */}
                 <section className="relative h-[80vh] w-full overflow-hidden">
                     <Image
-                        src={artist.image}
+                        src={artist.images && artist.images.length > 0 ? artist.images[0] : "https://via.placeholder.com/1200x800"}
                         alt={artist.name}
                         fill
                         className="object-cover"
@@ -92,26 +104,19 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                         <main id="story" className="md:col-span-9 space-y-12">
                             <div className="space-y-8">
                                 <h2 className="text-2xl md:text-3xl font-serif text-stone-800 leading-relaxed max-w-3xl">
-                                    {artist.bio}
+                                    {artist.description}
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-stone-500 font-light leading-relaxed">
-                                    <p>{artist.longBio.split('. ').slice(0, 2).join('. ') + '.'}</p>
-                                    <p>{artist.longBio.split('. ').slice(2).join('. ')}</p>
+                                    <p>{artist.longDescription ? artist.longDescription.split('. ').slice(0, Math.ceil(artist.longDescription.split('. ').length / 2)).join('. ') + '.' : ''}</p>
+                                    <p>{artist.longDescription ? artist.longDescription.split('. ').slice(Math.ceil(artist.longDescription.split('. ').length / 2)).join('. ') : ''}</p>
                                 </div>
                             </div>
 
-                            {/* Social Links */}
+                            {/* Social Links & Location */}
                             <div className="flex items-center gap-6 pt-4 border-t border-stone-100">
-                                <Link
-                                    href={`https://instagram.com/${artist.instagram.replace('@', '')}`}
-                                    className="text-stone-400 hover:text-stone-900 transition-colors flex items-center gap-2 text-sm uppercase tracking-wider font-medium"
-                                >
-                                    {/* <Instagram className="h-4 w-4" />
-                                    {artist.instagram} */}
-                                </Link>
                                 <div className="text-stone-400 flex items-center gap-2 text-sm uppercase tracking-wider font-medium">
                                     <MapPin className="h-4 w-4" />
-                                    {artist.location}
+                                    Santiniketan, West Bengal
                                 </div>
                             </div>
                         </main>
@@ -152,70 +157,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                         </div>
                     </div>
                 </section>
-
-                {/* Behind the Scenes Section */}
-                {artist.behindTheScenes && (
-                    <section className="py-32 bg-white">
-                        <div className="max-w-7xl mx-auto px-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                                <div className="space-y-8">
-                                    <h2 className="text-3xl md:text-5xl font-serif text-stone-900 leading-[1.1]">
-                                        {artist.behindTheScenes.title}
-                                    </h2>
-                                    <p className="text-stone-500 font-light leading-relaxed text-lg max-w-md">
-                                        {artist.behindTheScenes.description}
-                                    </p>
-                                    <Link
-                                        href="#"
-                                        className="text-xs uppercase tracking-[0.2em] font-bold border-b-2 border-stone-900 inline-block pb-1 mt-4 hover:border-stone-400 transition-colors"
-                                    >
-                                        Learn More
-                                    </Link>
-                                </div>
-                                <div className="relative aspect-4/3 overflow-hidden grayscale">
-                                    <Image
-                                        src={artist.behindTheScenes.image}
-                                        alt="Behind the scenes"
-                                        fill
-                                        className="object-cover hover:scale-105 transition-transform duration-1000"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                )}
-
-                {/* Conversation Section */}
-                {artist.conversation && (
-                    <section className="py-32 bg-stone-50 border-t border-stone-200">
-                        <div className="max-w-7xl mx-auto px-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-                                <div className="relative aspect-4/3 lg:order-1 grayscale">
-                                    <Image
-                                        src={artist.conversation.image}
-                                        alt="In conversation"
-                                        fill
-                                        className="object-cover hover:scale-105 transition-transform duration-1000"
-                                    />
-                                </div>
-                                <div className="space-y-8 lg:order-2">
-                                    <h2 className="text-2xl md:text-4xl font-serif text-stone-900 leading-tight">
-                                        {artist.conversation.title}
-                                    </h2>
-                                    <p className="text-stone-500 font-light leading-relaxed">
-                                        {artist.conversation.description}
-                                    </p>
-                                    <Link
-                                        href="#"
-                                        className="text-xs uppercase tracking-[0.2em] font-bold inline-flex items-center gap-2 hover:gap-4 transition-all duration-300"
-                                    >
-                                        Read more <ArrowRight className="h-4 w-4" />
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                )}
 
                 {/* Newsletter CTA Section */}
                 <section className="py-24 border-t border-stone-200 text-center">

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 export default function Error({
@@ -10,10 +9,6 @@ export default function Error({
     error: Error & { digest?: string };
     reset: () => void;
 }) {
-    useEffect(() => {
-        console.error(error);
-    }, [error]);
-
     return (
         <div className="container-custom py-24 flex flex-col items-center justify-center space-y-4 text-center">
             <h2 className="text-2xl font-bold">Something went wrong!</h2>

@@ -10,7 +10,7 @@ interface VendorStoreState {
     editVendor: (id: string, data: any) => Promise<boolean>;
     removeVendor: (id: string) => Promise<boolean>;
     VendorsByShortData: (force?: boolean) => Promise<void>;
-    
+    fetchVendorBySlug: (slug: string) => Promise<void>;
 }
 
 export const useVendorStore = create<VendorStoreState>((set, get) => ({
@@ -27,6 +27,15 @@ export const useVendorStore = create<VendorStoreState>((set, get) => ({
             set({ vendors: res.data || [], isLoading: false });
         } catch (error: any) {
             set({ error: error.response?.data?.message || error.message || "Failed to fetch vendors", isLoading: false });
+        }
+    },
+    fetchVendorBySlug: async (slug: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await vendorService.getVendorBySlug(slug);
+            set({ vendors: res.data ? [res.data] : [], isLoading: false });
+        } catch (error: any) {
+            set({ error: error.response?.data?.message || error.message || "Failed to fetch vendor by slug", isLoading: false });
         }
     },
 

@@ -2,22 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import {
     Package,
     Truck,
     CheckCircle2,
     Clock,
     ChevronDown,
-    // ArrowRight,
     Search,
     Filter
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-// import { PageTransition } from "@/components/layout/PageTransition";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const orders = [
     {
@@ -74,164 +72,154 @@ export default function MyOrdersPage() {
     };
 
     return (
-        <section>
-            <div className="bg-[#FAF9F6] min-h-screen">
-                <div className="container-custom py-12 lg:py-20">
+        <section className="bg-[#FAF9F6] min-h-screen">
+            <div className="container-custom py-12 lg:py-24 max-w-6xl mx-auto md:px-6">
 
-                    {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-                        <div className="space-y-4">
-                            <span className="text-xs font-bold tracking-[0.3em] uppercase text-accent">Personal Vault</span>
-                            <h1 className="text-4xl md:text-5xl font-heading font-black text-primary">Order History</h1>
-                            <p className="text-muted-foreground/80 max-w-md font-body">
-                                Trace the journey of your acquired heirlooms.
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <Input placeholder="Search orders..." className="pl-9 w-[200px] bg-white border-primary/10 focus:border-primary/30 transition-all rounded-none" />
-                            </div>
-                            <Button variant="outline" className="border-primary/10 bg-white hover:bg-stone-50 rounded-none gap-2">
-                                <Filter className="w-4 h-4" /> Filter
-                            </Button>
-                        </div>
+                {/* Header */}
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-16">
+                    <div className="space-y-4">
+                        <span className="text-[10px] font-bold tracking-[0.4em] uppercase text-stone-400">Personal Vault</span>
+                        <h1 className="text-5xl md:text-6xl font-serif text-stone-900 leading-tight">Order <span className="italic text-stone-400">History</span></h1>
+                        <p className="text-stone-500 max-w-md font-light text-lg">
+                            Trace the journey of your acquired treasures and legacy pieces.
+                        </p>
                     </div>
+                    
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div className="relative flex-1 sm:flex-none">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                            <Input 
+                                placeholder="Search orders..." 
+                                className="pl-11 pr-4 w-full sm:w-[260px] h-12 bg-white border-stone-200 focus:border-stone-900 transition-all rounded-full text-sm" 
+                            />
+                        </div>
+                        <Button variant="outline" className="h-12 px-6 border-stone-200 bg-white hover:bg-stone-50 rounded-full gap-2 text-[10px] uppercase tracking-widest font-bold">
+                            <Filter className="w-4 h-4" /> Filter
+                        </Button>
+                    </div>
+                </div>
 
-                    {orders.length === 0 ? (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-white border border-dashed border-primary/20 p-20 text-center"
-                        >
-                            <div className="h-20 w-20 rounded-full bg-primary/5 mx-auto flex items-center justify-center mb-6">
-                                <Package className="h-10 w-10 text-primary/40" />
-                            </div>
-                            <h3 className="text-2xl font-heading font-medium mb-3 text-primary">No acquisitions yet</h3>
-                            <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
-                                Your vault is currently empty. Explore our collection to begin your legacy.
-                            </p>
-                            <Button asChild className="rounded-none bg-primary text-white hover:bg-primary/90 px-8 h-12 text-xs uppercase tracking-widest font-black">
-                                <Link href="/products">Visit Gallery</Link>
-                            </Button>
-                        </motion.div>
-                    ) : (
-                        <div className="space-y-6">
-                            {orders.map((order) => {
-                                const statusConfig = getStatusConfig(order.status);
-                                const isExpanded = expandedOrder === order.id;
+                {orders.length === 0 ? (
+                    <div
+                        className="bg-white border border-dashed border-stone-200 p-20 rounded-[2rem] text-center"
+                    >
+                        <div className="h-24 w-24 rounded-full bg-stone-50 mx-auto flex items-center justify-center mb-8 border border-stone-100">
+                            <Package className="h-10 w-10 text-stone-300" />
+                        </div>
+                        <h3 className="text-3xl font-serif mb-4 text-stone-900">No acquisitions yet</h3>
+                        <p className="text-stone-400 mb-10 max-w-sm mx-auto font-light leading-relaxed">
+                            Your vault is currently empty. Explore our collection to begin your legacy.
+                        </p>
+                        <Button asChild className="rounded-full bg-stone-900 text-white hover:bg-stone-800 px-10 h-14 text-[10px] uppercase tracking-[0.25em] font-bold">
+                            <Link href="/products">Visit Gallery</Link>
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="space-y-5">
+                        {orders.map((order, index) => {
+                            const statusConfig = getStatusConfig(order.status);
+                            const isExpanded = expandedOrder === order.id;
 
-                                return (
-                                    <div
-                                        key={order.id}
-                                        className={`group bg-white border transition-all duration-300 ${isExpanded ? "border-primary/20 shadow-royal" : "border-primary/5 hover:border-primary/20 hover:shadow-sm"}`}
+                            return (
+                                <div
+                                    className={`group bg-white overflow-hidden transition-all duration-500 ${isExpanded ? "ring-1 ring-stone-900/10 shadow-[0_20px_50px_rgba(0,0,0,0.04)]" : "border border-stone-100 hover:border-stone-200 shadow-sm"}`}
+                                >
+                                    {/* Order Header */}
+                                    <button
+                                        onClick={() => toggleOrder(order.id)}
+                                        className="w-full p-5 flex flex-col md:flex-row md:items-center justify-between gap-6 text-left"
                                     >
-                                        {/* Order Header */}
-                                        <button
-                                            onClick={() => toggleOrder(order.id)}
-                                            className="w-full p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6"
-                                        >
-                                            <div className="flex items-start md:items-center gap-6 text-left">
-                                                <div
-                                                    className={`h-14 w-14 ${statusConfig.bg} border ${statusConfig.border} flex items-center justify-center transition-colors`}
-                                                >
-                                                    <statusConfig.icon className="h-6 w-6" />
+                                        <div className="flex items-center gap-6">
+                                            <div className={`h-16 w-16 shrink-0 ${statusConfig.bg} border ${statusConfig.border} rounded-2xl flex items-center justify-center transition-colors`}>
+                                                <statusConfig.icon className="h-7 w-7" />
+                                            </div>
+                                            <div className="space-y-1.5 min-w-0">
+                                                <div className="flex items-center gap-3 flex-wrap">
+                                                    <p className="text-xl font-bold text-stone-900 font-serif">{order.id}</p>
+                                                    <Badge className={cn("rounded-full px-3 py-1 text-[8px] uppercase tracking-widest font-bold", statusConfig.bg, "border", statusConfig.border)}>
+                                                        {order.status}
+                                                    </Badge>
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center gap-3">
-                                                        <p className="text-lg font-bold font-heading text-primary">{order.id}</p>
-                                                        {isExpanded && <Badge variant={statusConfig.color} className="rounded-none px-2 py-0.5 text-[9px] uppercase tracking-wider">{order.status}</Badge>}
-                                                    </div>
-                                                    <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                                        <span>{order.date}</span>
-                                                        <span className="w-1 h-1 rounded-full bg-muted-foreground/30"></span>
-                                                        <span>{order.items.length} Items</span>
-                                                    </div>
+                                                <div className="flex items-center gap-3 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                                                    <span>{order.date}</span>
+                                                    <span className="w-1 h-1 rounded-full bg-stone-200"></span>
+                                                    <span>{order.items.length} {order.items.length === 1 ? 'Item' : 'Items'}</span>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            <div className="flex items-center justify-between md:justify-end gap-8 w-full md:w-auto pl-20 md:pl-0">
-                                                <div className="text-left md:text-right">
-                                                    <p className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground/70 mb-1">Total Amount</p>
-                                                    <p className="text-xl font-bold text-primary font-heading">₹{order.total.toLocaleString()}</p>
-                                                </div>
-                                                <div className={`p-2 rounded-full transition-all duration-300 ${isExpanded ? "bg-primary text-white rotate-180" : "bg-stone-100 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"}`}>
-                                                    <ChevronDown className="h-5 w-5" />
-                                                </div>
+                                        <div className="flex items-center justify-between md:justify-end gap-10 w-full md:w-auto">
+                                            <div className="md:text-right">
+                                                <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-stone-400 mb-1">Total Amount</p>
+                                                <p className="text-2xl font-serif font-medium text-stone-900">₹{order.total.toLocaleString()}</p>
                                             </div>
-                                        </button>
+                                            <div className={`h-12 w-12 rounded-full flex items-center justify-center transition-all duration-500 ${isExpanded ? "bg-stone-900 text-white rotate-180" : "bg-stone-50 text-stone-400 group-hover:bg-stone-100 group-hover:text-stone-900"}`}>
+                                                <ChevronDown className="h-5 w-5" />
+                                            </div>
+                                        </div>
+                                    </button>
 
-                                        {/* Order Details */}
-                                        <AnimatePresence>
-                                            {isExpanded && (
-                                                <motion.div
-                                                    initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: "auto", opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }}
-                                                    transition={{ duration: 0.3, ease: "circOut" }}
-                                                    className="overflow-hidden bg-stone-50/50 block"
-                                                >
-                                                    <Separator className="opacity-50" />
-                                                    <div className="p-6 md:p-8">
-                                                        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
-                                                            {/* Items List */}
-                                                            <div className="md:col-span-2 space-y-6">
-                                                                <h4 className="text-xs font-black uppercase tracking-widest text-primary/60 mb-6">Acquired Items</h4>
-                                                                <div className="space-y-6">
-                                                                    {order.items.map((item, index) => (
-                                                                        <div
-                                                                            key={index}
-                                                                            className="flex items-center gap-6 group/item"
-                                                                        >
-                                                                            <div className="h-20 w-20 relative bg-white border border-primary/10 overflow-hidden shrink-0">
-                                                                                <img src={item.image} alt={item.name} className="object-cover w-full h-full" />
-                                                                            </div>
-                                                                            <div className="flex-1 min-w-0">
-                                                                                <p className="font-bold text-primary font-heading truncate">{item.name}</p>
-                                                                                <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">
-                                                                                    Quantity: {item.quantity}
-                                                                                </p>
-                                                                            </div>
-                                                                            <p className="font-semibold text-primary">₹{item.price.toLocaleString()}</p>
+                                    {/* Order Details */}
+                                    {isExpanded && (
+                                        <div className="px-6 pb-6 md:px-10 md:pb-10">
+                                            <Separator className="bg-stone-100 mb-8" />
+                                            <div className="grid lg:grid-cols-3 gap-12">
+                                                {/* Items List */}
+                                                <div className="lg:col-span-2 space-y-8">
+                                                    <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-400 mb-6">Acquired Items</h4>
+                                                    <div className="space-y-8">
+                                                        {order.items.map((item, index) => (
+                                                            <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-6 group/item">
+                                                                <div className="h-24 w-24 relative bg-stone-50 rounded-2xl overflow-hidden shrink-0 border border-stone-100">
+                                                                    <img src={item.image} alt={item.name} className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700" />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                                                                        <div className="space-y-1">
+                                                                            <p className="font-serif text-lg text-stone-900 leading-tight">{item.name}</p>
+                                                                            <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+                                                                                Quantity: {item.quantity}
+                                                                            </p>
                                                                         </div>
-                                                                    ))}
+                                                                        <p className="font-medium text-stone-900 text-lg">₹{item.price.toLocaleString()}</p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
 
-                                                            {/* Status & Actions */}
-                                                            <div className="space-y-8">
-                                                                {order.tracking && (
-                                                                    <div>
-                                                                        <h4 className="text-xs font-black uppercase tracking-widest text-primary/60 mb-4">Shipment Details</h4>
-                                                                        <div className="bg-white p-4 border border-primary/10">
-                                                                            <p className="text-xs text-muted-foreground uppercase mb-1">Tracking Number</p>
-                                                                            <p className="font-mono text-sm font-medium text-primary select-all">{order.tracking}</p>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-
-                                                                <div className="flex flex-col gap-3 pt-2">
-                                                                    <Button asChild className="w-full bg-white border border-primary text-primary hover:bg-primary hover:text-white transition-colors rounded-none h-12 text-xs uppercase tracking-widest font-bold">
-                                                                        <Link href={`/track-order/${order.id}`}>
-                                                                            Track Shipment
-                                                                        </Link>
-                                                                    </Button>
-                                                                    <Button variant="outline" className="w-full border-primary/10 text-muted-foreground hover:text-primary rounded-none h-12 text-xs uppercase tracking-widest font-bold">
-                                                                        Download Invoice
-                                                                    </Button>
-                                                                </div>
+                                                {/* Status & Actions */}
+                                                <div className="space-y-10">
+                                                    {order.tracking && (
+                                                        <div className="space-y-4">
+                                                            <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-400">Shipment Details</h4>
+                                                            <div className="bg-stone-50 p-6 rounded-2xl border border-stone-100">
+                                                                <p className="text-[9px] text-stone-400 uppercase tracking-widest font-bold mb-2">Tracking Number</p>
+                                                                <p className="font-mono text-sm font-medium text-stone-900 select-all break-all">{order.tracking}</p>
                                                             </div>
                                                         </div>
+                                                    )}
+
+                                                    <div className="flex flex-col gap-4">
+                                                        <Button asChild className="w-full bg-stone-900 text-white hover:bg-stone-800 rounded-full h-14 text-[10px] uppercase tracking-widest font-bold transition-all shadow-lg shadow-stone-200">
+                                                            <Link href={`/track-order/${order.id}`}>
+                                                                Track Shipment
+                                                            </Link>
+                                                        </Button>
+                                                        <Button variant="outline" className="w-full border-stone-200 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded-full h-14 text-[10px] uppercase tracking-widest font-bold transition-all">
+                                                            Download Invoice
+                                                        </Button>
                                                     </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
         </section>
     );

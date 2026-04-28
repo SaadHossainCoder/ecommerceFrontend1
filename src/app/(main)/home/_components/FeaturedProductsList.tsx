@@ -14,16 +14,15 @@ interface FeaturedProductsListProps {
 const ProductCardSkeleton = ({ index = 0 }: { index?: number }) => (
     <div
         className="space-y-3 animate-pulse"
-        style={{ animationDelay: `${index * 120}ms` }}
+        style={{ animationDelay: `${index * 100}ms` }}
     >
         {/* Image skeleton with shimmer */}
-        <div className="relative aspect-square bg-muted/40 overflow-hidden">
-            <div className="absolute inset-0 animate-shimmer" />
-        </div>
+        <div className="relative aspect-square bg-gradient-to-r from-zinc-100 via-zinc-50 to-zinc-100 overflow-hidden rounded-sm animate-shimmer" />
         {/* Text skeletons */}
-        <div className="space-y-1.5 px-0.5">
-            <div className="h-2.5 bg-muted/50 rounded-full w-4/5" />
-            <div className="h-2.5 bg-muted/50 rounded-full w-2/5" />
+        <div className="space-y-2 px-0.5">
+            <div className="h-3 bg-zinc-200 rounded-full w-3/4" />
+            <div className="h-2.5 bg-zinc-100 rounded-full w-2/5" />
+            <div className="h-3 bg-zinc-200 rounded-full w-1/3 mt-2" />
         </div>
     </div>
 );
@@ -90,14 +89,17 @@ export function FeaturedProductsList({ categoryId, categorySlug, limit = 4 }: Fe
 
     if (error) {
         return (
-            <div className="col-span-full py-20 text-center space-y-5">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-50 mb-2">
-                    <span className="text-red-400 text-xl">!</span>
+            <div className="col-span-full py-16 text-center space-y-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50 mb-3">
+                    <span className="text-red-500 text-2xl font-semibold">!</span>
                 </div>
-                <p className="text-red-800/50 font-medium text-xs tracking-[0.25em] uppercase">{error}</p>
-                <button 
+                <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">Unable to load products</p>
+                    <p className="text-xs text-foreground/60">{error}</p>
+                </div>
+                <button
                     onClick={() => fetchFeaturedProducts("all")}
-                    className="text-xs border-b border-foreground/30 pb-0.5 hover:border-foreground hover:text-foreground transition-all duration-300 uppercase tracking-[0.15em] text-foreground/60"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-foreground text-background text-xs font-semibold rounded-sm hover:opacity-90 transition-opacity"
                 >
                     Try Again
                 </button>
@@ -107,9 +109,9 @@ export function FeaturedProductsList({ categoryId, categorySlug, limit = 4 }: Fe
 
     if (!filteredProducts || filteredProducts.length === 0) {
         return (
-            <div className="col-span-full py-24 text-center space-y-3">
-                <p className="text-foreground/30 text-xs tracking-[0.25em] uppercase font-medium">Collection</p>
-                <p className="text-foreground/50 italic font-body text-lg">No masterpieces found in this collection yet.</p>
+            <div className="col-span-full py-16 text-center space-y-3">
+                <p className="text-xs font-semibold text-foreground/40 uppercase tracking-widest">No Items</p>
+                <p className="text-sm text-foreground/60">No masterpieces found in this collection yet.</p>
             </div>
         );
     }
@@ -120,6 +122,7 @@ export function FeaturedProductsList({ categoryId, categorySlug, limit = 4 }: Fe
         <>
             {displayProducts.map((p: any, index: number) => {
                 const displayPrice = p.subProducts?.[0]?.price || p.price || 0;
+                const categoryName = p.category?.name || p.categoryName || "Featured";
                 return (
                     <Link
                         key={p.id || p._id || index}
@@ -127,10 +130,11 @@ export function FeaturedProductsList({ categoryId, categorySlug, limit = 4 }: Fe
                         className="block animate-fade-in-up"
                         style={{ animationDelay: `${index * 80}ms`, animationFillMode: "both" }}
                     >
-                        <ProductCard 
-                            name={p.title || "Unknown Product"} 
-                            price={displayPrice} 
+                        <ProductCard
+                            name={p.title || "Unknown Product"}
+                            price={displayPrice}
                             image={p.subProducts?.[0]?.images?.[0] || "/placeholder.png"}
+                            category={categoryName}
                             index={index}
                         />
                     </Link>

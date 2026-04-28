@@ -65,7 +65,7 @@ export function TestimonialsSection() {
     };
 
     return (
-        <section className="py-16 md:py-24 bg-background border-y border-ash-brown/5 overflow-hidden">
+        <section className="py-16 md:py-24 bg-background overflow-hidden">
             <div className="container-custom max-w-7xl mx-auto px-4 sm:px-6 relative">
                 {/* Header */}
                 <div className="text-center mb-10 sm:mb-16">
@@ -92,7 +92,7 @@ export function TestimonialsSection() {
                             What our customers <br className="hidden lg:block" /> are saying
                         </h3>
                         <div className="flex gap-3 mt-4 lg:mt-6">
-                            <button 
+                            <button
                                 onClick={() => scroll("left")}
                                 disabled={!canScrollLeft}
                                 aria-label="Previous testimonials"
@@ -100,7 +100,7 @@ export function TestimonialsSection() {
                             >
                                 <ChevronLeft className="w-5 h-5" />
                             </button>
-                            <button 
+                            <button
                                 onClick={() => scroll("right")}
                                 disabled={!canScrollRight}
                                 aria-label="Next testimonials"
@@ -112,7 +112,7 @@ export function TestimonialsSection() {
                     </div>
 
                     {/* Right: Testimonials Cards */}
-                    <div 
+                    <div
                         ref={scrollContainerRef}
                         className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide gap-4 sm:gap-6 pb-6 pt-2 -mx-4 px-4 w-[calc(100%+2rem)] sm:mx-0 sm:px-0 sm:w-full lg:grid lg:grid-cols-3 lg:gap-6 lg:pb-0"
                     >

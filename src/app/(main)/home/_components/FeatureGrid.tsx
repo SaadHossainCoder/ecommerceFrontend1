@@ -85,7 +85,7 @@ const FeatureItem = ({ feature, priority = false }: { feature: typeof FEATURES[0
 
 export const FeatureGrid = () => {
     return (
-        <section className="relative container-custom py-12 border-y border-ash-brown/5">
+        <section className="relative container-custom py-12">
             <div className="flex justify-between items-baseline mb-6 md:mb-8">
                 <div className="flex items-center gap-4">
                     <h2 className="text-xl md:text-2xl font-heading font-medium tracking-tight">Artisanal Excellence</h2>

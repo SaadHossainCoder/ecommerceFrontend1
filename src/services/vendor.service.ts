@@ -57,6 +57,12 @@ export const vendorService = {
         return response.data;
     },
 
+    // GET /vendor/slug/:slug — Public
+    getVendorBySlug: async (slug: string): Promise<{ ok: boolean; message: string; data: Vendor }> => {
+        const response = await api.get(`vendor/slug/${slug}`);
+        return response.data;
+    },
+
     // POST /vendor — Admin only
     createVendor: async (data: CreateVendorData): Promise<{ ok: boolean; message: string; data: Vendor }> => {
         const response = await api.post("vendor", data);

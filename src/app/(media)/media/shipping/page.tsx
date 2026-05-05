@@ -1,218 +1,230 @@
-import {
-    Truck, Globe, Clock,
-    MapPin, Sparkles, Box, Shield, PackageCheck, ArrowRight, Zap
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+"use client";
 
-const methods = [
-    {
-        name: "Standard Delivery",
-        cost: "$5.99",
-        time: "3-5 Business Days",
-        description: "Complimentary on orders over $50. Perfect for your regular indulgence.",
-        icon: Box,
-        color: "text-stone-600",
-        bg: "bg-stone-50"
-    },
-    {
-        name: "Express Delivery",
-        cost: "$14.99",
-        time: "1-2 Business Days",
-        description: "When you simply cannot wait to experience the magic.",
-        icon: Zap,
-        color: "text-amber-600",
-        bg: "bg-amber-50"
-    },
-    {
-        name: "Next Day Priority",
-        cost: "$24.99",
-        time: "Next Business Day",
-        description: "The fastest way to bring elegance to your doorstep.",
-        icon: Sparkles,
-        color: "text-emerald-600",
-        bg: "bg-emerald-50"
-    },
-    {
-        name: "Global Concierge",
-        cost: "From $19.99",
-        time: "7-14 Business Days",
-        description: "Artisanal quality, delivered to any corner of the world.",
-        icon: Globe,
-        color: "text-blue-600",
-        bg: "bg-blue-50"
-    },
+import React from 'react';
+import { motion } from 'framer-motion';
+import { 
+    Truck, 
+    Globe, 
+    Clock,
+    MapPin, 
+    Sparkles, 
+    Box, 
+    Shield, 
+    PackageCheck, 
+    Zap,
+    ChevronRight
+} from "lucide-react";
+
+const sections = [
+    { id: "tracking", title: "Track Your Order", icon: PackageCheck, num: "01" },
+    { id: "safety", title: "Safe Arrival", icon: Shield, num: "02" },
+    { id: "standard", title: "Standard Delivery", icon: Box, num: "03" },
+    { id: "express", title: "Express Delivery", icon: Zap, num: "04" },
+    { id: "priority", title: "Next Day Priority", icon: Sparkles, num: "05" },
+    { id: "global", title: "Global Concierge", icon: Globe, num: "06" },
+    { id: "processing", title: "Order Processing", icon: Clock, num: "07" },
+    { id: "coverage", title: "Global Reach", icon: MapPin, num: "08" },
 ];
 
 export default function ShippingPage() {
-    return (
-        <div className="min-h-screen bg-stone-50">
+    const scrollTo = (id: string) => {
+        const el = document.getElementById(id);
+        if (el) {
+            window.scrollTo({
+                top: el.offsetTop - 100,
+                behavior: "smooth"
+            });
+        }
+    };
 
-            {/* ── Hero ── */}
-            <div className="bg-stone-900 px-8 md:px-16 py-16 md:py-20">
-                <div className="max-w-6xl mx-auto">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Truck className="h-3.5 w-3.5 text-amber-400" />
-                        <span className="text-[10px] uppercase tracking-[0.45em] font-semibold text-stone-400">
+    return (
+        <section className="min-h-screen bg-[#faf9f6] text-stone-900 selection:bg-stone-200">
+            {/* ── Dynamic Hero ── */}
+            <div className="relative overflow-hidden bg-white border-b border-stone-200 py-24 md:py-32">
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+                    <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <defs>
+                            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                            </pattern>
+                        </defs>
+                        <rect width="100" height="100" fill="url(#grid)" />
+                    </svg>
+                </div>
+                
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                        className="max-w-3xl"
+                    >
+                        <p className="text-[11px] uppercase tracking-[0.5em] font-bold text-stone-400 mb-6">
                             Global Logistics & Excellence
-                        </span>
-                    </div>
-                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-                        <h1 className="text-4xl md:text-5xl font-serif text-white leading-tight tracking-tight">
-                            Shipping <span className="italic font-light text-amber-200">Excellence</span>
-                        </h1>
-                        <p className="text-sm text-stone-400 max-w-sm leading-relaxed md:text-right">
-                            Every package is handled with the same care precision we use to create our products. Your luxury journey starts the moment you order.
                         </p>
-                    </div>
-                    <div className="mt-8 h-px bg-stone-700" />
+                        <h1 className="text-5xl md:text-7xl font-serif leading-[1.1] mb-8">
+                            Shipping <br />
+                            <span className="text-stone-400 italic">Excellence</span>
+                        </h1>
+                        <p className="text-lg text-stone-500 leading-relaxed max-w-xl">
+                            Every package is handled with the same care and precision we use to create our products. Your luxury journey starts the moment you order.
+                        </p>
+                        <div className="mt-12 flex items-center gap-6">
+                            <div className="flex -space-x-3">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-stone-100 flex items-center justify-center">
+                                        <Truck className="w-4 h-4 text-stone-400" />
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="text-xs font-semibold text-stone-400 uppercase tracking-widest">
+                                Always Reliable
+                            </p>
+                        </div>
+                    </motion.div>
                 </div>
             </div>
 
-            {/* ── Main Content ── */}
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-32">
+                <div className="flex flex-col lg:flex-row gap-20">
+                    
+                    {/* ── Sidebar Navigation ── */}
+                    <aside className="lg:w-1/4 hidden lg:block sticky top-32 h-fit">
+                        <nav className="space-y-1">
+                            {sections.map((section) => (
+                                <button
+                                    key={section.id}
+                                    onClick={() => scrollTo(section.id)}
+                                    className="w-full text-left group flex items-center justify-between p-3 rounded-lg transition-all hover:bg-stone-100 text-stone-500"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-[10px] font-mono text-stone-300">
+                                            {section.num}
+                                        </span>
+                                        <span className="text-sm font-medium tracking-tight">
+                                            {section.title}
+                                        </span>
+                                    </div>
+                                    <ChevronRight className="w-4 h-4 transition-transform opacity-0 group-hover:opacity-100" />
+                                </button>
+                            ))}
+                        </nav>
+                    </aside>
 
-                {/* ── Feature Cards ── */}
-                <div className="grid md:grid-cols-2 gap-5 mb-16">
-                    <div className="border border-stone-200 shadow-sm bg-white p-8 flex flex-col sm:flex-row gap-6 hover:border-stone-300 transition-colors group">
-                        <div className="h-12 w-12 shrink-0 bg-amber-50 flex items-center justify-center">
-                            <PackageCheck className="h-6 w-6 text-amber-600" />
-                        </div>
-                        <div className="space-y-3">
-                            <h3 className="text-lg font-serif text-stone-900">Track Your Order</h3>
-                            <p className="text-sm text-stone-500 font-light leading-relaxed">
-                                Once your order leaves our studio, you&apos;ll receive a personal tracking link to monitor its journey in real-time.
-                            </p>
-                            <button className="flex items-center text-amber-700 font-serif italic text-sm hover:text-amber-600 cursor-pointer pt-2">
-                                Visit Tracking Gallery <ArrowRight className="ml-2 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="border border-stone-200 shadow-sm bg-white p-8 flex flex-col sm:flex-row gap-6 hover:border-stone-300 transition-colors group">
-                        <div className="h-12 w-12 shrink-0 bg-emerald-50 flex items-center justify-center">
-                            <Shield className="h-6 w-6 text-emerald-600" />
-                        </div>
-                        <div className="space-y-3">
-                            <h3 className="text-lg font-serif text-stone-900">Guaranteed Safe Arrival</h3>
-                            <p className="text-sm text-stone-500 font-light leading-relaxed">
-                                Every delivery is fully insured and handled by our network of premium carriers including UPS, FedEx, and DHL.
-                            </p>
-                            <p className="text-xs font-light text-stone-400 italic pt-2">
-                                100% Carbon Neutral Shipping available.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Delivery Methods ── */}
-                <div className="mb-16">
-                    <div className="mb-10">
-                        <p className="text-[10px] uppercase tracking-[0.4em] font-semibold text-stone-400 mb-3">
-                            Delivery Options
-                        </p>
-                        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-                            <h2 className="text-3xl md:text-4xl font-serif text-stone-900">Delivery Rituals</h2>
-                            <p className="text-sm text-stone-500 max-w-sm font-light leading-relaxed md:text-right">
-                                Choose the speed that matches your desire. Each option is curated for reliability and discretion.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-stone-200 border border-stone-200">
-                        {methods.map((method) => (
-                            <div
-                                key={method.name}
-                                className="bg-white p-8 flex flex-col gap-5 hover:bg-stone-50 transition-colors duration-300 cursor-default group"
-                            >
-                                <div className={`w-10 h-10 ${method.bg} flex items-center justify-center`}>
-                                    <method.icon className={`h-5 w-5 ${method.color}`} />
+                    {/* ── Main Content ── */}
+                    <div className="lg:w-3/4 space-y-32">
+                        
+                        {/* 01. Tracking */}
+                        <section id="tracking" className="scroll-mt-32">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-14 h-14 bg-stone-900 text-white flex items-center justify-center rounded-2xl shadow-2xl">
+                                    <PackageCheck className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-semibold text-stone-900 mb-1">{method.name}</h3>
-                                    <p className="text-[10px] uppercase tracking-[0.15em] font-semibold text-stone-400">{method.time}</p>
+                                    <span className="text-xs font-mono text-stone-400">Section 01</span>
+                                    <h2 className="text-3xl font-serif">Track Your Order</h2>
                                 </div>
-                                <p className="text-xs text-stone-500 font-light leading-relaxed flex-1">
-                                    {method.description}
+                            </div>
+                            <div className="prose prose-stone max-w-none">
+                                <p className="text-lg text-stone-600 mb-8 leading-relaxed">
+                                    Once your order leaves our studio, you&apos;ll receive a personal tracking link to monitor its journey in real-time.
                                 </p>
-                                <p className="text-xl font-serif font-light text-stone-900 border-t border-stone-100 pt-4">
-                                    {method.cost}
+                            </div>
+                        </section>
+
+                        {/* 02. Safety */}
+                        <section id="safety" className="scroll-mt-32">
+                            <motion.div 
+                                whileHover={{ scale: 1.01 }}
+                                className="bg-emerald-50 border border-emerald-200 p-10 md:p-16 rounded-[2rem] relative overflow-hidden"
+                            >
+                                <Shield className="absolute -bottom-10 -right-10 w-64 h-64 text-emerald-200/50" />
+                                <div className="relative z-10 max-w-xl">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-12 h-12 bg-emerald-600 text-white flex items-center justify-center rounded-xl">
+                                            <Shield className="w-6 h-6" />
+                                        </div>
+                                        <h2 className="text-3xl font-serif text-emerald-950">Safe Arrival</h2>
+                                    </div>
+                                    <p className="text-emerald-800 mb-8 text-lg">Every delivery is fully insured and handled by our network of premium carriers.</p>
+                                    <div className="space-y-4">
+                                        {[
+                                            "Network of premium carriers (UPS, FedEx, DHL)",
+                                            "Fully insured during transit",
+                                            "100% Carbon Neutral Shipping available"
+                                        ].map((item, i) => (
+                                            <div key={i} className="flex items-center gap-4 text-emerald-900 font-medium">
+                                                <div className="w-2 h-2 rounded-full bg-emerald-600 shrink-0" />
+                                                {item}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </section>
+
+                        {/* 03-06. Delivery Methods */}
+                        <section className="scroll-mt-32">
+                            <h2 className="text-3xl font-serif mb-10">Delivery Rituals</h2>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {[
+                                    { id: "standard", title: "Standard Delivery", desc: "Complimentary on orders over $50. Perfect for your regular indulgence.", time: "3-5 Business Days", cost: "$5.99", icon: Box },
+                                    { id: "express", title: "Express Delivery", desc: "When you simply cannot wait to experience the magic.", time: "1-2 Business Days", cost: "$14.99", icon: Zap },
+                                    { id: "priority", title: "Next Day Priority", desc: "The fastest way to bring elegance to your doorstep.", time: "Next Business Day", cost: "$24.99", icon: Sparkles },
+                                    { id: "global", title: "Global Concierge", desc: "Artisanal quality, delivered to any corner of the world.", time: "7-14 Business Days", cost: "From $19.99", icon: Globe }
+                                ].map((method) => (
+                                    <div key={method.id} id={method.id} className="p-8 bg-white border border-stone-100 rounded-2xl group hover:border-stone-900 transition-colors">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center">
+                                                <method.icon className="w-5 h-5 text-stone-600" />
+                                            </div>
+                                            <span className="text-xs font-mono font-medium bg-stone-100 px-3 py-1 rounded-full text-stone-600">{method.time}</span>
+                                        </div>
+                                        <h4 className="text-xl font-serif font-bold text-stone-900 mb-2">{method.title}</h4>
+                                        <p className="text-sm text-stone-500 leading-relaxed mb-6 h-10">{method.desc}</p>
+                                        <div className="pt-4 border-t border-stone-100">
+                                            <span className="text-2xl font-serif text-stone-900">{method.cost}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* 07-08. Remaining Sections */}
+                        <div className="grid sm:grid-cols-2 gap-8">
+                            <section id="processing" className="scroll-mt-32 space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <Clock className="w-5 h-5 text-stone-400" />
+                                    <h3 className="text-xl font-serif">Order Processing</h3>
+                                </div>
+                                <ul className="list-disc pl-5 space-y-2 text-sm text-stone-500 leading-relaxed marker:text-stone-400">
+                                    <li>Orders placed before 2 PM EST ship same business day.</li>
+                                    <li>Personalized orders require 24-48 hours.</li>
+                                </ul>
+                            </section>
+
+                            <section id="coverage" className="scroll-mt-32 space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <MapPin className="w-5 h-5 text-stone-400" />
+                                    <h3 className="text-xl font-serif">Global Reach</h3>
+                                </div>
+                                <p className="text-sm text-stone-500 leading-relaxed">
+                                    We do not ship to P.O. Boxes or freight forwarders. Additional taxes and duties may apply to international orders.
                                 </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* ── Policy Details ── */}
-                <div className="grid md:grid-cols-2 gap-5 mb-16">
-
-                    <div className="bg-white border border-stone-200 p-8">
-                        <div className="flex items-center gap-3 mb-6 pb-6 border-b border-stone-100">
-                            <div className="w-9 h-9 bg-stone-100 flex items-center justify-center">
-                                <Clock className="h-4 w-4 text-stone-600" />
-                            </div>
-                            <div>
-                                <p className="text-[9px] uppercase tracking-[0.15em] font-semibold text-stone-400">Timeline</p>
-                                <h2 className="text-base font-semibold text-stone-900">Order Processing</h2>
-                            </div>
-                        </div>
-                        <p className="text-sm text-stone-500 font-light leading-relaxed mb-5">
-                            Our artisans prepare your order with meticulous attention to detail. Every bar is hand-inspected and wrapped specifically for its journey.
-                        </p>
-                        <ul className="space-y-3">
-                            <li className="flex gap-3 text-sm text-stone-600">
-                                <span className="text-amber-500 font-bold mt-0.5 shrink-0">•</span>
-                                <span>Orders placed before <span className="font-semibold text-stone-900">2 PM EST</span> typically ship the same business day.</span>
-                            </li>
-                            <li className="flex gap-3 text-sm text-stone-600">
-                                <span className="text-amber-500 font-bold mt-0.5 shrink-0">•</span>
-                                <span>Personalized orders require an additional <span className="font-semibold text-stone-900">24-48 hours</span> for artistic preparation.</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="bg-white border border-stone-200 p-8">
-                        <div className="flex items-center gap-3 mb-6 pb-6 border-b border-stone-100">
-                            <div className="w-9 h-9 bg-stone-100 flex items-center justify-center">
-                                <MapPin className="h-4 w-4 text-stone-600" />
-                            </div>
-                            <div>
-                                <p className="text-[9px] uppercase tracking-[0.15em] font-semibold text-stone-400">Coverage</p>
-                                <h2 className="text-base font-semibold text-stone-900">Global Reach</h2>
-                            </div>
-                        </div>
-                        <p className="text-sm text-stone-500 font-light leading-relaxed mb-5">
-                            While we strive to reach every destination, certain restrictions ensure our quality is never compromised during transit.
-                        </p>
-                        <div className="bg-stone-50 border border-stone-200 border-l-4 border-l-amber-400 px-4 py-3">
-                            <p className="text-xs text-stone-500 italic leading-relaxed">
-                                Currently, we do not ship to P.O. Boxes or freight forwarders to ensure direct and secure delivery of our artisanal goods. Additional taxes and duties may apply to international orders.
-                            </p>
+                            </section>
                         </div>
                     </div>
                 </div>
-
-                {/* ── Final CTA ── */}
-                <div className="bg-stone-900 p-10 md:p-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-                    <div>
-                        <p className="text-[9px] uppercase tracking-[0.35em] font-semibold text-stone-500 mb-4">
-                            Support
-                        </p>
-                        <h2 className="text-2xl md:text-4xl font-serif text-white leading-tight mb-3">
-                            Questions About<br />Your Arrival?
-                        </h2>
-                        <p className="text-sm text-stone-400 max-w-md font-light leading-relaxed">
-                            Our concierge team is available 24/7 to assist with tracking, delivery preferences, or any concerns regarding your package&apos;s journey.
-                        </p>
-                    </div>
-                    <div className="shrink-0">
-                        <Button className="h-12 px-10 rounded-none bg-amber-200 text-stone-900 hover:bg-white transition-all duration-300 font-semibold text-xs uppercase tracking-[0.2em] group">
-                            Contact Concierge
-                            <ArrowRight className="ml-2 w-3.5 h-3.5 group-hover:translate-x-1 transition-transform inline-block" />
-                        </Button>
-                    </div>
-                </div>
-
             </div>
-        </div>
+            
+            {/* ── Mobile Navigation (Floating) ── */}
+            <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+                <div className="bg-stone-900/90 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-6 shadow-2xl border border-white/10">
+                    <Truck className="w-5 h-5 text-white" />
+                    <div className="h-4 w-px bg-stone-700" />
+                    <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="text-xs text-white/70 uppercase tracking-widest font-bold">Top</button>
+                </div>
+            </div>
+        </section>
     );
 }

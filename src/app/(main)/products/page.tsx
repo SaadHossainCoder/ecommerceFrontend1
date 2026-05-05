@@ -16,6 +16,8 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useProductStore } from "@/store/product-store";
 import { useCategoryStore } from "@/store/category-store";
+import { wishlistLocalStorageData } from "@/localStorage/wishlistData";
+import { toast } from "@/components/ui/toaster";
 
 
 
@@ -223,10 +225,31 @@ function ProductCard({ product }: { product: any }) {
     const slug = product.slug ?? id;
     const categoryName = typeof product.category === "object" ? product.category?.name : product.category;
 
+    const handleAddToWishlist = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        wishlistLocalStorageData.addToWishlist({
+            id: String(id),
+            productId: String(id),
+            slug: String(slug),
+            name: product.title ?? product.name ?? "Product",
+            price: price,
+            quantity: 1,
+            image: image,
+            category: categoryName,
+        });
+        
+        toast({
+            title: "Added to Wishlist",
+            description: `${product.title ?? product.name ?? "Product"} saved to your collection.`,
+        });
+    };
+
     return (
         <div className="group">
             {/* Image */}
-            <div className="relative aspect-[3/4] overflow-hidden bg-stone-100 mb-4">
+            <div className="relative aspect-3/4 overflow-hidden bg-stone-100 mb-4">
                 <Link href={`/products/${slug}`}>
                     <Image
                         src={image}
@@ -252,7 +275,10 @@ function ProductCard({ product }: { product: any }) {
 
                 {/* Hover actions */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-stone-900 hover:text-white transition-colors shadow-sm">
+                    <button 
+                        onClick={handleAddToWishlist}
+                        className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-stone-900 hover:text-white transition-colors shadow-sm"
+                    >
                         <Heart className="w-3.5 h-3.5" />
                     </button>
                     <button className="w-8 h-8 bg-white border border-stone-100 flex items-center justify-center hover:bg-stone-900 hover:text-white transition-colors shadow-sm">

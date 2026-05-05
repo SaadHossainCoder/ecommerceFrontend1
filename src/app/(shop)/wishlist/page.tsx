@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
     Heart,
     ShoppingCart,
@@ -21,46 +22,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { WishlistItem, wishlistLocalStorageData } from "@/localStorage/wishlistData";
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
-const initialWishlist = [
-    {
-        id: 1,
-        name: "Wireless Headphones Pro",
-        price: 299.99,
-        originalPrice: 399.99,
-        rating: 4.8,
-        reviews: 2341,
-        category: "Electronics",
-        badge: "Best Seller",
-        image: "🎧",
-    },
-    {
-        id: 2,
-        name: "Smart Watch Series 5",
-        price: 449.99,
-        originalPrice: 549.99,
-        rating: 4.9,
-        reviews: 1876,
-        category: "Electronics",
-        badge: "New",
-        image: "⌚",
-    },
-    {
-        id: 5,
-        name: "Running Shoes Ultra",
-        price: 179.99,
-        originalPrice: 219.99,
-        rating: 4.5,
-        reviews: 543,
-        category: "Sports",
-        badge: null,
-        image: "👟",
-    },
-];
-
-type Item = typeof initialWishlist[0];
+type Item = WishlistItem;
 
 // ─── Discount helper ──────────────────────────────────────────────────────────
 
@@ -76,82 +40,93 @@ function GridCard({
     onAddToCart,
 }: {
     item: Item;
-    onRemove: (id: number) => void;
+    onRemove: (id: string) => void;
     onAddToCart: (item: Item) => void;
 }) {
+    const price = item.price;
+    const originalPrice = (item as any).originalPrice;
+    const discountPct = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+    const itemSlug = (item as any).slug;
+    const slug = (itemSlug && itemSlug !== "undefined") ? itemSlug : (item.productId ?? item.id);
+    const categoryName = item.category || "General";
+    
+    const isEmoji = item.image && item.image.length <= 4;
+    const imageUrl = isEmoji ? "https://placehold.co/600x800/png?text=Product" : (item.image || "https://placehold.co/600x800/png?text=Product");
+    const badge = (item as any).badge;
+
     return (
-        <div className="group bg-white border border-stone-200 hover:border-amber-700/50 hover:shadow-md transition-all duration-500 flex flex-col h-full">
-            {/* Image area */}
-            <div className="relative aspect-square bg-stone-50 overflow-hidden border-b border-stone-200 flex items-center justify-center">
-                <Link
-                    href={`/products/${(item as any).slug ?? item.id}`}
-                    className="absolute inset-0 z-10"
-                    aria-label={`View ${item.name}`}
-                />
-                <span className="text-7xl group-hover:scale-110 transition-transform duration-700">{item.image}</span>
-                <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/5 transition-colors duration-500 pointer-events-none" />
+        <div className="group h-full flex flex-col max-w-[240px] mx-auto w-full">
+            {/* Image */}
+            <div className="relative aspect-square overflow-hidden bg-stone-100 mb-3">
+                <Link href={`/products/${slug}`} className="absolute inset-0 z-0">
+                    {isEmoji ? (
+                        <div className="w-full h-full flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-700">
+                            {item.image}
+                        </div>
+                    ) : (
+                        <Image
+                            src={imageUrl}
+                            alt={item.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        />
+                    )}
+                </Link>
 
-                {/* Badge */}
-                {item.badge && (
-                    <span className="absolute top-4 left-4 z-20 bg-stone-900 text-white text-[9px] uppercase tracking-[0.25em] font-bold px-3 py-1.5 shadow-sm">
-                        {item.badge}
-                    </span>
-                )}
+                {/* Badges */}
+                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10 pointer-events-none">
+                    {badge && (
+                        <span className="bg-stone-900 text-white text-[7px] uppercase tracking-[0.2em] font-bold px-2 py-0.5">
+                            {badge}
+                        </span>
+                    )}
+                    {discountPct > 0 && (
+                        <span className="bg-red-600 text-white text-[7px] uppercase tracking-[0.2em] font-bold px-2 py-0.5">
+                            -{discountPct}%
+                        </span>
+                    )}
+                </div>
 
-                {/* Discount */}
-                {item.originalPrice > item.price && (
-                    <span className="absolute top-4 right-4 z-20 bg-amber-50 text-amber-900 border border-amber-200/50 text-[9px] uppercase tracking-[0.2em] font-bold px-2.5 py-1.5 shadow-sm">
-                        -{discount(item.price, item.originalPrice)}%
-                    </span>
-                )}
-
-                {/* Hover: Add to cart */}
-                <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-30">
-                    <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            onAddToCart(item);
-                        }}
-                        className="w-full bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.25em] font-bold py-4 flex items-center justify-center gap-2 transition-colors shadow-[0_-5px_15px_rgba(0,0,0,0.1)]"
+                {/* Hover actions */}
+                <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                    <button 
+                        onClick={() => onRemove(item.id)}
+                        className="w-7 h-7 bg-white border border-stone-100 flex items-center justify-center hover:bg-red-50 hover:text-red-600 transition-colors shadow-sm text-stone-500"
+                        aria-label="Remove from Wishlist"
                     >
-                        <ShoppingCart className="w-3.5 h-3.5" />
-                        Acquire
+                        <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+
+                {/* Bottom CTA */}
+                <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
+                    <button 
+                        onClick={() => onAddToCart(item)}
+                        className="w-full bg-stone-900 hover:bg-stone-800 text-white text-[8px] uppercase tracking-[0.2em] font-bold py-2.5 transition-colors"
+                    >
+                        Add to Cart
                     </button>
                 </div>
             </div>
 
             {/* Info */}
-            <div className="p-5 md:p-6 flex flex-col flex-1">
-                <div className="flex items-start justify-between gap-4 mb-2">
-                    <div className="min-w-0 pr-2">
-                        <p className="text-[9px] uppercase tracking-[0.25em] text-stone-400 font-bold mb-2">
-                            {item.category}
-                        </p>
-                        <Link href={`/products/${(item as any).slug ?? item.id}`} className="block relative z-10">
-                            <h3 className="text-sm font-serif font-semibold text-stone-900 leading-snug line-clamp-2 group-hover:text-amber-700 transition-colors">
-                                {item.name}
-                            </h3>
-                        </Link>
-                    </div>
-                    <button
-                        onClick={() => onRemove(item.id)}
-                        className="shrink-0 text-stone-300 hover:text-red-600 transition-colors mt-0 relative z-20"
-                        aria-label="Remove"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </button>
-                </div>
-
-                <div className="flex items-center gap-2 mt-auto mb-4 pt-1">
-                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    <span className="text-[11px] font-bold text-stone-700">{item.rating}</span>
-                    <span className="text-[9px] uppercase tracking-widest font-mono text-stone-400">({item.reviews.toLocaleString()})</span>
-                </div>
-
-                <div className="flex items-baseline gap-2 pt-4 border-t border-stone-200">
-                    <span className="text-lg font-serif text-stone-900 font-bold">₹{item.price.toLocaleString()}</span>
-                    {item.originalPrice > item.price && (
-                        <span className="text-xs font-mono font-bold text-stone-400 line-through tracking-wider">₹{item.originalPrice.toLocaleString()}</span>
+            <div className="flex-grow flex flex-col px-1">
+                <p className="text-[8px] uppercase tracking-[0.15em] text-stone-400 font-medium mb-1">
+                    {categoryName}
+                </p>
+                <Link href={`/products/${slug}`}>
+                    <h3 className="text-xs font-semibold text-stone-900 leading-snug hover:text-stone-500 transition-colors line-clamp-2 mb-1.5">
+                        {item.name}
+                    </h3>
+                </Link>
+                <div className="flex items-baseline gap-1.5 mt-auto pb-1">
+                    <span className="text-xs font-bold text-stone-900">
+                        ₹{price.toLocaleString()}
+                    </span>
+                    {originalPrice && originalPrice > price && (
+                        <span className="text-[10px] text-stone-400 line-through">
+                            ₹{originalPrice.toLocaleString()}
+                        </span>
                     )}
                 </div>
             </div>
@@ -167,27 +142,41 @@ function ListRow({
     onAddToCart,
 }: {
     item: Item;
-    onRemove: (id: number) => void;
+    onRemove: (id: string) => void;
     onAddToCart: (item: Item) => void;
 }) {
+    const price = item.price;
+    const originalPrice = (item as any).originalPrice;
+    const badge = (item as any).badge;
+    const rating = (item as any).rating || 4.5;
+    const reviews = (item as any).reviews || 0;
+    const itemSlug = (item as any).slug;
+    const slug = (itemSlug && itemSlug !== "undefined") ? itemSlug : (item.productId ?? item.id);
+    const categoryName = item.category || "General";
+    const isEmoji = item.image && item.image.length <= 4;
+    const imageUrl = isEmoji ? "https://placehold.co/600x800/png?text=Product" : (item.image || "https://placehold.co/600x800/png?text=Product");
     return (
         <div className="flex flex-col sm:flex-row gap-0 sm:gap-0 bg-white border border-stone-200 hover:border-amber-700/50 hover:shadow-md transition-all duration-300 group">
             {/* Thumbnail */}
             <div className="relative shrink-0 w-full sm:w-56 h-56 sm:h-auto bg-stone-50 flex items-center justify-center border-b sm:border-b-0 sm:border-r border-stone-200 overflow-hidden">
                 <Link
-                    href={`/products/${(item as any).slug ?? item.id}`}
+                    href={`/products/${slug}`}
                     className="absolute inset-0 z-10"
                     aria-label={`View ${item.name}`}
                 />
-                <span className="text-7xl group-hover:scale-110 transition-transform duration-700">{item.image}</span>
-                {item.badge && (
+                {isEmoji ? (
+                    <span className="text-7xl group-hover:scale-110 transition-transform duration-700">{item.image}</span>
+                ) : (
+                    <Image src={imageUrl} alt={item.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                )}
+                {badge && (
                     <span className="absolute top-4 left-4 z-20 bg-stone-900 text-white text-[9px] uppercase tracking-[0.25em] font-bold px-3 py-1.5 shadow-sm">
-                        {item.badge}
+                        {badge}
                     </span>
                 )}
-                {item.originalPrice > item.price && (
+                {originalPrice > price && (
                     <span className="absolute top-4 right-4 z-20 bg-amber-50 text-amber-900 border border-amber-200/50 text-[9px] uppercase tracking-[0.2em] font-bold px-2.5 py-1.5 shadow-sm">
-                        -{discount(item.price, item.originalPrice)}%
+                        -{discount(price, originalPrice)}%
                     </span>
                 )}
             </div>
@@ -196,26 +185,26 @@ function ListRow({
             <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-6 md:p-8">
                 <div className="flex-1 min-w-0 pr-0 sm:pr-6">
                     <p className="text-[10px] uppercase tracking-[0.25em] text-stone-400 font-bold mb-2.5 flex items-center gap-2">
-                        {item.category}
+                        {categoryName}
                     </p>
-                    <Link href={`/products/${(item as any).slug ?? item.id}`} className="block relative z-10 mb-3">
+                    <Link href={`/products/${slug}`} className="block relative z-10 mb-3">
                         <h3 className="text-xl md:text-2xl font-serif font-semibold text-stone-900 group-hover:text-amber-700 transition-colors line-clamp-2">
                             {item.name}
                         </h3>
                     </Link>
                     <div className="flex items-center gap-2">
                         <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                        <span className="text-xs font-bold text-stone-700">{item.rating}</span>
-                        <span className="text-[10px] uppercase font-mono tracking-widest text-stone-400">({item.reviews.toLocaleString()} Reviews)</span>
+                        <span className="text-xs font-bold text-stone-700">{rating}</span>
+                        <span className="text-[10px] uppercase font-mono tracking-widest text-stone-400">({reviews.toLocaleString()} Reviews)</span>
                     </div>
                 </div>
 
                 {/* Price + Actions */}
                 <div className="flex flex-col sm:items-end justify-between sm:justify-center gap-6 shrink-0 relative z-20 border-t sm:border-t-0 border-stone-200 sm:border-l pl-0 sm:pl-8 pt-6 sm:pt-0 w-full sm:w-auto min-w-[200px]">
                     <div className="flex items-baseline gap-3 mb-1 sm:mb-3">
-                        <span className="text-2xl font-serif text-stone-900">₹{item.price.toLocaleString()}</span>
-                        {item.originalPrice > item.price && (
-                            <span className="text-sm font-bold font-mono tracking-wider text-stone-400 line-through">₹{item.originalPrice.toLocaleString()}</span>
+                        <span className="text-2xl font-serif text-stone-900">₹{price.toLocaleString()}</span>
+                        {originalPrice > price && (
+                            <span className="text-sm font-bold font-mono tracking-wider text-stone-400 line-through">₹{originalPrice.toLocaleString()}</span>
                         )}
                     </div>
 
@@ -245,19 +234,30 @@ function ListRow({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function WishlistPage() {
-    const [wishlist, setWishlist] = useState(initialWishlist);
+    const [wishlist, setWishlist] = useState<Item[]>([]);
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [sortBy, setSortBy] = useState("added-newest");
+
+    useEffect(() => {
+        setWishlist(wishlistLocalStorageData.getWishlist());
+
+        const handleUpdate = () => {
+            setWishlist(wishlistLocalStorageData.getWishlist());
+        };
+
+        window.addEventListener("wishlistUpdated", handleUpdate);
+        return () => window.removeEventListener("wishlistUpdated", handleUpdate);
+    }, []);
 
     const sorted = [...wishlist].sort((a, b) => {
         if (sortBy === "price-low") return a.price - b.price;
         if (sortBy === "price-high") return b.price - a.price;
-        if (sortBy === "rating") return b.rating - a.rating;
+        if (sortBy === "rating") return ((b as any).rating || 0) - ((a as any).rating || 0);
         return 0;
     });
 
-    const removeFromWishlist = (id: number) => {
-        setWishlist((prev) => prev.filter((i) => i.id !== id));
+    const removeFromWishlist = (id: string) => {
+        wishlistLocalStorageData.removeItem(id);
         toast({ title: "Removed", description: "Item removed from wishlist." });
     };
 
@@ -266,7 +266,7 @@ export default function WishlistPage() {
     };
 
     const clearWishlist = () => {
-        setWishlist([]);
+        wishlistLocalStorageData.clearWishlist();
         toast({ title: "Wishlist Cleared", description: "All items removed." });
     };
 

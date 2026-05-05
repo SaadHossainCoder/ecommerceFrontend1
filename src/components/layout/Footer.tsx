@@ -30,8 +30,7 @@ const footerLinks = {
         { href: "/track-order/1", label: "Track Order" },
         { href: "/media/faq", label: "FAQ" },
         { href: "/media/shipping", label: "Shipping Policy" },
-        { href: "/media/returns", label: "Returns" },
-        { href: "/media/refund", label: "Refund Policy" },
+        { href: "/media/returns", label: "Return & Refund Policy" },
     ],
     legal: [
         { href: "/media/terms", label: "Terms of Service" },

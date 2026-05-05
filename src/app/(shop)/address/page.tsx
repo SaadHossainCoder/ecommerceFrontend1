@@ -25,14 +25,17 @@ import { AddressForm } from "./_components/addressFrom";
 
 export default function AddressPage() {
     const addresses = useAddressStore(state => state.addresses);
+    const selectedAddress = useAddressStore(state => state.selectedAddress);
     const isLoading = useAddressStore(state => state.isLoading);
     const error = useAddressStore(state => state.error);
     const fetchAddresses = useAddressStore(state => state.fetchAddresses);
+    const fetchAddressesById = useAddressStore(state => state.fetchAddressesById);
     const deleteAddress = useAddressStore(state => state.deleteAddress);
     const setDefault = useAddressStore(state => state.setDefault);
+    const setSelectedAddress = useAddressStore(state => state.setSelectedAddress);
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
         fetchAddresses();
@@ -48,8 +51,16 @@ export default function AddressPage() {
     }, [addresses, searchQuery]);
 
     const handleCloseDialog = useCallback(() => {
-        setIsAddDialogOpen(false);
-    }, []);
+        setIsDialogOpen(false);
+        setSelectedAddress(null);
+    }, [setSelectedAddress]);
+
+    const handleEdit = async (id: string) => {
+        const addr = addresses.find(a => a.id === id);
+        if (addr) setSelectedAddress(addr);
+        setIsDialogOpen(true);
+        await fetchAddressesById(id);
+    };
 
     return (
         <section className="bg-[#FAF9F6] min-h-screen">
@@ -83,7 +94,7 @@ export default function AddressPage() {
                             />
                         </div>
                         <Button 
-                            onClick={() => setIsAddDialogOpen(true)}
+                            onClick={() => setIsDialogOpen(true)}
                             className="h-12 px-8 bg-stone-900 text-white hover:bg-stone-800 rounded-full flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold border-none"
                         >
                             <Plus className="w-4 h-4" /> Add New
@@ -127,7 +138,7 @@ export default function AddressPage() {
                         </p>
                         {!searchQuery && (
                             <Button 
-                                onClick={() => setIsAddDialogOpen(true)}
+                                onClick={() => setIsDialogOpen(true)}
                                 className="rounded-full bg-stone-900 text-white hover:bg-stone-800 px-10 h-14 text-[10px] uppercase tracking-[0.25em] font-bold"
                             >
                                 Add First Address
@@ -179,7 +190,10 @@ export default function AddressPage() {
                                             <p className="text-lg font-mono text-stone-600">{address.phone}</p>
                                         </div>
                                         <div className="flex gap-2">
-                                            <button className="h-12 w-12 rounded-full bg-stone-50 text-stone-400 hover:text-stone-900 hover:bg-stone-100 transition-all flex items-center justify-center border border-stone-100">
+                                            <button 
+                                                onClick={() => handleEdit(address.id)}
+                                                className="h-12 w-12 rounded-full bg-stone-50 text-stone-400 hover:text-stone-900 hover:bg-stone-100 transition-all flex items-center justify-center border border-stone-100"
+                                            >
                                                 <Pencil className="h-5 w-5" />
                                             </button>
                                             <button 
@@ -205,22 +219,33 @@ export default function AddressPage() {
                 )}
             </div>
 
-            {/* Add Address Dialog */}
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            {/* Address Dialog */}
+            <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
                 <DialogContent className="sm:max-w-[600px] bg-[#FAF9F6] border-stone-200 p-0 overflow-hidden rounded-[2.5rem]">
                     <div className="p-8 md:p-12 overflow-y-auto max-h-[90vh]">
                         <DialogHeader className="mb-10 text-left">
                             <DialogTitle className="text-4xl font-serif text-stone-900 mb-4">
-                                New <span className="italic text-stone-400">Location</span>
+                                {selectedAddress ? "Update" : "New"} <span className="italic text-stone-400">Location</span>
                             </DialogTitle>
                             <p className="text-stone-500 font-light text-base leading-relaxed">
-                                Provide the details for your new shipping destination below.
+                                {selectedAddress 
+                                    ? "Modify the details for this shipping destination below."
+                                    : "Provide the details for your new shipping destination below."}
                             </p>
                         </DialogHeader>
-                        <AddressForm 
-                            onSuccess={handleCloseDialog} 
-                            onCancel={handleCloseDialog} 
-                        />
+                        
+                        {isLoading && selectedAddress === null ? (
+                            <div className="flex flex-col items-center justify-center py-20">
+                                <Loader2 className="w-8 h-8 text-stone-300 animate-spin" />
+                            </div>
+                        ) : (
+                            <AddressForm 
+                                key={selectedAddress?.id || "new"}
+                                initialData={selectedAddress || undefined}
+                                onSuccess={handleCloseDialog} 
+                                onCancel={handleCloseDialog} 
+                            />
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>

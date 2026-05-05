@@ -163,7 +163,7 @@ export default async function HomePage() {
                             <div className="relative aspect-2/3 overflow-hidden">
                                 <Image
                                     src="https://i.pinimg.com/736x/39/2b/39/392b39f3a3af88a805254025c5c18b6b.jpg"
-                                    alt="Brass Art 1"
+                                    alt="home-2"
                                     fill
                                     className="object-cover"
                                 />
@@ -171,7 +171,7 @@ export default async function HomePage() {
                             <div className="relative aspect-2/4 overflow-hidden mt-8">
                                 <Image
                                     src="https://i.pinimg.com/1200x/36/47/0e/36470e90391eaecf63e9528aaf10fd3f.jpg"
-                                    alt="Brass Art 2"
+                                    alt="home-3"
                                     fill
                                     className="object-cover"
                                 />
@@ -200,7 +200,7 @@ export default async function HomePage() {
                         <div className="relative aspect-square md:aspect-2/3 overflow-hidden">
                             <Image
                                 src="https://i.pinimg.com/736x/7f/49/2e/7f492ed36a65e79dda9c8454f9867a5d.jpg"
-                                alt="Elephant sculpture"
+                                alt="home-4"
                                 fill
                                 className="object-cover"
                             />
@@ -250,7 +250,7 @@ export default async function HomePage() {
                         <div className="relative aspect-4/5 overflow-hidden">
                             <Image
                                 src="https://i.pinimg.com/736x/19/9f/6f/199f6fae3ff34e0ce09f09fa61409821.jpg"
-                                alt="Chariot Art"
+                                alt="home-5"
                                 fill
                                 className="object-cover"
                             />

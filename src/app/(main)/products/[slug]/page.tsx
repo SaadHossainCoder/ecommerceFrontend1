@@ -817,16 +817,16 @@ export default function ProductDetailsPage() {
 
                                     <div>
                                         <label className="text-[9px] uppercase tracking-[0.25em] font-bold text-stone-400 block mb-2">Manuscript *</label>
-                                        <textarea 
-                                            rows={4} 
-                                            placeholder="Detail your experience with the craftsmanship..." 
-                                            className="w-full bg-stone-50 border border-stone-200 px-4 py-3 text-xs focus:border-stone-900 focus:bg-white focus:outline-none transition-colors resize-none shadow-sm" 
+                                        <textarea
+                                            rows={4}
+                                            placeholder="Detail your experience with the craftsmanship..."
+                                            className="w-full bg-stone-50 border border-stone-200 px-4 py-3 text-xs focus:border-stone-900 focus:bg-white focus:outline-none transition-colors resize-none shadow-sm"
                                             value={reviewComment}
                                             onChange={(e) => setReviewComment(e.target.value)}
                                         />
                                     </div>
 
-                                    <button 
+                                    <button
                                         onClick={handleReviewSubmit}
                                         disabled={isSubmittingReview}
                                         className="bg-stone-900 hover:bg-stone-800 text-white text-[10px] uppercase tracking-[0.25em] font-bold px-10 py-4 transition-all duration-300 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"

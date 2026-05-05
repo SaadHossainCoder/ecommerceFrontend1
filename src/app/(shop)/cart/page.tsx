@@ -38,7 +38,7 @@ export default function CartPage() {
     const handleGiftCodeSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (giftCode.trim()) {
-            console.log("Gift code submitted:", giftCode);
+            // console.log("Gift code submitted:", giftCode);
             toast({
                 title: "Code Applied",
                 description: `Gift code ${giftCode} has been applied to your order.`,

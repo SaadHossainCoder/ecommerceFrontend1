@@ -58,7 +58,7 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
         set({ isLoading: true, error: null });
 
         try {
-            console.log("Fetching products with params:", params);
+            // console.log("Fetching products with params:", params);
             const res = await productService.getAllProducts(params);
             
             // The structure is { ok: true, message: "...", data: { data: [...], pagination: {...} } }
@@ -113,9 +113,9 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
                 }))
             };
 
-            console.log("Adding Product - Formatted Data:", formattedData);
+            // console.log("Adding Product - Formatted Data:", formattedData);
             const res = await productService.createProduct(formattedData);
-            console.log("Adding Product - API Response:", res);
+            // console.log("Adding Product - API Response:", res);
 
             if (res.ok) {
                 set({ isLoading: false });
@@ -162,9 +162,9 @@ export const useProductStore = create<ProductStoreState>((set, get) => ({
                 }))
             };
 
-            console.log("Editing Product - Formatted Data:", formattedData);
+            // console.log("Editing Product - Formatted Data:", formattedData);
             const res = await productService.updateProduct(id, formattedData);
-            console.log("Editing Product - API Response:", res);
+            // console.log("Editing Product - API Response:", res);
 
             if (res.ok) {
                 set({ isLoading: false });
@@ -252,7 +252,7 @@ export const useFeaturedProducts = create<FeaturedProductStoreState>((set, get) 
         }));
 
         try {
-            console.log(`[Store] Fetching featured products for slug: ${slug}`);
+            // console.log(`[Store] Fetching featured products for slug: ${slug}`);
             const res = await productService.getFeaturedProductsBySlug(slug);
             set((s) => ({
                 featuredProductsByCategory: { ...s.featuredProductsByCategory, [slug]: res.data || [] },

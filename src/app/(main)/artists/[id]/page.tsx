@@ -11,29 +11,7 @@ import {
 } from "lucide-react";
 import { useVendorStore } from "@/store/vendor-store";
 
-// Mock products for the artist (in a real app, these would be filtered from a product list)
-const artistProducts = [
-    {
-        id: 1,
-        name: "Teak Wooden Chair",
-        image: "https://i.pinimg.com/1200x/56/b8/1b/56b81bf885a58febe005905f3aa7cacf.jpg",
-    },
-    {
-        id: 2,
-        name: "Teak Daybed",
-        image: "https://i.pinimg.com/1200x/95/8d/b5/958db5d1a83e0bbc8ff5fc50269e1550.jpg",
-    },
-    {
-        id: 3,
-        name: "Teak Daybed (Rattan)",
-        image: "https://i.pinimg.com/1200x/97/7c/2d/977c2d33614d92abc218bec9a00f95b7.jpg",
-    },
-    {
-        id: 4,
-        name: "Mungaru Dining Chair",
-        image: "https://i.pinimg.com/1200x/65/0a/50/650a50eb4f3a6ea1aae6bdd6d35acdb6.jpg",
-    },
-];
+// Products are now fetched directly as part of the artist (vendor) data
 
 export default function ArtistDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -135,26 +113,41 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                             </Link>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {artistProducts.map((product) => (
-                                <div
-                                    key={product.id}
-                                    className="group cursor-pointer"
-                                >
-                                    <div className="aspect-3/4 relative overflow-hidden bg-stone-200 mb-4">
-                                        <Image
-                                            src={product.image}
-                                            alt={product.name}
-                                            fill
-                                            className="object-cover hover:grayscale-0 transition-all duration-700"
-                                        />
-                                    </div>
-                                    <h3 className="text-sm text-stone-600 font-medium group-hover:text-stone-900 transition-colors">
-                                        {product.name}
-                                    </h3>
-                                </div>
-                            ))}
-                        </div>
+                        {artist.products && artist.products.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {artist.products.map((product: any) => {
+                                    const primaryImg =
+                                        product.subProducts?.[0]?.images?.[0] ||
+                                        product.images?.[0] ||
+                                        product.generalImages?.[0] ||
+                                        "https://via.placeholder.com/400x500";
+
+                                    return (
+                                        <Link
+                                            href={`/products/${product.slug || product.id}`}
+                                            key={product.id || product._id}
+                                            className="group cursor-pointer block"
+                                        >
+                                            <div className="aspect-3/4 relative overflow-hidden bg-stone-200 mb-4">
+                                                <Image
+                                                    src={primaryImg}
+                                                    alt={product.title || product.name || "Product"}
+                                                    fill
+                                                    className="object-cover hover:grayscale-0 transition-all duration-700"
+                                                />
+                                            </div>
+                                            <h3 className="text-sm text-stone-600 font-medium group-hover:text-stone-900 transition-colors">
+                                                {product.title || product.name}
+                                            </h3>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="py-16 text-center border border-stone-200 bg-white">
+                                <p className="text-stone-500 font-serif italic">No items crafted by this artist yet.</p>
+                            </div>
+                        )}
                     </div>
                 </section>
 

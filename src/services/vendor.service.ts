@@ -36,6 +36,7 @@ export interface Vendor {
     descriptionImages: string[];
     createdAt: string;
     updatedAt: string;
+    products?: any[];
 }
 
 export const vendorService = {

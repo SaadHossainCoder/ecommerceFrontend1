@@ -304,12 +304,12 @@ export default function ProductsPage() {
                         </SelectContent>
                     </Select>
 
-                    <div className="flex bg-background p-1.5 rounded-2xl shadow-sm border border-primary/10">
+                    <div className="flex gap-1 bg-background p-1.5 rounded-2xl shadow-sm border border-primary/10">
                         <Button variant={viewMode === "table" ? "default" : "ghost"} size="icon" className={`rounded-xl h-11 w-11 ${viewMode === "table" ? "shadow-md bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setViewMode("table")}>
-                            <List className="h-5 w-5" />
+                            <List className="h-4 w-4" />
                         </Button>
                         <Button variant={viewMode === "grid" ? "default" : "ghost"} size="icon" className={`rounded-xl h-11 w-11 ${viewMode === "grid" ? "shadow-md bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`} onClick={() => setViewMode("grid")}>
-                            <LayoutGrid className="h-5 w-5" />
+                            <LayoutGrid className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
@@ -351,8 +351,7 @@ export default function ProductsPage() {
                         </TableHeader>
                         <TableBody>
                             {paginatedProducts.map((product) => {
-                                const mainImg = product.generalImages?.[0]?.url || product.generalImages?.[0] || 
-                                               product.images?.[0]?.url || product.images?.[0] || "📦";
+                                const mainImg = product.subProducts?.[0]?.images?.[0] || "📦";
                                 const totalStock = (product.subProducts || product.sizes)?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
                                 const prices = (product.subProducts || product.sizes)?.map((s: any) => Number(s.price)) || [0];
                                 const minPrice = Math.min(...prices);
@@ -434,21 +433,20 @@ export default function ProductsPage() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {paginatedProducts.map((product) => {
-                        const mainImg = product.generalImages?.[0]?.url || product.generalImages?.[0] || 
-                                       product.images?.[0]?.url || product.images?.[0] || "📦";
+                        const mainImg = product.subProducts?.[0]?.images?.[0] || "📦";
                         const totalStock = (product.subProducts || product.sizes)?.reduce((acc: number, s: any) => acc + (Number(s.qty) || 0), 0) || 0;
                         const prices = (product.subProducts || product.sizes)?.map((s: any) => Number(s.price)) || [0];
                         const minPrice = Math.min(...prices);
                         const status = product.disableProduct ? "Disabled" : totalStock > 10 ? "Published" : totalStock > 0 ? "Low Stock" : "Out of Stock";
 
                         return (
-                            <Card key={product._id || product.id} className={`rounded-3xl overflow-hidden group hover:shadow-2xl border border-transparent hover:border-primary/30 bg-card flex flex-col relative ${product.disableProduct ? 'opacity-60 shadow-none' : ''}`}>
+                            <Card key={product._id || product.id} className={`overflow-hidden group hover:shadow-2xl border border-transparent hover:border-primary/30 bg-card flex flex-col relative ${product.disableProduct ? 'opacity-60 shadow-none' : ''}`}>
                                 <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 items-end">
                                     <Badge variant={getStatusColor(status) as any} className="shadow-lg backdrop-blur-md px-3 py-1 font-bold text-[10px] uppercase tracking-widest">
                                         {status}
                                     </Badge>
                                 </div>
-                                <div className="aspect-[4/3] bg-muted relative overflow-hidden shrink-0">
+                                <div className="aspect-4/3 bg-muted relative overflow-hidden shrink-0">
                                     {typeof mainImg === 'string' && mainImg.startsWith('http') ? (
                                         <img src={mainImg} alt={product.title} className="w-full h-full object-cover" />
                                     ) : <div className="w-full h-full flex items-center justify-center text-6xl">📦</div>}

@@ -9,6 +9,7 @@ interface FeaturedProductsListProps {
     categoryId?: string;
     categorySlug?: string;
     limit?: number;
+    randomize?: boolean;
 }
 
 const ProductCardSkeleton = ({ index = 0 }: { index?: number }) => (
@@ -27,11 +28,11 @@ const ProductCardSkeleton = ({ index = 0 }: { index?: number }) => (
     </div>
 );
 
-export function FeaturedProductsList({ categoryId, categorySlug, limit = 4 }: FeaturedProductsListProps) {
-    const { 
-        featuredProductsByCategory, 
-        loadingStates, 
-        errors, 
+export function FeaturedProductsList({ categoryId, categorySlug, limit = 4, randomize = true }: FeaturedProductsListProps) {
+    const {
+        featuredProductsByCategory,
+        loadingStates,
+        errors,
         fetchFeaturedProducts,
     } = useFeaturedProducts();
 
@@ -77,6 +78,14 @@ export function FeaturedProductsList({ categoryId, categorySlug, limit = 4 }: Fe
         });
     }, [allProducts, categoryId, categorySlug]);
 
+    const displayProducts = useMemo(() => {
+        let items = [...filteredProducts];
+        if (randomize) {
+            items = items.sort(() => 0.5 - Math.random());
+        }
+        return items.slice(0, limit);
+    }, [filteredProducts, limit, randomize]);
+
     if (isLoading) {
         return (
             <>
@@ -116,28 +125,17 @@ export function FeaturedProductsList({ categoryId, categorySlug, limit = 4 }: Fe
         );
     }
 
-    const displayProducts = filteredProducts.slice(0, limit);
-
     return (
         <>
             {displayProducts.map((p: any, index: number) => {
-                const displayPrice = p.subProducts?.[0]?.price || p.price || 0;
-                const categoryName = p.category?.name || p.categoryName || "Featured";
                 return (
-                    <Link
+                    <div
                         key={p.id || p._id || index}
-                        href={`/products/${p.slug}`}
                         className="block animate-fade-in-up"
                         style={{ animationDelay: `${index * 80}ms`, animationFillMode: "both" }}
                     >
-                        <ProductCard
-                            name={p.title || "Unknown Product"}
-                            price={displayPrice}
-                            image={p.subProducts?.[0]?.images?.[0] || "/placeholder.png"}
-                            category={categoryName}
-                            index={index}
-                        />
-                    </Link>
+                        <ProductCard product={p} />
+                    </div>
                 );
             })}
         </>

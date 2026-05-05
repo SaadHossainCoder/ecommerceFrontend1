@@ -81,14 +81,14 @@ export const useAuthGuardStore = create<AuthGuardState>((set, get) => ({
                 // Handle specific auth guard messages
                 if (res.message === "noRefreshToken") {
                     set({ login: true, isAuthenticated: false, user: null, role: null, isLoading: false });
-                    console.log("noRefreshToken");
+                    // console.log("noRefreshToken");
                     return;
                 }
                 
                 // If access token is missing but refresh token exists, try to refresh
                 if (res.message === "noAccessToken" || (!res.isAuthorised && res.message?.includes("User not authorised"))) {
                     try {
-                        console.log("noAccessToken - Attempting to refresh tokens");
+                        // console.log("noAccessToken - Attempting to refresh tokens");
                         await authService.refresh();
                         
                         // Call verify again with new access token
@@ -105,7 +105,7 @@ export const useAuthGuardStore = create<AuthGuardState>((set, get) => ({
                             return;
                         }
                     } catch (refreshErr) {
-                        console.log("Failed to refresh token:", refreshErr);
+                        // console.log("Failed to refresh token:", refreshErr);
                     }
                     
                     // If refresh failed or verify after refresh failed

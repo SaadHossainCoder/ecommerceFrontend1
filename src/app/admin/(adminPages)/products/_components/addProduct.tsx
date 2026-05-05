@@ -92,7 +92,7 @@ function MultiUrlInput({
                                     placeholder={placeholder}
                                     value={val}
                                     onChange={(e) => updateRow(i, e.target.value)}
-                                    className="pl-9 h-10 bg-muted/30 focus-visible:bg-background border-dashed focus-visible:border-solid transition-all"
+                                    className={`pl-9 h-10 bg-muted/30 focus-visible:bg-background border-dashed focus-visible:border-solid transition-all ${errors ? "border-destructive ring-1 ring-destructive" : ""}`}
                                 />
                             </div>
                             {values.length > 1 && (
@@ -295,7 +295,7 @@ export default function EditProductForm({
         data.benefits = (data.benefits || []).filter(b => b.value.trim() !== "");
         data.ingredients = (data.ingredients || []).filter(i => i.value.trim() !== "");
 
-        console.log("Form submission data (sanitized):", data);
+        // console.log("Form submission data (sanitized):", data);
         try {
             if (onSave) {
                 await onSave(data);
@@ -306,8 +306,8 @@ export default function EditProductForm({
     };
 
     const onError = (errors: any) => {
-        console.error("Form validation failed for fields:", Object.keys(errors));
-        console.error("Form validation error details:", errors);
+        // Validation caught the empty fields. Logging as a warning instead of an error to prevent confusion.
+        console.warn("Form validation caught empty fields:", Object.keys(errors));
     };
 
     return (
@@ -322,29 +322,29 @@ export default function EditProductForm({
                         </div>
                         <div className="grid gap-4">
                             <div>
-                                <Label htmlFor="title" className="text-xs font-semibold">PRODUCT TITLE *</Label>
-                                <Input id="title" {...register("title")} placeholder="e.g. Wireless Noise Cancelling Headphones" className="mt-1" />
+                                <Label htmlFor="title" className={`text-xs font-semibold ${errors.title ? "text-destructive" : ""}`}>PRODUCT TITLE *</Label>
+                                <Input id="title" {...register("title")} placeholder="e.g. Wireless Noise Cancelling Headphones" className={`mt-1 ${errors.title ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                 {errors.title && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.title.message}</p>}
                             </div>
                             <div>
-                                <Label htmlFor="description" className="text-xs font-semibold">HOOK LINE / SHORT DESCRIPTION *</Label>
-                                <Input id="description" {...register("description")} placeholder="A punchy 1-line summary (min 20 chars)" className="mt-1" />
+                                <Label htmlFor="description" className={`text-xs font-semibold ${errors.description ? "text-destructive" : ""}`}>HOOK LINE / SHORT DESCRIPTION *</Label>
+                                <Input id="description" {...register("description")} placeholder="A punchy 1-line summary (min 20 chars)" className={`mt-1 ${errors.description ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                 {errors.description && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.description.message}</p>}
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label htmlFor="brand" className="text-xs font-semibold">MANUFACTURER / BRAND *</Label>
-                                    <Input id="brand" {...register("brand")} placeholder="e.g. Sony, Bose" className="mt-1" />
+                                    <Label htmlFor="brand" className={`text-xs font-semibold ${errors.brand ? "text-destructive" : ""}`}>MANUFACTURER / BRAND *</Label>
+                                    <Input id="brand" {...register("brand")} placeholder="e.g. Sony, Bose" className={`mt-1 ${errors.brand ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                     {errors.brand && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.brand.message as string}</p>}
                                 </div>
                                 <div>
-                                    <Label className="text-xs font-semibold">VENDOR PARTNER *</Label>
+                                    <Label className={`text-xs font-semibold ${errors.vendor ? "text-destructive" : ""}`}>VENDOR PARTNER *</Label>
                                     <Controller
                                         name="vendor"
                                         control={control}
                                         render={({ field }) => (
                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <SelectTrigger className="mt-1">
+                                                <SelectTrigger className={`mt-1 ${errors.vendor ? "border-destructive ring-1 ring-destructive" : ""}`}>
                                                     <SelectValue placeholder="Select Vendor" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -353,6 +353,7 @@ export default function EditProductForm({
                                             </Select>
                                         )}
                                     />
+                                    {errors.vendor && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.vendor.message as string}</p>}
                                 </div>
                             </div>
                         </div>
@@ -365,7 +366,7 @@ export default function EditProductForm({
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label className="text-xs font-semibold">PRIMARY CATEGORY *</Label>
+                                <Label className={`text-xs font-semibold ${errors.category ? "text-destructive" : ""}`}>PRIMARY CATEGORY *</Label>
                                 <Controller
                                     name="category"
                                     control={control}
@@ -374,7 +375,7 @@ export default function EditProductForm({
                                             field.onChange(v);
                                             setValue("subcategory", ""); // Reset subcategory when primary changes
                                         }} defaultValue={field.value}>
-                                            <SelectTrigger className="mt-1">
+                                            <SelectTrigger className={`mt-1 ${errors.category ? "border-destructive ring-1 ring-destructive" : ""}`}>
                                                 <SelectValue placeholder="Select Category" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -383,15 +384,16 @@ export default function EditProductForm({
                                         </Select>
                                     )}
                                 />
+                                {errors.category && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.category.message as string}</p>}
                             </div>
                             <div>
-                                <Label className="text-xs font-semibold">SUBCATEGORY *</Label>
+                                <Label className={`text-xs font-semibold ${errors.subcategory ? "text-destructive" : ""}`}>SUBCATEGORY *</Label>
                                 <Controller
                                     name="subcategory"
                                     control={control}
                                     render={({ field }) => (
                                         <Select onValueChange={field.onChange} value={field.value}>
-                                            <SelectTrigger className="mt-1">
+                                            <SelectTrigger className={`mt-1 ${errors.subcategory ? "border-destructive ring-1 ring-destructive" : ""}`}>
                                                 <SelectValue placeholder="Select Subcategory" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -413,13 +415,13 @@ export default function EditProductForm({
                                 {errors.subcategory && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.subcategory.message as string}</p>}
                             </div>
                             <div>
-                                <Label htmlFor="sku" className="text-xs font-semibold">UNIQUE SKU *</Label>
-                                <Input id="sku" {...register("sku")} placeholder="e.g. AUD-001-WH" className="mt-1 font-mono" />
+                                <Label htmlFor="sku" className={`text-xs font-semibold ${errors.sku ? "text-destructive" : ""}`}>UNIQUE SKU *</Label>
+                                <Input id="sku" {...register("sku")} placeholder="e.g. AUD-001-WH" className={`mt-1 font-mono ${errors.sku ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                 {errors.sku && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.sku.message as string}</p>}
                             </div>
                             <div>
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="slug" className="text-xs font-semibold">URL SLUG *</Label>
+                                    <Label htmlFor="slug" className={`text-xs font-semibold ${errors.slug ? "text-destructive" : ""}`}>URL SLUG *</Label>
                                     <Button
                                         type="button"
                                         variant="ghost"
@@ -438,12 +440,12 @@ export default function EditProductForm({
                                         Sync with Title
                                     </Button>
                                 </div>
-                                <Input id="slug" {...register("slug")} placeholder="e.g. wireless-headphones" className="mt-1 font-mono" />
+                                <Input id="slug" {...register("slug")} placeholder="e.g. wireless-headphones" className={`mt-1 font-mono ${errors.slug ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                 {errors.slug && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.slug.message as string}</p>}
                             </div>
                             <div>
-                                <Label htmlFor="discount" className="text-xs font-semibold">FLAT DISCOUNT (%)</Label>
-                                <Input id="discount" type="number" {...register("discount", { valueAsNumber: true })} className="mt-1" />
+                                <Label htmlFor="discount" className={`text-xs font-semibold ${errors.discount ? "text-destructive" : ""}`}>FLAT DISCOUNT (%)</Label>
+                                <Input id="discount" type="number" {...register("discount", { valueAsNumber: true })} className={`mt-1 ${errors.discount ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                 {errors.discount && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.discount.message as string}</p>}
                             </div>
                         </div>
@@ -477,8 +479,8 @@ export default function EditProductForm({
                             <h3 className="font-bold uppercase tracking-wider">Detailed Narrative</h3>
                         </div>
                         <div>
-                            <Label htmlFor="longDescription" className="text-xs font-semibold">STORYTELLING / LONG DESCRIPTION *</Label>
-                            <Textarea id="longDescription" rows={10} {...register("longDescription")} placeholder="Go deep into product features, history, and usage..." className="mt-1 leading-relaxed" />
+                            <Label htmlFor="longDescription" className={`text-xs font-semibold ${errors.longDescription ? "text-destructive" : ""}`}>STORYTELLING / LONG DESCRIPTION *</Label>
+                            <Textarea id="longDescription" rows={10} {...register("longDescription")} placeholder="Go deep into product features, history, and usage..." className={`mt-1 leading-relaxed ${errors.longDescription ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                             {errors.longDescription && <p className="text-destructive text-[10px] uppercase font-bold mt-1">{errors.longDescription.message}</p>}
                         </div>
                     </section>
@@ -492,6 +494,7 @@ export default function EditProductForm({
                             values={watchGeneralImages}
                             onChange={(vals) => setValue("generalImages", vals, { shouldValidate: true })}
                             placeholder="https://images.unsplash.com/photo-..."
+                            errors={errors.generalImages}
                         />
                         {errors.generalImages && <p className="text-destructive text-[10px] uppercase font-bold text-center">{errors.generalImages.message}</p>}
                     </section>
@@ -513,20 +516,20 @@ export default function EditProductForm({
                                     <div className="grid gap-3">
                                         <div className="flex items-center gap-3">
                                             <div className="flex-1">
-                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Sub-SKU</Label>
-                                                <Input placeholder="e.g. SKU-RED-L" {...register(`subProducts.${index}.sku`)} className="mt-0.5 h-8 text-xs font-mono" />
+                                                <Label className={`text-[10px] font-bold uppercase ${errors.subProducts?.[index]?.sku ? "text-destructive" : "text-muted-foreground"}`}>Sub-SKU</Label>
+                                                <Input placeholder="e.g. SKU-RED-L" {...register(`subProducts.${index}.sku`)} className={`mt-0.5 h-8 text-xs font-mono ${errors.subProducts?.[index]?.sku ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                             </div>
                                             <div className="flex-1">
-                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Variant Type</Label>
-                                                <Input placeholder="Small, Red, 1TB..." {...register(`subProducts.${index}.type`)} className="mt-0.5 h-8 text-xs" />
+                                                <Label className={`text-[10px] font-bold uppercase ${errors.subProducts?.[index]?.type ? "text-destructive" : "text-muted-foreground"}`}>Variant Type</Label>
+                                                <Input placeholder="Small, Red, 1TB..." {...register(`subProducts.${index}.type`)} className={`mt-0.5 h-8 text-xs ${errors.subProducts?.[index]?.type ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                             </div>
                                             <div className="w-16">
-                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Qty</Label>
-                                                <Input type="number" placeholder="0" {...register(`subProducts.${index}.qty`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
+                                                <Label className={`text-[10px] font-bold uppercase ${errors.subProducts?.[index]?.qty ? "text-destructive" : "text-muted-foreground"}`}>Qty</Label>
+                                                <Input type="number" placeholder="0" {...register(`subProducts.${index}.qty`, { valueAsNumber: true })} className={`mt-0.5 h-8 text-xs ${errors.subProducts?.[index]?.qty ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                             </div>
                                             <div className="w-20">
-                                                <Label className="text-[10px] font-bold text-muted-foreground uppercase">Price ($)</Label>
-                                                <Input type="number" step="0.01" placeholder="0.00" {...register(`subProducts.${index}.price`, { valueAsNumber: true })} className="mt-0.5 h-8 text-xs" />
+                                                <Label className={`text-[10px] font-bold uppercase ${errors.subProducts?.[index]?.price ? "text-destructive" : "text-muted-foreground"}`}>Price ($)</Label>
+                                                <Input type="number" step="0.01" placeholder="0.00" {...register(`subProducts.${index}.price`, { valueAsNumber: true })} className={`mt-0.5 h-8 text-xs ${errors.subProducts?.[index]?.price ? "border-destructive focus-visible:ring-destructive" : ""}`} />
                                             </div>
                                             {subProductFields.length > 1 && (
                                                 <Button type="button" variant="ghost" size="icon" onClick={() => removeSubProduct(index)} className="mt-4 h-8 w-8 text-destructive hover:bg-destructive/5 shrink-0">
@@ -544,6 +547,7 @@ export default function EditProductForm({
                                                         values={field.value || []}
                                                         onChange={(vals) => field.onChange(vals)}
                                                         placeholder="Variant image URL..."
+                                                        errors={errors.subProducts?.[index]?.images}
                                                     />
                                                 )}
                                             />
@@ -610,14 +614,21 @@ export default function EditProductForm({
                 </div>
             </div>
 
-            <div className="flex justify-end gap-3 pt-10 border-t sticky bottom-0 bg-background/80 backdrop-blur-sm pb-4">
-                <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="min-w-[120px]">
-                    Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting} className="min-w-[200px] shadow-lg shadow-primary/20">
-                    {isSubmitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> :
-                        initialData?._id || initialData?.id ? "Apply Modifications" : "Register Product"}
-                </Button>
+            <div className="flex flex-col gap-3 pt-6 border-t sticky bottom-0 bg-background/80 backdrop-blur-sm pb-4 z-10">
+                {Object.keys(errors).length > 0 && (
+                    <div className="p-3 bg-destructive/10 border border-destructive rounded-md text-destructive text-sm font-semibold flex items-center justify-center animate-in fade-in zoom-in duration-300">
+                        Please fill in all required fields highlighted in red before submitting.
+                    </div>
+                )}
+                <div className="flex justify-end gap-3">
+                    <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="min-w-[120px]">
+                        Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting} className="min-w-[200px] shadow-lg shadow-primary/20">
+                        {isSubmitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</> :
+                            initialData?._id || initialData?.id ? "Apply Modifications" : "Register Product"}
+                    </Button>
+                </div>
             </div>
         </form>
     );

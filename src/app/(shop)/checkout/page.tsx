@@ -26,6 +26,7 @@ import { Label } from "@/components/ui/label";
 // } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cartLocalStorageData, CartItem } from "@/localStorage/cartData";
+import { useAddressStore } from "@/store/address-stor";
 
 export default function CheckoutPage() {
     const [step, setStep] = useState(1); // 1: Delivery, 2: Payment, 3: Success
@@ -35,11 +36,21 @@ export default function CheckoutPage() {
     
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
+    
+    const { addresses, fetchAddresses, selectedAddress, setSelectedAddress } = useAddressStore();
+    const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
     useEffect(() => {
         setCartItems(cartLocalStorageData.getCart());
         setIsLoaded(true);
-    }, []);
+        fetchAddresses();
+    }, [fetchAddresses]);
+
+    useEffect(() => {
+        if (isLoaded && addresses.length === 0) {
+            setShowNewAddressForm(true);
+        }
+    }, [isLoaded, addresses.length]);
 
     const subtotal = cartItems.reduce(
         (sum, item) => sum + item.price * item.quantity,
@@ -151,79 +162,132 @@ export default function CheckoutPage() {
                                     >
                                         <section className="space-y-10">
                                             <h2 className="text-2xl font-serif text-stone-900 italic lowercase border-b border-stone-100 pb-4">Shipping Destination</h2>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Full Name</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="e.g. Nils Sveje" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Phone Number</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="+91 98765 43210" />
-                                                </div>
-                                                <div className="space-y-2 md:col-span-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Email Address</Label>
-                                                    <input type="email" className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="nils@inodasveje.com" />
-                                                </div>
-                                                <div className="space-y-2 md:col-span-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Street Address</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Studio 12, Artisans Alley" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">City</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Milan" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">State</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Lombardy" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Postal Code</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="20121" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Country</Label>
-                                                    <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Italy" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Address Label</Label>
-                                                    <select className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors">
-                                                        <option value="Home">Home</option>
-                                                        <option value="Office">Office</option>
-                                                        <option value="Other">Other</option>
-                                                    </select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Address Type</Label>
-                                                    <select 
-                                                        className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" 
-                                                        value={addressType} 
-                                                        onChange={(e) => setAddressType(e.target.value)}
-                                                    >
-                                                        <option value="MY_ADDRESS">My Address</option>
-                                                        <option value="GIFT_ADDRESS">Gift Address</option>
-                                                    </select>
-                                                </div>
-
-                                                {addressType === 'GIFT_ADDRESS' && (
-                                                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 mt-4 pt-8 border-t border-stone-100">
-                                                        <div className="space-y-2 md:col-span-2">
-                                                            <h3 className="text-lg font-serif text-stone-900 italic lowercase">Gift Details</h3>
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Recipient Name</Label>
-                                                            <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Friend's Name" />
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Recipient Phone</Label>
-                                                            <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="+91 98765 43210" />
-                                                        </div>
-                                                        <div className="space-y-2 md:col-span-2">
-                                                            <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Gift Message (Optional)</Label>
-                                                            <textarea className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors resize-none" rows={3} placeholder="Add a personalized message..." />
-                                                        </div>
+                                            {(!addresses || addresses.length === 0 || showNewAddressForm) ? (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Full Name</Label>
+                                                        <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="e.g. Nils Sveje" />
                                                     </div>
-                                                )}
-                                            </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Phone Number</Label>
+                                                        <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="+91 98765 43210" />
+                                                    </div>
+                                                    <div className="space-y-2 md:col-span-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Email Address</Label>
+                                                        <input type="email" className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="nils@inodasveje.com" />
+                                                    </div>
+                                                    <div className="space-y-2 md:col-span-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Street Address</Label>
+                                                        <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Studio 12, Artisans Alley" />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">City</Label>
+                                                        <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Milan" />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">State</Label>
+                                                        <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Lombardy" />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Postal Code</Label>
+                                                        <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="20121" />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Country</Label>
+                                                        <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Italy" />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Address Label</Label>
+                                                        <select className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors">
+                                                            <option value="Home">Home</option>
+                                                            <option value="Office">Office</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Address Type</Label>
+                                                        <select 
+                                                            className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" 
+                                                            value={addressType} 
+                                                            onChange={(e) => setAddressType(e.target.value)}
+                                                        >
+                                                            <option value="MY_ADDRESS">My Address</option>
+                                                            <option value="GIFT_ADDRESS">Gift Address</option>
+                                                        </select>
+                                                    </div>
+
+                                                    {addressType === 'GIFT_ADDRESS' && (
+                                                        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 mt-4 pt-8 border-t border-stone-100">
+                                                            <div className="space-y-2 md:col-span-2">
+                                                                <h3 className="text-lg font-serif text-stone-900 italic lowercase">Gift Details</h3>
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Recipient Name</Label>
+                                                                <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="Friend's Name" />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Recipient Phone</Label>
+                                                                <input className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors" placeholder="+91 98765 43210" />
+                                                            </div>
+                                                            <div className="space-y-2 md:col-span-2">
+                                                                <Label className="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Gift Message (Optional)</Label>
+                                                                <textarea className="w-full bg-transparent border-b border-stone-200 py-2 text-sm focus:outline-none focus:border-stone-900 transition-colors resize-none" rows={3} placeholder="Add a personalized message..." />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {addresses.length > 0 && (
+                                                        <div className="md:col-span-2 pt-4">
+                                                            <Button
+                                                                variant="outline"
+                                                                onClick={() => setShowNewAddressForm(false)}
+                                                                className="border-stone-200 text-stone-900 rounded-none px-6 h-12 uppercase tracking-widest text-xs font-bold hover:bg-stone-50"
+                                                                type="button"
+                                                            >
+                                                                Cancel & Select Existing
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-6">
+                                                    <RadioGroup value={selectedAddress?.id} onValueChange={(id) => {
+                                                        const addr = addresses.find(a => a.id === id);
+                                                        setSelectedAddress(addr || null);
+                                                    }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        {addresses.map((addr) => (
+                                                            <Label
+                                                                key={addr.id}
+                                                                htmlFor={addr.id}
+                                                                className={`relative flex flex-col p-6 border cursor-pointer hover:bg-stone-50 transition-colors ${selectedAddress?.id === addr.id ? 'border-stone-900 bg-stone-50/50' : 'border-stone-100'}`}
+                                                            >
+                                                                <div className="flex items-center justify-between mb-4">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <RadioGroupItem value={addr.id} id={addr.id} />
+                                                                        <span className="text-xs uppercase tracking-widest font-bold text-stone-900">{addr.label || "Address"}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="space-y-1 text-sm text-stone-600">
+                                                                    <p className="font-bold">{addr.name}</p>
+                                                                    <p>{addr.street}</p>
+                                                                    <p>{addr.city}, {addr.state} {addr.postalCode}</p>
+                                                                    <p>{addr.country}</p>
+                                                                    <p>{addr.phone}</p>
+                                                                </div>
+                                                            </Label>
+                                                        ))}
+                                                    </RadioGroup>
+                                                    
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => setShowNewAddressForm(true)}
+                                                        className="border-stone-200 text-stone-900 rounded-none px-6 h-12 uppercase tracking-widest text-xs font-bold hover:bg-stone-50"
+                                                        type="button"
+                                                    >
+                                                        Add another Address
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </section>
 
                                         <section className="space-y-8">

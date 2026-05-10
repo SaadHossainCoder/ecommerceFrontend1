@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, LoaderCircle } from "lucide-react";
 
-export const Hero = () => {
+const Hero = () => {
     return (
         <section className="relative w-full h-[85vh] min-h-[600px] overflow-hidden bg-stone-900 group">
             {/* Video Background with Poster for Performance */}
@@ -58,3 +58,5 @@ export const Hero = () => {
         </section>
     );
 };
+
+export default Hero;

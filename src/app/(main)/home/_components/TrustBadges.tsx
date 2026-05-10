@@ -24,7 +24,7 @@ const TRUST_BADGES = [
     },
 ];
 
-export const TrustBadges = () => {
+const TrustBadges = () => {
     return (
         <section className="py-20 bg-background border-y border-ash-brown/10">
             <div className="container-custom">
@@ -48,4 +48,6 @@ export const TrustBadges = () => {
         </section>
     );
 };
+
+export default TrustBadges;
 

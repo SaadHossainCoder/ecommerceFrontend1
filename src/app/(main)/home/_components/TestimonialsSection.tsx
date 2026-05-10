@@ -26,7 +26,7 @@ const testimonials = [
     }
 ];
 
-export function TestimonialsSection() {
+ function TestimonialsSection() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
@@ -154,3 +154,5 @@ export function TestimonialsSection() {
         </section>
     );
 }
+
+export default TestimonialsSection;

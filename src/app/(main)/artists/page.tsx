@@ -1,8 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-// import { PageTransition } from "@/components/layout/PageTransition";
+import dynamic from 'next/dynamic'
 import { Button } from "@/components/ui/button";
-import ArtistCard from "./_components/artistCard";
+// import { PageTransition } from "@/components/layout/PageTransition";
+const ArtistCard = dynamic(() => import("./_components/artistCard"), {
+    loading: () => <div>Loading...</div>
+})
 
 export default function ArtistsPage() {
     return (

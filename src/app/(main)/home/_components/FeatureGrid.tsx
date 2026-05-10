@@ -83,7 +83,7 @@ const FeatureItem = ({ feature, priority = false }: { feature: typeof FEATURES[0
     </div>
 );
 
-export const FeatureGrid = () => {
+const FeatureGrid = () => {
     return (
         <section className="relative container-custom py-12">
             <div className="flex justify-between items-baseline mb-6 md:mb-8">
@@ -104,3 +104,5 @@ export const FeatureGrid = () => {
         </section>
     );
 };
+
+export default FeatureGrid;

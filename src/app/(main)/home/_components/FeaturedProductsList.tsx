@@ -3,7 +3,11 @@
 import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useFeaturedProducts } from "@/store/product-store";
-import ProductCard from "./ProductCard";
+import dynamic from "next/dynamic";
+const ProductCard = dynamic(() => import("./ProductCard"), {
+    ssr: false,
+    loading: () => <div>Loading...</div>
+});
 
 interface FeaturedProductsListProps {
     categoryId?: string;
@@ -28,7 +32,7 @@ const ProductCardSkeleton = ({ index = 0 }: { index?: number }) => (
     </div>
 );
 
-export function FeaturedProductsList({ categoryId, categorySlug, limit = 4, randomize = true }: FeaturedProductsListProps) {
+function FeaturedProductsList({ categoryId, categorySlug, limit = 4, randomize = true }: FeaturedProductsListProps) {
     const {
         featuredProductsByCategory,
         loadingStates,
@@ -141,3 +145,5 @@ export function FeaturedProductsList({ categoryId, categorySlug, limit = 4, rand
         </>
     );
 }
+
+export default FeaturedProductsList;

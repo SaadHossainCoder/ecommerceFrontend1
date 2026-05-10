@@ -2,18 +2,41 @@ import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
+import dynamic from 'next/dynamic'
 import { Button } from "@/components/ui/button";
 import { ShareholderReports } from "@/app/(main)/home/_components/carousel";
-// import { getTrendingProducts, getSeasonChoices, getReports } from "@/services/product-service";
-import ProductCard from "./_components/ProductCard";
-import { TestimonialsSection } from "./_components/TestimonialsSection";
-import { FeatureGrid } from "./_components/FeatureGrid";
-import { FeaturedProductsList } from "./_components/FeaturedProductsList";
 import { Suspense } from "react";
 import {LoaderCircleIcon as LoaderCircle} from "@/components/icon/loader-circle"
+// import { getTrendingProducts, getSeasonChoices, getReports } from "@/services/product-service";
+import ProductCard from "./_components/ProductCard";
+import TestimonialsSection from "./_components/TestimonialsSection";
+import FeatureGrid from "./_components/FeatureGrid";
+import FeaturedProductsList from "./_components/FeaturedProductsList";
+import Hero from "./_components/Hero";
+import TrustBadges from "./_components/TrustBadges";
 
-import { Hero } from "./_components/Hero";
-import { TrustBadges } from "./_components/TrustBadges";
+// const TestimonialsSection = dynamic(() => import("./_components/TestimonialsSection"), {
+//     loading: () => <div>Loading...</div>
+// })
+// const FeaturedProductsList = dynamic(() => import("./_components/FeaturedProductsList"), {
+//     loading: () => <div>Loading...</div>
+// })
+// const TrustBadges = dynamic(() => import("./_components/TrustBadges"), {
+//     loading: () => <div>Loading...</div>
+// })
+// const Hero = dynamic(() => import("./_components/Hero"), {
+//     loading: () => <div>Loading...</div>
+// })
+// const FeatureGrid = dynamic(() => import("./_components/FeatureGrid"), {
+//     loading: () => <div>Loading...</div>
+// })
+// const FeaturedProductsList = dynamic(() => import("./_components/FeaturedProductsList"), {
+//     ssr: false,
+//     loading: () => <div>Loading...</div>
+// })
+
+
+
 
 export const metadata: Metadata = {
     title: "Home | ShopHub - Premium E-Commerce",
@@ -21,45 +44,42 @@ export const metadata: Metadata = {
 };
 
 
-const reportsData = [
-  {
-    id: "1",
-    name: "Elegance Collection",
-    artName: "Classic Timepieces",
-    period: "2024",
-    imageSrc: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80",
-    isNew: true,
-  },
-  {
-    id: "2",
-    name: "Essential Artisanal",
-    artName: "Gold Jewelry",
-    period: "2024",
-    imageSrc: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
-  },
-  {
-    id: "3",
-    name: "Oceanic Edit",
-    artName: "Selected Pearls",
-    period: "2023",
-    imageSrc: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
-  },
-  {
-    id: "4",
-    name: "Modern Acoustics",
-    artName: "Studio Audio",
-    period: "2024",
-    imageSrc: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80",
-    isNew: true,
-  }
-];
+// const reportsData = [
+//   {
+//     id: "1",
+//     name: "Elegance Collection",
+//     artName: "Classic Timepieces",
+//     period: "2024",
+//     imageSrc: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80",
+//     isNew: true,
+//   },
+//   {
+//     id: "2",
+//     name: "Essential Artisanal",
+//     artName: "Gold Jewelry",
+//     period: "2024",
+//     imageSrc: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
+//   },
+//   {
+//     id: "3",
+//     name: "Oceanic Edit",
+//     artName: "Selected Pearls",
+//     period: "2023",
+//     imageSrc: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
+//   },
+//   {
+//     id: "4",
+//     name: "Modern Acoustics",
+//     artName: "Studio Audio",
+//     period: "2024",
+//     imageSrc: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80",
+//     isNew: true,
+//   }
+// ];
 
 
 
 export default async function HomePage() {
-    // const trendingProducts = await getTrendingProducts();
-    // const seasonChoices = await getSeasonChoices();
-
     return (
 
         <div className="bg-background">

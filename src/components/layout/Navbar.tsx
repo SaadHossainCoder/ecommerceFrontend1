@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSearchStore } from "@/store/search-store";
 import { Badge } from "@/components/ui/badge";
-// import { useAuthStore } from "@/store/auth-store";
+import { useAuthStore } from "@/store/auth-store";
 import { useState, useEffect, Suspense } from "react";
 import { Menu, X, ChevronRight } from "lucide-react";
 import { cartLocalStorageData } from "@/localStorage/cartData";
@@ -95,6 +95,7 @@ export function Navbar() {
 
     const pathname = usePathname();
     const { openSearch } = useSearchStore();
+    const logout = useAuthStore(state => state.logout);
     // const user = userLocalStorageData.getUser();
 
     return (
@@ -169,20 +170,66 @@ export function Navbar() {
                                 <Search />
                             </Button>
 
-                            <Button variant="outline" size="icon" className="hidden md:flex border-none hover:bg-transparent text-black hover:text-black">
+                            <Button variant="outline" size="icon" className={cn(
+                                "hidden md:flex border-none hover:bg-transparent relative group transition-colors",
+                                pathname.startsWith("/wishlist") ? "text-black" : "text-black hover:text-black"
+                            )} asChild>
                                 <Link href="/wishlist">
                                     <Wishlist />
                                 </Link>
                             </Button>
 
                             {/* Profile - Hidden on mobile */}
-                            <Button variant="outline" size="icon" className="hidden md:flex border-none hover:bg-transparent text-black hover:text-black" asChild>
-                                <Link href="/myAccount">
-                                    <User />
-                                </Link>
-                            </Button>
+                            <div className="relative group hidden md:flex items-center h-full">
+                                <Button variant="outline" size="icon" className={cn(
+                                    "border-none hover:bg-transparent hover:text-black relative transition-colors",
+                                    pathname.startsWith("/myAccount") ? "text-black" : "text-black hover:text-black"
+                                )} asChild>
+                                    <Link href="/myAccount">
+                                        <User/>
+                                    </Link>
+                                </Button>
+
+                                <div className="absolute top-full right-0 invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out pt-7 w-48 z-50">
+                                    <div className="bg-background shadow-lg flex flex-col py-2 border-x border-b">
+                                        <Link
+                                            href="/myAccount"
+                                            className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-200 relative group/sub"
+                                        >
+                                            Account Overview
+                                            <span className="absolute bottom-1 left-4 w-[calc(100%-2rem)] h-0.5 bg-primary scale-x-0 origin-left group-hover/sub:scale-x-100 transition-transform duration-300 ease-out" />
+                                        </Link>
+                                        <Link
+                                            href="/address"
+                                            className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-200 relative group/sub"
+                                        >
+                                            Addresses
+                                            <span className="absolute bottom-1 left-4 w-[calc(100%-2rem)] h-0.5 bg-primary scale-x-0 origin-left group-hover/sub:scale-x-100 transition-transform duration-300 ease-out" />
+                                        </Link>
+                                        <Link
+                                            href="/track-order/1"
+                                            className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-200 relative group/sub"
+                                        >
+                                            Track Order
+                                            <span className="absolute bottom-1 left-4 w-[calc(100%-2rem)] h-0.5 bg-primary scale-x-0 origin-left group-hover/sub:scale-x-100 transition-transform duration-300 ease-out" />
+                                        </Link>
+                                        <div className="h-px bg-border my-1" />
+                                        <button
+                                            onClick={() => logout()}
+                                            className="px-4 py-2 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors duration-200 text-left w-full relative group/sub"
+                                        >
+                                            Logout
+                                            <span className="absolute bottom-1 left-4 w-[calc(100%-2rem)] h-0.5 bg-red-500 scale-x-0 origin-left group-hover/sub:scale-x-100 transition-transform duration-300 ease-out" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Cart - Hidden on mobile */}
-                            <Button variant="outline" size="icon" className="relative hidden md:flex border-none hover:bg-transparent text-black hover:text-black " asChild>
+                            <Button variant="outline" size="icon" className={cn(
+                                "relative hidden md:flex border-none hover:bg-transparent group transition-colors",
+                                pathname.startsWith("/cart") ? "text-primary" : "text-black hover:text-primary"
+                            )} asChild>
                                 <Link href="/cart">
                                     <ShoppingBag className="" />
                                     {cartItemCount > 0 && (
@@ -192,6 +239,10 @@ export function Navbar() {
                                             {cartItemCount}
                                         </Badge>
                                     )}
+                                    <span className={cn(
+                                        "absolute bottom-0 left-0 w-full h-[2px] bg-primary transform transition-transform duration-300 ease-out",
+                                        pathname.startsWith("/cart") ? "scale-x-100 origin-left" : "scale-x-0 origin-right group-hover:scale-x-100 group-hover:origin-left"
+                                    )} />
                                 </Link>
                             </Button>
 

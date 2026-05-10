@@ -63,9 +63,9 @@ export const addressService = {
         return { data: response.data.data, message: response.data.message };
     },
 
-    // PATCH /api/addresses/:id   (backend uses PUT for full update, PATCH for partial)
+    // PUT /api/addresses/:id   (backend uses PUT for full update, PATCH for partial)
     updateAddress: async (id: string, data: UpdateAddressData): Promise<{ data: Address; message: string }> => {
-        const response = await api.patch<{ ok: boolean; data: Address; message: string }>(`addresses/${id}`, data);
+        const response = await api.put<{ ok: boolean; data: Address; message: string }>(`addresses/${id}`, data);
         return { data: response.data.data, message: response.data.message };
     },
 

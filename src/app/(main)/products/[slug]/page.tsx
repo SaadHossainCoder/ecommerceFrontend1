@@ -421,7 +421,7 @@ export default function ProductDetailsPage() {
                                     <span className={`w-2 h-2 rounded-full ${currentVariant.qty > 10 ? "bg-emerald-500" : currentVariant.qty > 0 ? "bg-amber-400" : "bg-red-500"}`} />
                                     <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-stone-500">
                                         {currentVariant.qty <= 0
-                                            ? "Out of Stock"
+                                            ? "Sold Out"
                                             : currentVariant.qty <= 10
                                                 ? `Only ${currentVariant.qty} left`
                                                 : "In Stock"}
@@ -547,21 +547,24 @@ export default function ProductDetailsPage() {
                                         cartLocalStorageData.addToCart(newItem);
                                         toast({ title: "Added to Cart", description: `${name} · ${selectedSize}${selectedSubSize ? ` (${selectedSubSize})` : ''} added to your collection.` });
                                     }}
-                                    disabled={currentVariant?.qty <= 0}
+                                    disabled={currentVariant?.qty <= 1}
                                     className="flex-1 h-12 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 disabled:cursor-not-allowed text-white text-[10px] uppercase tracking-[0.25em] font-bold flex items-center justify-center gap-2 transition-all duration-300 shadow-sm"
                                 >
                                     <ShoppingCart className="w-4 h-4" />
-                                    {currentVariant?.qty <= 0 ? "Out of Stock" : "Add to Cart"}
+                                    {currentVariant?.qty <= 1 ? "Sold Out" : "Add to Cart"}
                                 </button>
                             </div>
 
-                            {/* Buy now */}
-                            <Link
-                                href="/checkout"
-                                className="block w-full h-12 bg-amber-100 hover:bg-white text-stone-900 border border-amber-200 hover:border-stone-900 text-[10px] uppercase tracking-[0.25em] font-bold flex items-center justify-center transition-all duration-300 shadow-sm"
+                            {/* <Link
+                                href={currentVariant?.qty <= 1 ? "#" : "/checkout"}
+                                className={`block w-full h-12 text-[10px] uppercase tracking-[0.25em] font-bold flex items-center justify-center transition-all duration-300 shadow-sm ${
+                                    currentVariant?.qty <= 1
+                                        ? "bg-stone-200 text-stone-400 cursor-not-allowed pointer-events-none border border-stone-200"
+                                        : "bg-amber-100 hover:bg-white text-stone-900 border border-amber-200 hover:border-stone-900"
+                                }`}
                             >
-                                Secure Checkout
-                            </Link>
+                                {currentVariant?.qty <= 1 ? "Sold Out" : "Gift Wrap & Checkout"}
+                            </Link> */}
                         </div>
 
                         {/* Delivery */}

@@ -43,5 +43,14 @@ const nextConfig: NextConfig = {
 
   },
 };
-
-export default nextConfig;
+export default {
+  ...nextConfig,
+  openNextConfig: {
+    default: {
+      override: {
+        wrapper: "cloudflare-node",
+        converter: "edge",
+      },
+    },
+  },
+};

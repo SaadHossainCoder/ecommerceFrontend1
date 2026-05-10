@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Artisan E-Commerce Platform - Frontend
 
-## Getting Started
+A modern, high-end, and feature-rich frontend for an artisanal e-commerce platform. Built with Next.js 16, Tailwind CSS v4, and Shadcn UI, this platform emphasizes premium aesthetics, fluid animations, and a seamless user experience.
 
-First, run the development server:
+## 🚀 Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/), [Radix UI](https://www.radix-ui.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **Forms & Validation**: [React Hook Form](https://react-hook-form.com/), [Zod](https://zod.dev/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
+- **Animations**: [Motion](https://motion.dev/)
+- **Charts**: [Recharts](https://recharts.org/)
+
+## ✨ Key Features
+
+- **Dynamic Artist & Vendor Profiles**: Detailed showcase pages mapping artists to their exclusive product catalogs dynamically.
+- **Premium Checkout Experience**: Multi-step, secure checkout workflow with saved address management, guest/gift options, and dynamic shipping methods.
+- **Advanced State Management**: Efficient management of Cart, Address, and User state using Zustand.
+- **Editorial-Style Legal Pages**: High-end, card-based layout designs for policies (Return & Refund, Privacy & Security) focused on scannability, interactive navigation, and professional branding.
+- **Admin Management Tools**: Robust management features for products, including toggle capabilities for disabled/hidden products in the administrative dashboard.
+- **Intuitive Form Validation**: Clear error handling and intuitive feedback loops using React Hook Form and Zod validation schemas.
+
+## 📦 Getting Started
+
+### Prerequisites
+
+Ensure you have Node.js and `npm` installed on your machine.
+
+### Installation
+
+1. Clone the repository and navigate to the project directory:
+   ```bash
+   git clone <repository-url>
+   cd ecommersce-frontend2
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Configure Environment Variables:
+   Create a `.env.local` file in the root directory and configure your necessary environment variables, primarily mapping to your backend API server.
+
+### Running the Development Server
+
+Start the application in development mode:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. The application will hot-reload as you make modifications.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📂 Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/`: Next.js App Router (Pages, Layouts, Loading states, Error boundaries).
+- `src/components/`: Reusable UI components (including base Shadcn UI components).
+- `src/services/`: API integration layers using Axios (e.g., Product, Vendor, Address services).
+- `src/store/`: Zustand state management stores handling global application data.
+- `src/lib/`: Shared utility functions, Axios base instances, and configuration helpers.
 
-## Learn More
+## 🛡️ Security & Integrations
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Protected routes and authenticated user flows.
+- Backend integrations with Arcjet for rate limiting and bot protection, backed by Redis for high-performance caching.

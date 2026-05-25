@@ -12,6 +12,7 @@ import { MapPin, Phone, Mail } from "lucide-react";
 // import { Separator } from "@/components/ui/separator";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import logoImage from "@/assets/images/favicon/khoshil_logo.webp";
 
 const footerLinks = {
     company: [
@@ -86,9 +87,15 @@ export function Footer() {
                 <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-8 gap-y-12 lg:gap-12 mb-20">
                     {/* Brand Section */}
                     <div className="col-span-2 lg:col-span-4 relative">
-                        <h2 className="text-6xl sm:text-7xl md:text-[6rem] lg:text-[8rem] text-white/90 font-heading font-bold leading-[0.8] tracking-tight pointer-events-none select-none">
+                        <div className="flex items-center">
+                            {/* <h2 className="text-6xl sm:text-7xl md:text-[6rem] lg:text-[8rem] text-white/90 font-heading font-bold leading-[0.8] tracking-tight pointer-events-none select-none">
                             GEMINI
-                        </h2>
+                        </h2> */}
+                        <Image src={logoImage} alt="Logo" width={35} height={35} />
+                            <h3 className="text-xl md:text-xl tracking-tight text-white">
+                                Khoshil
+                            </h3>
+                        </div>
                         <div className="mt-8 space-y-4 relative z-10">
                             <blockquote className="quote max-w-md text-stone-200 italic leading-relaxed">
                                 {"From Soil to Soul. Where art breathes, and tradition lives."}
@@ -100,7 +107,7 @@ export function Footer() {
                             <div className="pt-8 space-y-5">
                                 <div className="flex items-start gap-4 group cursor-default">
                                     <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white group-hover:border-white transition-all duration-500">
-                                        <MapPin className="w-4 h-4 text-stone-300 group-hover:text-[#34150f] transition-colors" />
+                                        <MapPin className="size-4 text-stone-300 group-hover:text-[#34150f] transition-colors" />
                                     </div>
                                     <div className="text-sm">
                                         <p className="font-bold text-white/50 uppercase tracking-[0.2em] text-[9px] mb-1.5 mt-1">Location</p>
@@ -109,8 +116,8 @@ export function Footer() {
                                 </div>
 
                                 <div className="flex items-start gap-4 group cursor-default">
-                                    <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white group-hover:border-white transition-all duration-500">
-                                        <Phone className="w-4 h-4 text-stone-300 group-hover:text-[#34150f] transition-colors" />
+                                    <div className="size-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white group-hover:border-white transition-all duration-500">
+                                        <Phone className="size-4 text-stone-300 group-hover:text-[#34150f] transition-colors" />
                                     </div>
                                     <div className="text-sm">
                                         <p className="font-bold text-white/50 uppercase tracking-[0.2em] text-[9px] mb-1.5 mt-1">Phone</p>
@@ -119,8 +126,8 @@ export function Footer() {
                                 </div>
 
                                 <div className="flex items-start gap-4 group cursor-default">
-                                    <div className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white group-hover:border-white transition-all duration-500">
-                                        <Mail className="w-4 h-4 text-stone-300 group-hover:text-[#34150f] transition-colors" />
+                                    <div className="size-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-white group-hover:border-white transition-all duration-500">
+                                        <Mail className="size-4 text-stone-300 group-hover:text-[#34150f] transition-colors" />
                                     </div>
                                     <div className="text-sm">
                                         <p className="font-bold text-white/50 uppercase tracking-[0.2em] text-[9px] mb-1.5 mt-1">Email</p>
@@ -133,7 +140,7 @@ export function Footer() {
 
                     {/* Company */}
                     <div className="col-span-1 lg:col-span-2 space-y-8 pt-6 lg:pt-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Company</h4>
+                        <h4 className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/40">Company</h4>
                         <ul className="space-y-4">
                             {footerLinks.company.map((link) => (
                                 <li key={link.href}>
@@ -157,7 +164,7 @@ export function Footer() {
 
                     {/* Support */}
                     <div className="col-span-1 lg:col-span-2 space-y-8 pt-6 lg:pt-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Support</h4>
+                        <h4 className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/40">Support</h4>
                         <ul className="space-y-4">
                             {footerLinks.support.map((link) => (
                                 <li key={link.href}>
@@ -181,7 +188,7 @@ export function Footer() {
 
                     {/* Legal */}
                     <div className="col-span-1 lg:col-span-2 space-y-8 pt-6 lg:pt-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Legal</h4>
+                        <h4 className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/40">Legal</h4>
                         <ul className="space-y-4">
                             {footerLinks.legal.map((link) => (
                                 <li key={link.href}>
@@ -205,7 +212,7 @@ export function Footer() {
 
                     {/* Social Media */}
                     <div className="col-span-1 lg:col-span-2 space-y-8 pt-6 lg:pt-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Connect</h4>
+                        <h4 className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/40">Connect</h4>
                         <div className="flex flex-wrap gap-4">
                             {socialLinks.map((social) => (
                                 <a
@@ -213,10 +220,10 @@ export function Footer() {
                                     href={social.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-10 h-10 flex items-center justify-center text-stone-300 transition-all duration-50 group"
+                                    className="size-10 flex items-center justify-center text-stone-300 transition-all duration-50 group"
                                     aria-label={social.label}
                                 >
-                                    <social.icon className="w-4 h-4 fill-current" />
+                                    <social.icon className="size-4 fill-current" />
                                 </a>
                             ))}
                         </div>

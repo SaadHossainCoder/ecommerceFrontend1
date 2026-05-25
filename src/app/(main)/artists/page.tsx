@@ -1,11 +1,19 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from 'next/dynamic'
 import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = {
+    title: "Our Designers & Artisans",
+    description: "Discover the stories and unique legacy of master craftspeople behind our premium collections.",
+};
 // import { PageTransition } from "@/components/layout/PageTransition";
 const ArtistCard = dynamic(() => import("./_components/artistCard"), {
     loading: () => <div>Loading...</div>
 })
+
+
 
 export default function ArtistsPage() {
     return (

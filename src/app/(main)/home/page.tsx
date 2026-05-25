@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 import { Button } from "@/components/ui/button";
 import { ShareholderReports } from "@/app/(main)/home/_components/carousel";
 import { Suspense } from "react";
-import {LoaderCircleIcon as LoaderCircle} from "@/components/icon/loader-circle"
+import { LoaderCircleIcon as LoaderCircle } from "@/components/icon/loader-circle"
 // import { getTrendingProducts, getSeasonChoices, getReports } from "@/services/product-service";
 import ProductCard from "./_components/ProductCard";
 import TestimonialsSection from "./_components/TestimonialsSection";
@@ -39,45 +39,34 @@ import TrustBadges from "./_components/TrustBadges";
 
 
 export const metadata: Metadata = {
-    title: "Home | ShopHub - Premium E-Commerce",
+    title: "Home | khoshil Premium E-Commerce",
     description: "Explore our curated collection of premium products, from artisanal jewelry to modern electronics.",
+    keywords: ["e-commerce", "online shopping", "products", "sonajhuri", "khoshil", "premium", "Santiniketan", "handicrafts", "fashion", "home decor", "gifts", "Haat", "home", "lifestyle", "trending", "collections"],
+    applicationName: "khoshil",
+    creator: "MD. SAAD HOSSAIN",
+    openGraph: {
+        title: 'khoshil - Premium E-Commerce',
+        description: 'Your one-stop destination for premium products. Quality, style, and convenience delivered to your doorstep.',
+        url: 'https://example.com',
+        siteName: 'khoshil',
+        images: [
+            {
+                url: '/image.png',
+                width: 1200,
+                height: 630,
+                alt: 'khoshil',
+            },
+        ],
+        locale: 'in_IN',
+        type: 'website',
+    },
+    robots: {
+        index: true,
+        follow: true,
+        noarchive: false,
+        nosnippet: false
+    }
 };
-
-
-// const reportsData = [
-//   {
-//     id: "1",
-//     name: "Elegance Collection",
-//     artName: "Classic Timepieces",
-//     period: "2024",
-//     imageSrc: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80",
-//     isNew: true,
-//   },
-//   {
-//     id: "2",
-//     name: "Essential Artisanal",
-//     artName: "Gold Jewelry",
-//     period: "2024",
-//     imageSrc: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
-//   },
-//   {
-//     id: "3",
-//     name: "Oceanic Edit",
-//     artName: "Selected Pearls",
-//     period: "2023",
-//     imageSrc: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
-//   },
-//   {
-//     id: "4",
-//     name: "Modern Acoustics",
-//     artName: "Studio Audio",
-//     period: "2024",
-//     imageSrc: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80",
-//     isNew: true,
-//   }
-// ];
-
-
 
 export default async function HomePage() {
     return (
@@ -85,7 +74,7 @@ export default async function HomePage() {
         <div className="bg-background">
             {/* --- SECTON: HERO --- */}
             <Hero />
-            
+
             <section>
                 <hr />
 
@@ -108,13 +97,13 @@ export default async function HomePage() {
                     <div className="flex justify-between items-end pb-4 container-custom">
                         <h2 className="text-3xl font-heading font-medium "> Trending Now </h2>
                         <Link href="/products" className="text-sm font-medium hover:underline flex items-center gap-1">
-                            VIEW ALL <ArrowRight className="w-4 h-4" />
+                            VIEW ALL <ArrowRight className="size-4" />
                         </Link>
                     </div>
                     <hr className="pb-10 h-3" />
-                    <Suspense fallback={<LoaderCircle className="text-black"/>}>
+                    <Suspense fallback={<LoaderCircle className="text-black" />}>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-x-4 gap-y-8 container-custom">
-                            <FeaturedProductsList limit={6}/>
+                            <FeaturedProductsList limit={6} />
                         </div>
                     </Suspense>
                 </section>
@@ -126,6 +115,7 @@ export default async function HomePage() {
                             src="/fig.png"
                             alt="Footer Background"
                             fill
+                            // sizes="(max-width: 768px) 100vw, 50vw"
                             className="object-cover opacity-50"
                             priority
                         />
@@ -149,11 +139,11 @@ export default async function HomePage() {
                     <div className="flex justify-between items-end pb-4 container-custom">
                         <h2 className="text-3xl font-heading font-medium "> Dresses </h2>
                         <Link href="/products" className="text-sm font-medium hover:underline flex items-center gap-1">
-                            VIEW ALL <ArrowRight className="w-4 h-4" />
+                            VIEW ALL <ArrowRight className="size-4" />
                         </Link>
                     </div>
                     <hr className="pb-10 h-3" />
-                    <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
+                    <Suspense fallback={<div className="text-center py-20">Loading…</div>}>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-x-4 gap-y-8 container-custom">
                             {/* Passing the specific category Slug for Ladies/Dresses */}
                             <FeaturedProductsList limit={6} categorySlug="bags" />
@@ -178,25 +168,27 @@ export default async function HomePage() {
                                 OUR HERITAGE
                             </Link>
                         </div>
-                        <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
-                        <div className="grid grid-cols-2 gap-4 relative ">
-                            <div className="relative aspect-2/3 overflow-hidden">
-                                <Image
-                                    src="https://i.pinimg.com/736x/39/2b/39/392b39f3a3af88a805254025c5c18b6b.jpg"
-                                    alt="home-2"
-                                    fill
-                                    className="object-cover"
-                                />
+                        <Suspense fallback={<div className="text-center py-20">Loading…</div>}>
+                            <div className="grid grid-cols-2 gap-4 relative ">
+                                <div className="relative aspect-2/3 overflow-hidden">
+                                    <Image
+                                        src="https://i.pinimg.com/736x/39/2b/39/392b39f3a3af88a805254025c5c18b6b.jpg"
+                                        alt="home-2"
+                                        fill
+                                        // sizes="(max-width: 768px) 100vw, 50vw"
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="relative aspect-2/4 overflow-hidden mt-8">
+                                    <Image
+                                        src="https://i.pinimg.com/1200x/36/47/0e/36470e90391eaecf63e9528aaf10fd3f.jpg"
+                                        alt="home-3"
+                                        fill
+                                        // sizes="(max-width: 768px) 100vw, 50vw"
+                                        className="object-cover"
+                                    />
+                                </div>
                             </div>
-                            <div className="relative aspect-2/4 overflow-hidden mt-8">
-                                <Image
-                                    src="https://i.pinimg.com/1200x/36/47/0e/36470e90391eaecf63e9528aaf10fd3f.jpg"
-                                    alt="home-3"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                        </div>
                         </Suspense>
                     </div>
                 </section>
@@ -210,21 +202,22 @@ export default async function HomePage() {
                 </section>
 
                 <section className="hidden md:block">
-                <TrustBadges />
+                    <TrustBadges />
                 </section>
-       
+
                 {/* --- SECTION: ELEPHANT PROMO --- */}
                 <section className="container-custom py-24 relative ">
                     <div className="grid md:grid-cols-2 gap-12 items-start relative h-full">
-                        <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
-                        <div className="relative aspect-square md:aspect-2/3 overflow-hidden">
-                            <Image
-                                src="https://i.pinimg.com/736x/7f/49/2e/7f492ed36a65e79dda9c8454f9867a5d.jpg"
-                                alt="home-4"
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
+                        <Suspense fallback={<div className="text-center py-20">Loading…</div>}>
+                            <div className="relative aspect-square md:aspect-2/3 overflow-hidden">
+                                <Image
+                                    src="https://i.pinimg.com/736x/7f/49/2e/7f492ed36a65e79dda9c8454f9867a5d.jpg"
+                                    alt="home-4"
+                                    fill
+                                    // sizes="(max-width: 768px) 100vw, 50vw"
+                                    className="object-cover"
+                                />
+                            </div>
                         </Suspense>
                         <div className="space-y-6 sticky top-32">
                             <p className="text-xs tracking-[0.3em] font-medium text-secondary uppercase">MASTERPIECE</p>
@@ -249,7 +242,7 @@ export default async function HomePage() {
                 <hr />
                 {/* Customer Testimonials Section */}
                 <TestimonialsSection />
-               
+
                 <hr />
                 {/* --- SECTION: EXPLORE COLLECTIONS --- */}
                 <section className=" py-24 bg-muted/30">
@@ -266,15 +259,16 @@ export default async function HomePage() {
                                 ))}
                             </div>
                         </div>
-                        <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
-                        <div className="relative aspect-4/5 overflow-hidden">
-                            <Image
-                                src="https://i.pinimg.com/736x/19/9f/6f/199f6fae3ff34e0ce09f09fa61409821.jpg"
-                                alt="home-5"
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
+                        <Suspense fallback={<div className="text-center py-20">Loading…</div>}>
+                            <div className="relative aspect-4/5 overflow-hidden">
+                                <Image
+                                    src="https://i.pinimg.com/736x/19/9f/6f/199f6fae3ff34e0ce09f09fa61409821.jpg"
+                                    alt="home-5"
+                                    fill
+                                    // sizes="(max-width: 768px) 100vw, 50vw"
+                                    className="object-cover"
+                                />
+                            </div>
                         </Suspense>
                     </div>
                 </section>

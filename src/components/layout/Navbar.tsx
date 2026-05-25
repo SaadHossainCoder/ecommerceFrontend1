@@ -1,5 +1,7 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
+import logoImage from "@/assets/images/favicon/khoshil_logo.webp";
 import { usePathname } from "next/navigation";
 import { SearchIcon as Search } from "@/components/icon/search";
 import { UserIcon as User } from "@/components/icon/user";
@@ -108,9 +110,10 @@ export function Navbar() {
                     <nav className="flex h-16 items-center justify-between gap-4">
                         {/* Logo - Hidden when search is open on mobile */}
                         <Link href="/home" className="flex items-center">
-                            <span className="text-2xl md:text-3xl font-heading font-bold tracking-tight text-primary">
-                                GEMINI
-                            </span>
+                            <Image src={logoImage} alt="Logo" width={21.5} height={21.5} />
+                            <h3 className="text-xl md:text-xl tracking-tight text-black">
+                                Khoshil
+                            </h3>
                         </Link>
 
                         {/* Desktop Navigation */}
@@ -234,7 +237,7 @@ export function Navbar() {
                                     <ShoppingBag className="" />
                                     {cartItemCount > 0 && (
                                         <Badge
-                                            className="absolute -right-1 -top-1 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center bg-primary text-primary-foreground border-none"
+                                            className="absolute -right-1 -top-1 size-4 rounded-full p-0 text-[10px] flex items-center justify-center bg-primary text-primary-foreground border-none"
                                         >
                                             {cartItemCount}
                                         </Badge>
@@ -250,10 +253,10 @@ export function Navbar() {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="md:hidden h-7 w-7  border-none "
+                                className="md:hidden size-7  border-none "
                                 onClick={toggleSidebar}
                             >
-                                <Menu className="h-5 w-5" />
+                                <Menu className="size-5" />
                             </Button>
                         </div>
                     </nav>
@@ -275,7 +278,7 @@ export function Navbar() {
                         {/* Header */}
                         <div className="p-4 border-b flex items-center justify-between">
                             <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 rounded-full">
-                                <X className="h-4 w-4" />
+                                <X className="size-4" />
                             </Button>
                         </div>
 

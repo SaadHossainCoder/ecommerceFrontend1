@@ -1,63 +1,18 @@
 @import "tailwindcss";
-/* ===== Google Fonts - Shantiniketan Heritage Typography ===== */
-/* @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap'); */
 
 @font-face {
   font-family: 'Makova';
-  src: url('/font/makova.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Shanoy';
-  src: url('/font/shanoy-regular.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Shanoy';
-  src: url('/font/shanoy-italic.otf') format('opentype');
-  font-weight: normal;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'anlira';
-  src: url('/font/anlira.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'anlira';
-  src: url('/font/anlira.otf') format('opentype');
-  font-weight: normal;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'glinke';
-  src: url('/font/glinke.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'ground';
-  src: url('/font/ground.otf') format('opentype');
+  src: url('../assets/font/makova.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'goldens';
-  src: url('/font/goldens.otf') format('opentype');
+  src: url('../assets/font/goldens.otf') format('opentype');
   font-weight: normal;  
   font-style: normal;
 }
-
 
 /* ===== Shantiniketan Heritage Design System ===== */
 :root {
@@ -118,27 +73,11 @@
 
 
   /* Typography System */
-  /* --font-heading: 'Shanoy', serif; */
-  /* --font-heading: 'anlira', serif; */
-  /* --font-heading: 'Shanoy', serif; */
   --font-heading: 'Makova', serif;
-
-  /* --font-sub-heading: 'Shanoy', serif; */
-  /* --font-sub-heading: 'anlira', serif; */
-  /* --font-sub-heading: 'Shanoy', serif; */
   --font-sub-heading: 'Makova', serif;
-  /* --font-sub-heading: 'ground', sans-serif; */
-
-
-  /* --font-body: 'Makova', sans-serif; */
   --font-body: 'goldens', sans-serif;
-  /* --font-body: 'anlira', sans-serif; */
-  /* --font-body: 'ground', sans-serif; */
-  /* --font-body: 'glinke', sans-serif; */
-  /* --font-body: 'shanoy', serif; */
-  /* Clean, readable, modern */
   --font-quote: 'Libre Baskerville', serif;
-  /* Artisan stories, cultural descriptions */
+
 
   /* Luxury Shadow System - Subtle, soft, no harsh shadows */
   --shadow-subtle: 0 2px 8px rgba(107, 94, 85, 0.08);
@@ -341,9 +280,9 @@ p {
   font-weight: 400;
 } */
 
-.text-small {
-  /* font-size: 0.875rem;        14px */
-}
+/* .text-small {
+  font-size: 0.875rem;        14px
+} */
 
 .quote, blockquote {
   font-family: var(--font-quote);
@@ -353,44 +292,6 @@ p {
   line-height: 1.8;
   color: hsl(var(--ash-brown));
 }
-
-/* Dark mode typography adjustments */
-/* .dark h1, .dark h2, .dark h3 {
-  color: hsl(var(--ivory-white));
-} */
-
-/* ===== Button Styles - Luxury Heritage ===== */
-/* .btn-primary, button.bg-primary {
-  background: hsl(var(--antique-gold));
-  color: hsl(var(--charcoal-ink));
-  border-radius: 14px;
-  padding: 0.75rem 2rem;
-  font-weight: 600;
-  font-family: var(--font-body);
-  border: none;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-subtle);
-}
-
-.btn-primary:hover, button.bg-primary:hover {
-  background: hsl(var(--muted-brass));
-  box-shadow: 0 4px 16px rgba(201, 162, 77, 0.3);
-  transform: translateY(-2px);
-} */
-
-/* .btn-secondary {
-  background: hsl(var(--terracotta-clay));
-  color: white;
-  border-radius: 14px;
-  padding: 0.75rem 2rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-secondary:hover {
-  background: hsl(var(--shantiniketan-red));
-  box-shadow: var(--shadow-card);
-} */
 
 /* ===== Card Styles - Handmade Paper Feel ===== */
 .card-heritage {

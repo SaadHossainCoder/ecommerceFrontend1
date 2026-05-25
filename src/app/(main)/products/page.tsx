@@ -13,7 +13,7 @@ import {
     Loader2,
     AlertCircle,
 } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
+
 import { useProductStore } from "@/store/product-store";
 import { useCategoryStore } from "@/store/category-store";
 import { wishlistLocalStorageData } from "@/localStorage/wishlistData";
@@ -23,17 +23,24 @@ import { toast } from "@/components/ui/toaster";
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
+interface CategoryNode {
+    id: string;
+    name: string;
+    slug: string;
+    subCategories?: CategoryNode[];
+}
+
 function Sidebar({
     categoryTree,
     selectedCat,
     setSelectedCat,
-    priceRange,
-    setPriceRange,
+    // priceRange,
+    // setPriceRange,
     onReset,
     onClose,
-    sliderMax,
+    // sliderMax,
 }: {
-    categoryTree: any[];
+    categoryTree: CategoryNode[];
     selectedCat: string | null;
     setSelectedCat: (v: string | null) => void;
     priceRange: number[];
@@ -49,7 +56,7 @@ function Sidebar({
     useEffect(() => {
         if (selectedCat) {
             const parent = categoryTree.find(cat => 
-                cat.subCategories?.some((s: any) => s.slug === selectedCat)
+                cat.subCategories?.some((s: CategoryNode) => s.slug === selectedCat)
             );
             if (parent && !expandedCats.includes(parent.id)) {
                 setExpandedCats(prev => [...prev, parent.id]);
@@ -69,7 +76,7 @@ function Sidebar({
         if (!catSearch.trim()) return cat;
         const q = catSearch.toLowerCase();
         const matchesMain = cat.name.toLowerCase().includes(q);
-        const matchingSubs = (cat.subCategories || []).filter((s: any) => s.name.toLowerCase().includes(q));
+        const matchingSubs = (cat.subCategories || []).filter((s: CategoryNode) => s.name.toLowerCase().includes(q));
         
         if (matchesMain || matchingSubs.length > 0) {
             return {
@@ -119,8 +126,8 @@ function Sidebar({
                             No collections found.
                         </div>
                     )}
-                    {filteredTree.map((cat: any) => {
-                        const hasActiveSub = cat.subCategories?.some((s: any) => s.slug === selectedCat);
+                    {filteredTree.map((cat: CategoryNode) => {
+                        const hasActiveSub = cat.subCategories?.some((s: CategoryNode) => s.slug === selectedCat);
                         const isSearching = catSearch.trim().length > 0;
                         const isExpanded = expandedCats.includes(cat.id) || hasActiveSub || isSearching;
                         const hasSubs = cat.subCategories && cat.subCategories.length > 0;
@@ -152,7 +159,7 @@ function Sidebar({
                                 
                                 {hasSubs && isExpanded && (
                                     <div className="ml-3 border-l border-stone-100 flex flex-col animate-fade-in">
-                                        {cat.subCategories.map((sub: any) => {
+                                        {cat.subCategories.map((sub: CategoryNode) => {
                                             const active = selectedCat === sub.slug;
                                             return (
                                                 <button
@@ -177,25 +184,38 @@ function Sidebar({
             </div>
 
             {/* Price */}
-            <div className="space-y-6">
+            {/* <div className="space-y-6">
                 <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-stone-300">
                     Investment
                 </p>
                 <div className="px-2">
-                    <Slider
-                        value={priceRange}
-                        onValueChange={setPriceRange}
-                        max={sliderMax}
-                        step={100}
-                        className="mb-5"
-                    />
-                    <div className="flex justify-between items-center text-[11px] font-medium text-stone-500">
-                        <span className="bg-stone-100 px-2 py-1 rounded-sm">₹{priceRange[0].toLocaleString()}</span>
-                        <div className="h-px w-4 bg-stone-200" />
-                        <span className="bg-stone-100 px-2 py-1 rounded-sm">₹{priceRange[1].toLocaleString()}</span>
+
+                    <div className="mt-4 grid grid-cols-2 gap-1.5">
+                        {[
+                            { label: "Under ₹1K",  range: [0, 200] },
+                            { label: "₹200 – 500",   range: [200, 500] },
+                            { label: "₹500 – 1000",  range: [500, 1000] },
+                            { label: "₹1K+",      range: [1000, sliderMax] },
+                        ].map(({ label, range }) => {
+                            const isActive =
+                                priceRange[0] === range[0] && priceRange[1] === range[1];
+                            return (
+                                <button
+                                    key={label}
+                                    onClick={() => setPriceRange(range)}
+                                    className={`py-1.5 text-[10px] uppercase tracking-[0.15em] font-bold border transition-all duration-200 rounded-sm ${
+                                        isActive
+                                            ? "bg-stone-900 text-white border-stone-900"
+                                            : "bg-white text-stone-500 border-stone-200 hover:border-stone-900 hover:text-stone-900"
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Reset */}
             <button

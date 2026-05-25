@@ -1,7 +1,13 @@
+import { Metadata } from "next";
 import Image from "next/image";
 import { Mail, Phone, MapPin, Clock, Sparkles } from "lucide-react";
 // import { PageTransition } from "@/components/layout/PageTransition";
 import ContactForm from "./_components/from";
+
+export const metadata: Metadata = {
+    title: "Contact Us",
+    description: "Connect with our concierge at the Atelier. Book private consultations or request client assistance.",
+};
 
 
 const contactInfo = [

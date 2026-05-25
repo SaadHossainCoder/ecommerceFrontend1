@@ -1,5 +1,15 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { Check, ClipboardList, Package, Truck, Home, MapPin, Phone, Headphones, ArrowLeft } from "lucide-react";
+
+export async function generateMetadata({ params }: { params: Promise<{ orderId: string }> }): Promise<Metadata> {
+    const resolvedParams = await params;
+    return {
+        title: `Track Order #${resolvedParams.orderId}`,
+        description: `Real-time shipment and delivery updates for order #${resolvedParams.orderId}.`,
+        robots: { index: false, follow: false },
+    };
+}
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";

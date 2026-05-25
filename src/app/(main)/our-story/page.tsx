@@ -1,6 +1,12 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Leaf, Award, ShieldCheck,  Sparkles, Quote, ArrowRight } from "lucide-react";
+
+export const metadata: Metadata = {
+    title: "Our Story",
+    description: "Discover the heritage, ethical sourcing practices, and artisanal mastery behind khoshil.",
+};
 
 const values = [
     {

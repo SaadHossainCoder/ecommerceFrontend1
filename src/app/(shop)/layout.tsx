@@ -1,6 +1,14 @@
+import { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | khoshil Store",
+    default: "Shop | khoshil Premium E-Commerce",
+  },
+};
 
 export default function ShopLayout({
     children,

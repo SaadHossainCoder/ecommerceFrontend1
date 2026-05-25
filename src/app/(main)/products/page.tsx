@@ -77,7 +77,7 @@ function Sidebar({
         const q = catSearch.toLowerCase();
         const matchesMain = cat.name.toLowerCase().includes(q);
         const matchingSubs = (cat.subCategories || []).filter((s: CategoryNode) => s.name.toLowerCase().includes(q));
-        
+
         if (matchesMain || matchingSubs.length > 0) {
             return {
                 ...cat,
@@ -86,7 +86,7 @@ function Sidebar({
             };
         }
         return null;
-    }).filter(Boolean);
+    }).filter(Boolean) as CategoryNode[];
 
     return (
         <div className="space-y-12">

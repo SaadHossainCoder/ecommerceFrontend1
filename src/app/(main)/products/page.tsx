@@ -159,7 +159,7 @@ function Sidebar({
                                 
                                 {hasSubs && isExpanded && (
                                     <div className="ml-3 border-l border-stone-100 flex flex-col animate-fade-in">
-                                        {cat.subCategories.map((sub: CategoryNode) => {
+                                        {cat.subCategories?.map((sub: CategoryNode) => {
                                             const active = selectedCat === sub.slug;
                                             return (
                                                 <button

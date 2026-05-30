@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useAuthGuardStore } from "@/store/auth-guard-store";
 import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
@@ -19,6 +20,7 @@ import {
     Megaphone,
     BellRing,
     UserStar,
+    Loader,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,9 +93,68 @@ export default function AdminLayoutClient({
 }: {
     children: React.ReactNode;
 }) {
+    const { role, isLoading, isAuthenticated, authguard } = useAuthGuardStore();
+    const [isInitializing, setIsInitializing] = useState(true);
+    const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileOpen, setMobileOpen] = useState(false);
     const pathname = usePathname();
+
+    useEffect(() => {
+        let mounted = true;
+
+        const initialize = async () => {
+            try {
+                // Only call authguard when we do not already know the user state
+                if (!isAuthenticated || !role) {
+                    await authguard();
+                }
+            } finally {
+                if (mounted) {
+                    setHasCheckedAuth(true);
+                    setIsInitializing(false);
+                }
+            }
+        };
+
+        initialize();
+
+        return () => {
+            mounted = false;
+        };
+    }, [authguard, isAuthenticated, role]);
+
+    // Show loading state while initializing
+    if (isInitializing) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-muted/30">
+                <div className="text-center space-y-4">
+                    <div className="flex justify-center">
+                        <Loader className="h-12 w-12 animate-spin text-primary" />
+                    </div>
+                    <div className="space-y-2">
+                        <p className="text-lg font-semibold text-foreground">Initializing Admin Portal</p>
+                        <p className="text-sm text-muted-foreground">Please wait while we verify your access...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Guard: redirect or show error if not authenticated
+    if (!isAuthenticated || !role) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-muted/30">
+                <div className="text-center space-y-4">
+                    <p className="text-lg font-semibold text-destructive">Access Denied</p>
+                    <p className="text-muted-foreground">You are not authorized to access this area.</p>
+                    <Link href="/auth/login" className=" bg-amber-800 p-3 text-white  hover:underline ">
+                        Return to Login
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-muted/30">

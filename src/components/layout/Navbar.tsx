@@ -1,25 +1,42 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import logoImage from "@/assets/images/favicon/khoshil_logo.webp";
+import logoImage from "@/assets/images/favicon/logowhite_logo.webp";
 import { usePathname } from "next/navigation";
-import { SearchIcon as Search } from "@/components/icon/search";
-import { UserIcon as User } from "@/components/icon/user";
-import { ArchiveIcon as ShoppingBag } from "@/components/icon/archive";
-import { HeartIcon as Wishlist } from "@/components/icon/heart";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSearchStore } from "@/store/search-store";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/store/auth-store";
 import { useState, useEffect, Suspense } from "react";
-import { Menu, X, ChevronRight } from "lucide-react";
+import {
+    Menu,
+    X,
+    ChevronRight,
+    BookOpen,
+    Newspaper,
+    Briefcase,
+    Store,
+    Mail,
+    UserPlus,
+    Settings,
+    ShoppingBag, // Using lucide-react ShoppingBag
+    Heart,       // Using lucide-react Heart
+    User,        // Using lucide-react User
+    Truck,
+    HelpCircle,
+    RefreshCcw,
+    FileText,
+    Lock,
+    Cookie
+} from "lucide-react";
+import { SearchIcon as Search } from "@/components/icon/search"; // Keep custom Search icon
 import { cartLocalStorageData } from "@/localStorage/cartData";
 import TopBarNotification from "./TopBarNotification";
 // import { userLocalStorageData } from "@/localStorage/userData";
 
 const navLinks = [
-    { href: "/home", label: "Home" },
+    { href: "/", label: "Home" },
     {
         href: "/products",
         label: "Shop",
@@ -29,11 +46,13 @@ const navLinks = [
         ]
     },
     { href: "/artists", label: "Artisans" },
-    { href: "/our-story", label: "Our Story", subLinks: [
-        { href: "/our-story", label: "Our Story" },
-        { href: "/media/careers", label: "Join Us" },
-        { href: "/contact", label: "Contact Us" },
-    ] },
+    {
+        href: "/our-story", label: "Our Story", subLinks: [
+            { href: "/our-story", label: "Our Story" },
+            { href: "/media/careers", label: "Join Us" },
+            { href: "/contact", label: "Contact Us" },
+        ]
+    },
     {
         href: "/media/privacy&security",
         label: "Policy&security",
@@ -49,23 +68,24 @@ const navLinks = [
 ];
 
 const MobileLink = [
-    { href: "/media/ourStory", label: "Our Story" },
-    { href: "/media/post", label: "Journal" },
-    { href: "/media/careers", label: "Careers" },
-    { href: "/media/vendor", label: "Vendor" },
-    { href: "/contact", label: "Contact Us" },
-    { href: "/auth/register", label: "Register" },
-    { href: "/admin/dashboard", label: "admin" },
-    { href: "/wishlist", label: "wishlist" },
-    { href: "/myAccount", label: "My Account" },
-    { href: "/track-order/1", label: "Track Order" },
-    { href: "/media/faq", label: "FAQ" },
-    { href: "/media/shipping", label: "Shipping Policy" },
-    { href: "/media/returns", label: "Return & Refund Policy" },
+    { href: "/myAccount", label: "My Account", icon: User },
+    { href: "/wishlist", label: "Wishlist", icon: Heart },
+    { href: "/contact", label: "Contact Us", icon: Mail },
+    { href: "/media/ourStory", label: "Our Story", icon: BookOpen },
+    { href: "/auth/register", label: "Register", icon: UserPlus },
+    { href: "/track-order/1", label: "Track Order", icon: Truck },
+    // { href: "/media/post", label: "Journal", icon: Newspaper },
+    { href: "/media/careers", label: "Careers", icon: Briefcase },
+    { href: "/media/vendor", label: "Vendor", icon: Store },
+    { href: "/cart", label: "Cart", icon: ShoppingBag },
+    { href: "/media/faq", label: "FAQ", icon: HelpCircle },
+    { href: "/media/shipping", label: "Shipping Policy", icon: Truck },
+    { href: "/media/returns", label: "Return & Refund Policy", icon: RefreshCcw },
     // { href: "/media/refund", label: "Refund Policy" },
-    { href: "/media/terms", label: "Terms of Service" },
-    { href: "/media/privacy&security", label: "Privacy & Security" },
-    { href: "/media/cookies", label: "Cookie Policy" },
+    { href: "/admin/dashboard", label: "admin", icon: Settings },
+    { href: "/media/terms", label: "Terms of Service", icon: FileText },
+    { href: "/media/privacy&security", label: "Privacy & Security", icon: Lock },
+    { href: "/media/cookies", label: "Cookie Policy", icon: Cookie },
     // { href: "/media/post", label: "Post" },
 ];
 
@@ -74,13 +94,16 @@ export function Navbar() {
     const [cartItemCount, setCartItemCount] = useState(0);
 
     useEffect(() => {
-        setHasMounted(true);
-        setCartItemCount(cartLocalStorageData.getCartCount());
-
         const handleCartUpdate = () => {
             setCartItemCount(cartLocalStorageData.getCartCount());
         };
 
+        const init = () => {
+            handleCartUpdate();
+            setHasMounted(true);
+        };
+
+        init();
         window.addEventListener("cartUpdated", handleCartUpdate);
         return () => window.removeEventListener("cartUpdated", handleCartUpdate);
     }, []);
@@ -109,8 +132,8 @@ export function Navbar() {
                 <div className="container-custom">
                     <nav className="flex h-16 items-center justify-between gap-4">
                         {/* Logo - Hidden when search is open on mobile */}
-                        <Link href="/home" className="flex items-center">
-                            <Image src={logoImage} alt="Logo" width={21.5} height={21.5} />
+                        <Link href="/" className="flex items-center">
+                            <Image src={logoImage} alt="Logo" width={30} height={30}/>
                             <h3 className="text-xl md:text-xl tracking-tight text-black">
                                 Khoshil
                             </h3>
@@ -173,12 +196,12 @@ export function Navbar() {
                                 <Search />
                             </Button>
 
-                            <Button variant="outline" size="icon" className={cn(
+                            <Button variant="outline" size="icon" className={cn( // Changed Wishlist to Heart
                                 "hidden md:flex border-none hover:bg-transparent relative group transition-colors",
                                 pathname.startsWith("/wishlist") ? "text-black" : "text-black hover:text-black"
-                            )} asChild>
+                            )} asChild> 
                                 <Link href="/wishlist">
-                                    <Wishlist />
+                                    <Heart />
                                 </Link>
                             </Button>
 
@@ -188,8 +211,8 @@ export function Navbar() {
                                     "border-none hover:bg-transparent hover:text-black relative transition-colors",
                                     pathname.startsWith("/myAccount") ? "text-black" : "text-black hover:text-black"
                                 )} asChild>
-                                    <Link href="/myAccount">
-                                        <User/>
+                                    <Link href="/myAccount"> 
+                                        <User />
                                     </Link>
                                 </Button>
 
@@ -234,7 +257,7 @@ export function Navbar() {
                                 pathname.startsWith("/cart") ? "text-primary" : "text-black hover:text-primary"
                             )} asChild>
                                 <Link href="/cart">
-                                    <ShoppingBag className="" />
+                                    <ShoppingBag className="" /> 
                                     {cartItemCount > 0 && (
                                         <Badge
                                             className="absolute -right-1 -top-1 size-4 rounded-full p-0 text-[10px] flex items-center justify-center bg-primary text-primary-foreground border-none"
@@ -291,18 +314,19 @@ export function Navbar() {
                                     const isActive = pathname === link.href;
 
                                     return (
-                                        <div key={link.label} className="flex flex-col">
+                                        <div key={link.label} className="flex flex-col"> 
                                             <div className="flex items-center group">
                                                 <Link
                                                     href={link.href}
                                                     className={cn(
-                                                        "flex-1 py-2 px-3 text-[14px] font-medium rounded-md transition-all",
+                                                        "flex flex-1 items-center gap-3 py-2 px-3 text-[14px] font-medium rounded-md transition-all",
                                                         isActive
                                                             ? "text-primary bg-primary/5"
                                                             : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                                                     )}
                                                     onClick={toggleSidebar}
                                                 >
+                                                    <link.icon className="size-4 shrink-0" />
                                                     {link.label}
                                                 </Link>
                                                 {/* {hasSubLinks && (

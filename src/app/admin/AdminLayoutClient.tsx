@@ -218,7 +218,7 @@ export default function AdminLayoutClient({
                     {/* Footer */}
                     <div className="p-4 border-t">
                         <Link
-                            href="/home"
+                            href="/"
                             className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                         >
                             <LogOut className="size-5 shrink-0" />

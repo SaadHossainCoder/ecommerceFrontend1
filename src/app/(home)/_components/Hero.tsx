@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, LoaderCircle } from "lucide-react";
+import Image from "next/image";
 
 const Hero = () => {
     return (
@@ -15,6 +16,8 @@ const Hero = () => {
                     muted
                     loop
                     playsInline
+                    preload="auto"
+                    poster="/figimage.webp"
                     className="absolute inset-0 w-full h-full object-cover opacity-50"
                 >
                     <source src="https://cdn.pixabay.com/video/2018/10/25/18897-297379518_large.mp4" type="video/mp4" />

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -341,7 +342,7 @@ function ProductCard({ product }: { product: any }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function ProductsPage() {
+function ProductsPageInner() {
     const { products, pagination, isLoading, error, fetchProducts, clearProducts, lastParams } = useProductStore();
     const { categoryTree, fetchTreeShortData } = useCategoryStore();
 
@@ -381,18 +382,30 @@ export default function ProductsPage() {
         }
     });
 
-    const [priceRange, setPriceRange] = useState<number[]>(() => {
-        if (!lastParams) return [0, 10000];
-        try { const p = JSON.parse(lastParams); return [p.minPrice || 0, p.maxPrice || 10000]; } catch { return [0, 10000]; }
-    });
+    const searchParams = useSearchParams();
+    const urlSearch = searchParams.get("search") || "";
+    const urlCategory = searchParams.get("category") || "";
+
+    const [priceRange, setPriceRange] = useState<number[]>([0, 10000]);
     const [selectedCat, setSelectedCat] = useState<string | null>(() => {
+        // URL param takes priority, then persisted store params
+        if (urlCategory) return urlCategory;
         if (!lastParams) return null;
         try { return JSON.parse(lastParams).category || null; } catch { return null; }
     });
     const [searchTerm, setSearchTerm] = useState(() => {
+        // URL search param takes priority (handles redirect from Search overlay)
+        if (urlSearch) return urlSearch;
         if (!lastParams) return "";
         try { return JSON.parse(lastParams).search || ""; } catch { return ""; }
     });
+    // Sync URL params into state when they change (e.g. navigating from Search overlay)
+    useEffect(() => {
+        if (urlSearch) setSearchTerm(urlSearch);
+    }, [urlSearch]);
+    useEffect(() => {
+        if (urlCategory) setSelectedCat(urlCategory);
+    }, [urlCategory]);
     const [sortBy, setSortBy] = useState(() => {
         if (!lastParams) return "featured";
         try {
@@ -696,5 +709,17 @@ export default function ProductsPage() {
                 </>
             )}
         </div>
+    );
+}
+
+export default function ProductsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-stone-400" />
+            </div>
+        }>
+            <ProductsPageInner />
+        </Suspense>
     );
 }

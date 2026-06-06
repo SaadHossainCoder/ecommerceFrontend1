@@ -3,6 +3,7 @@
 @font-face {
   font-family: 'Makova';
   src: url('../assets/font/makova.otf') format('opentype');
+  font-display: swap;
   font-weight: normal;
   font-style: normal;
 }
@@ -10,6 +11,7 @@
 @font-face {
   font-family: 'goldens';
   src: url('../assets/font/goldens.otf') format('opentype');
+  font-display: swap;
   font-weight: normal;  
   font-style: normal;
 }
@@ -310,18 +312,16 @@ p {
 
 /* ===== Custom Scrollbar - Cultural Theme ===== */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(var(--handmade-paper));
-  border-radius: 8px;
+  background: hsl(var(--handmade-paper)); ;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--antique-gold));
-  border-radius: 8px;
+  background: #34150f;
 }
 
 ::-webkit-scrollbar-thumb:hover {

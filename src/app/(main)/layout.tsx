@@ -4,10 +4,10 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 export const metadata: Metadata = {
-  title: {
-    template: "%s | khoshil",
-    default: "khoshil - Premium E-Commerce",
-  },
+    title: {
+        template: "%s | khoshil",
+        default: "khoshil - Premium E-Commerce",
+    },
 };
 
 export default function MainLayout({

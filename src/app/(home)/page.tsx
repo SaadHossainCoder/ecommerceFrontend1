@@ -1,72 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Metadata } from "next";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LoaderCircle } from "lucide-react";
 import dynamic from 'next/dynamic'
 import { Button } from "@/components/ui/button";
-import { ShareholderReports } from "@/app/(main)/home/_components/carousel";
+import { ShareholderReports } from "./_components/carousel";
 import { Suspense } from "react";
-import { LoaderCircleIcon as LoaderCircle } from "@/components/icon/loader-circle"
-// import { getTrendingProducts, getSeasonChoices, getReports } from "@/services/product-service";
-import ProductCard from "./_components/ProductCard";
-import TestimonialsSection from "./_components/TestimonialsSection";
-import FeatureGrid from "./_components/FeatureGrid";
-import FeaturedProductsList from "./_components/FeaturedProductsList";
+
+// import ProductCard from "./_components/ProductCard";
 import Hero from "./_components/Hero";
-import TrustBadges from "./_components/TrustBadges";
+import FeaturedProductsList from "./_components/FeaturedProductsList";
 
-// const TestimonialsSection = dynamic(() => import("./_components/TestimonialsSection"), {
-//     loading: () => <div>Loading...</div>
-// })
-// const FeaturedProductsList = dynamic(() => import("./_components/FeaturedProductsList"), {
-//     loading: () => <div>Loading...</div>
-// })
-// const TrustBadges = dynamic(() => import("./_components/TrustBadges"), {
-//     loading: () => <div>Loading...</div>
-// })
-// const Hero = dynamic(() => import("./_components/Hero"), {
-//     loading: () => <div>Loading...</div>
-// })
-// const FeatureGrid = dynamic(() => import("./_components/FeatureGrid"), {
-//     loading: () => <div>Loading...</div>
-// })
-// const FeaturedProductsList = dynamic(() => import("./_components/FeaturedProductsList"), {
-//     ssr: false,
-//     loading: () => <div>Loading...</div>
-// })
+const TestimonialsSection = dynamic(() => import("./_components/TestimonialsSection"), {
+    loading: () => <div className="py-20 text-center">Loading…</div>
+})
+
+const TrustBadges = dynamic(() => import("./_components/TrustBadges"), {
+    loading: () => <div className="py-20 text-center">Loading…</div>
+})
+
+const FeatureGrid = dynamic(() => import("./_components/FeatureGrid"), {
+    loading: () => <div className="py-20 text-center">Loading…</div>
+})
 
 
 
 
-export const metadata: Metadata = {
-    title: "Home | khoshil Premium E-Commerce",
-    description: "Explore our curated collection of premium products, from artisanal jewelry to modern electronics.",
-    keywords: ["e-commerce", "online shopping", "products", "sonajhuri", "khoshil", "premium", "Santiniketan", "handicrafts", "fashion", "home decor", "gifts", "Haat", "home", "lifestyle", "trending", "collections"],
-    applicationName: "khoshil",
-    creator: "MD. SAAD HOSSAIN",
-    openGraph: {
-        title: 'khoshil - Premium E-Commerce',
-        description: 'Your one-stop destination for premium products. Quality, style, and convenience delivered to your doorstep.',
-        url: 'https://example.com',
-        siteName: 'khoshil',
-        images: [
-            {
-                url: '/image.png',
-                width: 1200,
-                height: 630,
-                alt: 'khoshil',
-            },
-        ],
-        locale: 'in_IN',
-        type: 'website',
-    },
-    robots: {
-        index: true,
-        follow: true,
-        noarchive: false,
-        nosnippet: false
-    }
-};
+
 
 export default async function HomePage() {
     return (
@@ -175,6 +134,7 @@ export default async function HomePage() {
                                         src="https://i.pinimg.com/736x/39/2b/39/392b39f3a3af88a805254025c5c18b6b.jpg"
                                         alt="home-2"
                                         fill
+                                        loading="lazy"
                                         // sizes="(max-width: 768px) 100vw, 50vw"
                                         className="object-cover"
                                     />
@@ -182,6 +142,7 @@ export default async function HomePage() {
                                 <div className="relative aspect-2/4 overflow-hidden mt-8">
                                     <Image
                                         src="https://i.pinimg.com/1200x/36/47/0e/36470e90391eaecf63e9528aaf10fd3f.jpg"
+                                        loading="lazy"
                                         alt="home-3"
                                         fill
                                         // sizes="(max-width: 768px) 100vw, 50vw"
@@ -212,6 +173,7 @@ export default async function HomePage() {
                             <div className="relative aspect-square md:aspect-2/3 overflow-hidden">
                                 <Image
                                     src="https://i.pinimg.com/736x/7f/49/2e/7f492ed36a65e79dda9c8454f9867a5d.jpg"
+                                    loading="lazy"
                                     alt="home-4"
                                     fill
                                     // sizes="(max-width: 768px) 100vw, 50vw"
@@ -263,6 +225,7 @@ export default async function HomePage() {
                             <div className="relative aspect-4/5 overflow-hidden">
                                 <Image
                                     src="https://i.pinimg.com/736x/19/9f/6f/199f6fae3ff34e0ce09f09fa61409821.jpg"
+                                    loading="lazy"
                                     alt="home-5"
                                     fill
                                     // sizes="(max-width: 768px) 100vw, 50vw"

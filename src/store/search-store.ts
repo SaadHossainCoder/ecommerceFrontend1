@@ -13,3 +13,26 @@ export const useSearchStore = create<SearchState>((set) => ({
   closeSearch: () => set({ isOpen: false }),
   toggleSearch: () => set((state) => ({ isOpen: !state.isOpen })),
 }));
+
+interface Product {
+  _id: string;
+  title: string;
+  slug: string;
+  sku?: string;
+}
+
+interface SearchStore {
+  loading: boolean;
+  results: Product[];
+
+  setLoading: (loading: boolean) => void;
+  setResults: (results: Product[]) => void;
+}
+
+export const useSearchResultsStore = create<SearchStore>((set) => ({
+  loading: false,
+  results: [],
+
+  setLoading: (loading: boolean) => set({ loading }),
+  setResults: (results: Product[]) => set({ results }),
+}));

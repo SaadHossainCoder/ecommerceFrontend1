@@ -35,6 +35,14 @@ export interface CreateProductData {
     descriptionImages: string[];
 }
 
+export interface SearchProduct {
+    _id: string;
+    title: string;
+    slug: string;
+    sku: string;
+    generalImages?: string[];
+}
+
 export interface Product extends Omit<CreateProductData, 'categoryId' | 'vendorId'> {
     id: string;
     _id?: string;
@@ -49,10 +57,10 @@ export interface Product extends Omit<CreateProductData, 'categoryId' | 'vendorI
 
 export const productService = {
     // GET /products — Public
-    getAllProducts: async (params?: Record<string, any>): Promise<{ 
-        ok: boolean; 
-        message: string; 
-        data: { data: Product[]; pagination: any } 
+    getAllProducts: async (params?: Record<string, any>): Promise<{
+        ok: boolean;
+        message: string;
+        data: { data: Product[]; pagination: any }
     }> => {
         const response = await api.get("products", { params });
         return response.data;
@@ -126,12 +134,27 @@ export const productService = {
         return response.data;
     },
 
-    getAllProductsByAdmin: async (params?: Record<string, any>): Promise<{ 
-        ok: boolean; 
-        message: string; 
-        data: { data: Product[]; pagination: any } 
+    getAllProductsByAdmin: async (params?: Record<string, any>): Promise<{
+        ok: boolean;
+        message: string;
+        data: { data: Product[]; pagination: any }
     }> => {
         const response = await api.get("products/admin", { params });
         return response.data;
     },
+
+    searchproducts: async (query: string, limit: number = 10): Promise<{
+        ok: boolean;
+        message: string;
+        data: SearchProduct[];
+    }> => {
+        const response = await api.get("products/search", {
+            params: {
+                query,
+                limit,
+            }
+        });
+        return response.data;
+    }
 };
+

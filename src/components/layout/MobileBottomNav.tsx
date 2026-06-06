@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { cartLocalStorageData } from "@/localStorage/cartData";
 
 const navItems = [
-    { icon: Home, label: "Home", href: "/home" },
+    { icon: Home, label: "Home", href: "/" },
     { icon: LayoutGrid, label: "Shop", href: "/products" },
     { icon: Heart, label: "Wishlist", href: "/wishlist" },
     { icon: ShoppingBag, label: "Cart", href: "/cart", hasBadge: true },
@@ -17,11 +17,9 @@ const navItems = [
 
 export function MobileBottomNav() {
     const pathname = usePathname();
-    const [cartItemCount, setCartItemCount] = useState(0);
+    const [cartItemCount, setCartItemCount] = useState(() => cartLocalStorageData.getCartCount());
 
     useEffect(() => {
-        setCartItemCount(cartLocalStorageData.getCartCount());
-
         const handleCartUpdate = () => {
             setCartItemCount(cartLocalStorageData.getCartCount());
         };

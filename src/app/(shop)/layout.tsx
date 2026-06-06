@@ -5,8 +5,8 @@ import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 export const metadata: Metadata = {
     title: {
-        template: "%s | khoshil Store",
-        default: "Shop | khoshil Premium E-Commerce",
+        template: "%s ",
+        default: "khoshil Premium E-CommerceKhoshil invites you to explore unique handcrafted treasures where mystery, heritage, and elegance blend—discover the story behind every piece today.",
     },
 };
 

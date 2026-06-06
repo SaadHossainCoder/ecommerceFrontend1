@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Gifting Solutions",
-  description: "Explore premium, custom, and hand-wrapped corporate and personal gift services.",
+  title: "Gifting ",
+  description: "Khoshil invites you to explore unique handcrafted treasures where mystery, heritage, and elegance blend—discover the story behind every piece today.",
 };
 
 export default function GiftingLayout({ children }: { children: React.ReactNode }) {

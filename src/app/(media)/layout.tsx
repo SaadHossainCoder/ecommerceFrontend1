@@ -4,10 +4,10 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 export const metadata: Metadata = {
-  title: {
-    template: "%s | Support & Media | khoshil",
-    default: "Help Center | khoshil",
-  },
+    title: {
+        template: "%s | Support & Media | khoshil",
+        default: "Help Center | Khoshil invites you to explore unique handcrafted treasures where mystery, heritage, and elegance blend—discover the story behind every piece today.",
+    },
 };
 
 export default function MediaLayout({
